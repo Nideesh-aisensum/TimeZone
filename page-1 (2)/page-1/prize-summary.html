@@ -61,9 +61,11 @@
             overflow: hidden;
             height: 100%;
             width: 100%;
-            padding-top: 80px;
+    padding: 40px 50px 30px;
             background: transparent !important;
         }
+
+
 
         /* Back button - remove blue circle, show only the PNG */
 
@@ -92,20 +94,20 @@
         /* Popup Container - the card */
         .popup-container {
             position: relative;
-            width: 850px;
-            height: 900px;
+            width: 1180px;
+            height: 1144px;
             display: flex;
             flex-direction: column;
             align-items: center;
             margin-bottom: 30px;
-            margin-left: 25px;
+            margin-left: 0;
         }
 
         /* Popup Background Image */
         .popup-bg {
             position: absolute;
-            top: 0;
-            left: 0;
+            top: 45px;
+            left: -5px;
             width: 100%;
             height: 100%;
             object-fit: contain;
@@ -114,25 +116,27 @@
 
         /* Content overlay on top of popup bg - INSIDE THE CARD */
         .popup-content {
-            position: relative;
+            position: absolute;
             z-index: 2;
-            display: flex;
-            flex-direction: column;
+  
+         
             align-items: center;
-            width: 100%;
+            width: 450px;
             height: 100%;
-            padding: 80px 60px 40px;
+            top:80px;
+            padding: 0 20px;
+            transform: scale(0.9, 0.9);
         }
 
         /* Surprise Header - INSIDE CARD */
         .surprise-header {
             text-align: center;
-            margin-top: 85px;
+            margin-top: 135px;
         }
 
         .surprise-title {
             font-family: 'Nulshock', 'Arial Black', sans-serif;
-            font-size: 80px;
+            font-size: 70px;
             color: #ff00ff;
             text-shadow: 0 0 30px rgba(255, 0, 255, 0.7);
             margin-bottom: 10px;
@@ -265,7 +269,9 @@
         .buttons-section {
             display: flex;
             gap: 10px;
-            margin-top: 20px;
+            position: absolute;
+            bottom:570px;
+
         }
 
         .action-button {
@@ -294,6 +300,7 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
+
             pointer-events: none;
         }
 
@@ -651,15 +658,34 @@
                 transform: rotate(360deg);
             }
         }
+
+  .header-section {
+      text-align: center;
+      margin-bottom: 0 !important;
+      margin-top: 0 !important;
+    }
+
+    .scratch-title {
+      font-family: "Nulshock", sans-serif;
+      font-size: 70px;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.3);
+      margin-bottom: 6px;
+      /*max-width: 600px;*/
+    }
+
+    .scratch-subtitle {
+      font-family: "Nulshock", sans-serif;
+      font-size: 36px;
+      color: #b8f5ff;
+      letter-spacing: 2px;
+    }
+
     </style>
 
 </head>
 
-<body class="" __processed_00038f81-6516-48f9-a4d6-c2fd85614b62__="true"
-    bis_register="W3sibWFzdGVyIjp0cnVlLCJleHRlbnNpb25JZCI6ImVwcGlvY2VtaG1ubGJoanBsY2drb2ZjaWllZ29tY29uIiwiYWRibG9ja2VyU3RhdHVzIjp7IkRJU1BMQVkiOiJkaXNhYmxlZCIsIkZBQ0VCT09LIjoiZGlzYWJsZWQiLCJUV0lUVEVSIjoiZGlzYWJsZWQiLCJSRURESVQiOiJkaXNhYmxlZCIsIlBJTlRFUkVTVCI6ImRpc2FibGVkIiwiSU5TVEFHUkFNIjoiZGlzYWJsZWQiLCJUSUtUT0siOiJkaXNhYmxlZCIsIkxJTktFRElOIjoiZGlzYWJsZWQiLCJDT05GSUciOiJkaXNhYmxlZCJ9LCJ2ZXJzaW9uIjoiMi4wLjM1Iiwic2NvcmUiOjIwMDM1fV0="
-    __processed_62b71047-b5f7-4597-8db7-9f8f04d264b9__="true" __processed_85e09e4a-e1a7-4e78-8d4e-23567cdc3849__="true"
-    __processed_63d3e2b9-69a7-476c-94a2-0ddeff0d58f0__="true" __processed_736ff819-d367-40dc-9922-43b5d16fb990__="true"
-    __processed_4f65dd26-21e6-49c2-bef5-6b56b07f3454__="true">
+<body>
     <div class="container" bis_skin_checked="1">
         <!-- Video Background -->
         <video class="video-bg" autoplay="" loop="" muted="" playsinline="">
@@ -673,6 +699,11 @@
             style="max-width: 200px; height: auto; position: absolute; top: 31px; right: 30px; /*transform: translate(calc(-50% + 412.67px), calc(-50% - 792px)) scale(0.9);*/ z-index: 50; cursor: pointer;">
 
         <div class="content" bis_skin_checked="1">
+
+            <div class="header-section editable" data-id="header-section" style="transform: translate(4.15581px, 270.325px) scale(1)" bis_skin_checked="1">
+        <h1 id="main-title" class="scratch-title editable" data-id="main-title" style="transform: translate(-4.15585px, -2.07795px) scale(1)">GOSOK DAN DAPATKAN HADIAH!</h1>
+        <p id="main-subtitle" class="scratch-subtitle editable" data-id="main-subtitle" style="transform: translate(-2.07794px, 4.15578px) scale(1)">BUKA MEGA TIZO MU!</p>
+      </div>
 
 
             <!-- Popup Card Container - THE CARD -->
@@ -765,7 +796,7 @@
                 </div>
             </div>
             <img src="gold-coin.png" alt="Added Image" class="editable added-element" data-id="added-2-1765387288264"
-                style="max-width: 200px; height: auto; position: absolute; top: 50%; left: 49%; transform: translate(calc(-50% + 381.333px), calc(-50% + 285.333px)) scale(1.4); z-index: 50;">
+                style="max-width: 200px; height: auto; position: absolute; bottom: 350px; left: 500px; transform: translate(calc(-50% + 381.333px), calc(-50% + 285.333px)) scale(1.4); z-index: 50;">
 
             <!-- Congrats Overlay -->
             <div class="congrats-overlay">
