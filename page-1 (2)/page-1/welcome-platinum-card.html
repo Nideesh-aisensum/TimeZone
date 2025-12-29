@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timezone - Platinum Card</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Fixed for 1080x1920 resolution - NO SCROLLING */
+        html,
+        body {
+            overflow: hidden;
+        }
+
+        .container {
+            width: 1080px;
+            height: 1920px;
+            overflow: hidden;
+        }
+
+        .content {
+            padding: 80px 50px 40px;
+            justify-content: flex-start;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        /* Header Section with Card GIF */
+        .header-section {
+            display: flex;
+            align-items: flex-start;
+            width: 100%;
+            margin-bottom: 30px;
+            gap: 15px;
+        }
+
+        .card-gif {
+            width: 200px;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .header-text {
+            flex: 1;
+            text-align: right;
+            padding-top: 10px;
+        }
+
+        .upgrade-subtitle {
+            color: #e5e4e2;
+            font-size: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            font-family: 'Nulshock', 'Michroma', sans-serif;
+        }
+
+        .elite-title {
+            font-family: 'Nulshock', 'Michroma', sans-serif;
+            font-size: 60px;
+            color: #e5e4e2;
+            text-shadow: 0 0 30px rgba(229, 228, 226, 0.5);
+            line-height: 1.1;
+            text-transform: uppercase;
+        }
+
+        /* Card Display */
+        .blue-card-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -55%);
+            z-index: 40;
+        }
+
+        .blue-card-display img {
+            width: 600px;
+            height: auto;
+            filter: drop-shadow(0 10px 40px rgba(229, 228, 226, 0.4));
+        }
+
+        /* Info Text Section */
+        .info-section {
+            text-align: center;
+            padding: 0 60px;
+            max-width: 750px;
+        }
+
+        .info-text {
+            color: #ffffff;
+            font-size: 18px;
+            letter-spacing: 1px;
+            line-height: 1.2em;
+            font-weight: bold;
+        }
+
+        /* CTA Button Section */
+        .cta-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: auto;
+            padding-bottom: 50px;
+        }
+
+        .cta-button-wrapper {
+            position: relative;
+            width: 70%;
+            max-width: 380px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.1s;
+            margin-bottom: 25px;
+        }
+
+        .cta-button-wrapper:hover {
+            transform: translateY(-4px);
+        }
+
+        .cta-button-wrapper:active {
+            transform: scale(0.95);
+        }
+
+        .cta-button-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        .cta-button-text {
+            position: relative;
+            z-index: 1;
+            color: white;
+            font-family: 'Nulshock', sans-serif;
+            font-size: 24px;
+            letter-spacing: 2px;
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .skip-link {
+            color: #fff;
+            font-size: 18px;
+
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: color 0.2s;
+        }
+
+        .skip-link:hover {
+            color: #ffffff;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" bis_skin_checked="1">
+        <!-- Video Background -->
+        <video class="video-bg" autoplay="" loop="" muted="" playsinline="">
+            <source src="other-bg.mp4" type="video/mp4">
+        </video>
+        <!-- Back Button -->
+        <img src="back-button.png" alt="Back" class="back-button" onclick="goBack()">
+
+        <!-- Home Button -->
+        <img src="home.png" alt="Home" class="editable added-element" data-id="home-button" onclick="goHome()"
+            style="max-width: 200px; height: auto; position: absolute; top: 31px; right: 30px; z-index: 50; cursor: pointer;">
+
+        <div class="content" bis_skin_checked="1">
+            <!-- Header Section (Empty now) -->
+            <div class="header-section" bis_skin_checked="1">
+            </div>
+
+            <!-- Card Display -->
+            <div class="blue-card-display" style="top: 650px;">
+                <img src="platinumcard-gif.gif" alt="Platinum Card" style="width: 1050px;">
+            </div>
+
+            <!-- Upgrade Notification Text - BELOW CARD -->
+            <div class="upgrade-notif"
+                style="position: absolute; top: 850px; left: 50%; transform: translateX(-50%); text-align: center; width: 100%; z-index: 50;">
+                <p id="upgrade-text" class="upgrade-subtitle editable" data-id="upgrade-text"
+                    style="color: rgb(255, 255, 255); font-size: 36px; margin-bottom: 20px; font-weight: normal; letter-spacing: 2px;">
+                    YOU HAVE BEEN UPGRADED TO</p>
+                <h1 class="elite-title editable" data-id="elite-title"
+                    style="color: #e5e4e2; font-size: 80px; margin: 0; font-weight: bold; text-shadow: 0 0 30px rgba(229, 228, 226, 0.5);">
+                    PLATINUM</h1>
+            </div>
+
+            <!-- Quantity Section - copied from card-selection.html -->
+            <img src="blue-banner.png" alt="Added Image" class="editable added-element" data-id="added-1-1765247779590"
+                style="max-width: 200px; height: auto; position: absolute; top: 50%; left: 50%; transform: translate(calc(-50% + 0px), calc(-50% + 280px)) scale(4.5); z-index: 50" />
+
+            <img src="plus-minus-bg.png" alt="Added Image" class="editable added-element"
+                data-id="added-2-1765247860342"
+                style="max-width: 200px; height: auto; position: absolute; top: 50%; left: 50%; transform: translate(calc(-50% + 280px), calc(-50% + 280px)) scale(1.4); z-index: 50" />
+
+            <img src="plus-button.png" alt="Plus" class="editable added-element" data-id="added-3-1765247923856"
+                onclick="changeCardQuantity(1)"
+                style="max-width: 200px; height: auto; position: absolute; top: 50%; left: 50%; transform: translate(calc(-50% + 340px), calc(-50% + 280px)) scale(0.4); z-index: 50; cursor: pointer" />
+
+            <img src="minus-button.png" alt="Minus" class="editable added-element" data-id="added-4-1765247950642"
+                onclick="changeCardQuantity(-1)"
+                style="max-width: 200px; height: auto; position: absolute; top: 50%; left: 50%; transform: translate(calc(-50% + 220px), calc(-50% + 280px)) scale(0.4); z-index: 50; cursor: pointer" />
+
+            <p id="card-quantity" class="editable added-element added-text" data-id="text-5-1765247979831" style="
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(calc(-50% + 281px), calc(-50% + 280px)) scale(1.4);
+                z-index: 50;
+                font-family: Nulshock, sans-serif;
+                font-size: 1.5rem;
+                color: rgb(255, 255, 255);
+                text-align: center;
+                margin: 0px;
+                max-width: 80%;
+                font-weight: bold;
+            ">
+                1
+            </p>
+
+            <p id="qty-label" class="editable added-element added-text" data-id="text-6-1765248045227" style="
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(calc(-50% - 120px), calc(-50% + 280px)) scale(0.9);
+                z-index: 50;
+                font-family: Nulshock, sans-serif;
+                font-size: 1.5rem;
+                color: rgb(255, 255, 255);
+                text-align: center;
+                margin: 0px;
+                max-width: 80%;
+                font-weight: bold;
+            ">
+                NUMBER OF CARDS<br />YOU WANT TO TOP-UP?
+            </p>
+
+            <!-- Info Text -->
+            <div class="info-section editable" data-id="info-section"
+                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, calc(-50% + 530px)) scale(1.5);text-align: center;"
+                bis_skin_checked="1">
+                <p class="info-text" id="info-text-1"
+                    style="font-size: 18px; color: #ffffff; letter-spacing: 1px; line-height: 1.2; font-weight: bold; margin-bottom: 5px;">
+                    RP 1.000 = 1 TIZO</p>
+                <p class="info-text" id="info-text-2"
+                    style="font-size: 18px; color: #ffffff; letter-spacing: 1px; line-height: 1.2; font-weight: bold;">
+                    USE TIZOS TO PLAY YOUR FAVOURITE GAMES.</p>
+            </div>
+
+            <!-- CTA Button -->
+            <div class="cta-section" bis_skin_checked="1">
+                <div class="cta-button-wrapper editable" data-id="cta-button" onclick="handleGrabOffer()"
+                    style="transform: translate(6px, -20px) scale(1.3) !important; bottom: 80px; position: absolute;   right: 100px;"
+                    bis_skin_checked="1">
+                    <img src="button.png" alt="Button" class="cta-button-bg">
+                    <span id="cta-text" class="cta-button-text">KLAIM SEKARANG</span>
+                </div>
+
+
+                <div class="cta-section" bis_skin_checked="1">
+                    <div class="cta-button-wrapper editable" data-id="cta-button" onclick="handleSkip()"
+                        style="transform: translate(6px, -20px) scale(1.3) !important; bottom: 80px; position: absolute;   left: 100px;"
+                        bis_skin_checked="1">
+                        <img src="button.png" alt="Button" class="cta-button-bg">
+                        <span id="skip-text" class="skip-link editable" data-id="skip-link" onclick="handleSkip()"
+                            style="transform: translate(0, -2px) scale(1.3);">LEWATI DULU</span>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="shell-connector.js"></script>
+    <script src="api-config.js"></script>
+    <script src="session-manager.js"></script>
+    <script src="language.js"></script>
+    <script>
+        // Set current page in session and mark as platinum card flow
+        setCurrentPage('welcome-platinum-card');
+        updateSession({ isNewPlayer: false, selectedCard: 'platinum' });
+
+        let quantity = 1;
+
+        const translations = {
+            en: {
+                upgradeText: "YOU HAVE BEEN UPGRADED TO",
+                qtyLabel: "NUMBER OF CARDS<br/>YOU WANT TO TOP-UP?",
+                infoText1: "RP 1000 = 1 TIZO",
+                infoText2: "USE TIZOS TO PLAY YOUR FAVOURITE GAMES.",
+                ctaText: "GRAB THIS OFFER<br/>NOW!",
+                skipText: "SKIP THIS",
+                langLabel: "English"
+            },
+            id: {
+                upgradeText: "ANDA TELAH DIUPGRADE KE",
+                qtyLabel: "BERAPA KARTU YANG<br/>INGIN ANDA TOP-UP?",
+                infoText1: "RP 1000 = 1 TIZO",
+                infoText2: "GUNAKAN TIZO UNTUK MEMAINKAN GAME FAVORITMU.",
+                ctaText: "KLAIM SEKARANG",
+                skipText: "LEWATI DULU",
+                langLabel: "Bahasa"
+            }
+        };
+
+        let currentLang = getCurrentLanguage();
+
+        function toggleLanguage() {
+            const dropdown = document.getElementById('lang-dropdown');
+            if (dropdown) dropdown.classList.toggle('hidden');
+        }
+
+        function applyLanguage(lang) {
+            currentLang = lang;
+            const data = translations[lang];
+
+            document.getElementById('upgrade-text').textContent = data.upgradeText;
+            document.getElementById('qty-label').innerHTML = data.qtyLabel;
+            document.getElementById('info-text-1').textContent = data.infoText1;
+            document.getElementById('info-text-2').textContent = data.infoText2;
+            document.getElementById('cta-text').innerHTML = data.ctaText;
+            document.getElementById('skip-text').textContent = data.skipText;
+            const langEl = document.getElementById('current-lang');
+            if (langEl) langEl.textContent = data.langLabel;
+        }
+
+        function setLanguage(lang) {
+            saveLanguage(lang);
+            applyLanguage(lang);
+            const dropdown = document.getElementById('lang-dropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+        }
+
+        function changeCardQuantity(delta) {
+            if (window.isEditModeActive && window.isEditModeActive()) return;
+
+            quantity = Math.max(1, Math.min(10, quantity + delta));
+            document.getElementById('card-quantity').textContent = quantity;
+            localStorage.setItem('cardQuantity', quantity);
+        }
+
+        function handleGrabOffer() {
+            // Prevent action if edit mode is active
+            if (window.isEditModeActive && window.isEditModeActive()) {
+                return;
+            }
+            console.log('Grab Offer clicked');
+
+            // Get splitTopup data from session (set by custom-topup.html)
+            const session = typeof getSession === 'function' ? getSession() : null;
+            const splitTopup = session?.splitTopup || null;
+
+            // Save the platinum card selection to session
+            updateSession({
+                selectedCard: 'platinum',
+                cardQuantity: quantity,
+                selectedCardCount: quantity,
+                isNewPlayer: true // Keep as new player for scratch card flow
+            });
+
+            // If there's split topup data, save the offer cost and tizo
+            if (splitTopup) {
+                updateSession({
+                    offerCost: splitTopup.cardOfferCost,
+                    offerTizo: splitTopup.cardOfferTizo
+                });
+            }
+
+            // Also keep localStorage for backward compatibility
+            localStorage.setItem('selectedCard', 'platinum');
+            localStorage.setItem('cardQuantity', quantity);
+            localStorage.setItem('selectedCardCount', quantity);
+            localStorage.setItem('isNewPlayer', 'true');
+
+            console.log('Platinum card offer saved:', { quantity, splitTopup });
+
+            // Save source page for back navigation and navigate to scratch card
+            updateSession({ scratchCardSource: 'welcome-platinum-card' });
+            window.location.href = 'scratch-card.html';
+        }
+
+        function handleSkip() {
+            // Prevent action if edit mode is active
+            if (window.isEditModeActive && window.isEditModeActive()) {
+                return;
+            }
+            console.log('Skip clicked');
+            window.location.href = 'welcomeredcard.html';
+        }
+
+        // Close dropdown when clicking outside
+        window.onclick = function (event) {
+            if (!event.target.matches('#lang-btn') && !event.target.closest('#lang-btn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (!openDropdown.classList.contains('hidden')) {
+                        openDropdown.classList.add('hidden');
+                    }
+                }
+            }
+        }
+
+        function goBack() {
+            if (window.isEditModeActive && window.isEditModeActive()) return;
+            window.history.back();
+        }
+
+        function goHome() {
+            if (window.isEditModeActive && window.isEditModeActive()) return;
+            window.location.href = 'welcome.html';
+        }
+
+        // Direct initialization
+        (function () {
+            // Apply language immediately
+            applyLanguage(currentLang);
+        })();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <title>Timezone - Screensaver</title>
+    <link rel="stylesheet" href="style.css">
+
+    <script src="shell-connector.js"></script>
+    <script src="page-transition.js"></script>
+    <script src="currency-formatter.js"></script>
+
+    <style>
+        @font-face {
+            font-family: 'Nulshock';
+            src: url('nulshock/nulshock-heavy.otf') format('opentype');
+            font-weight: bold;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            overflow: hidden;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        .screensaver-container {
+            width: 1080px;
+            height: 1920px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Video Backgrounds - stacked */
+        .bg-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1080px;
+            height: 1920px;
+            object-fit: cover;
+            z-index: 1;
+
+        }
+
+        .bg-video.hidden {
+            opacity: 0;
+        }
+
+        /* Offer Slides */
+        .offer-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 60px;
+
+        }
+
+        .offer-slide.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Logo Section */
+        .logo-section {
+            margin-bottom: 20px;
+            transform: translate(-2.66666px, -10.6668px) scale(1) !important;
+        }
+
+        .logo-img {
+            width: 450px;
+            height: auto;
+            margin-top: 100px;
+        }
+
+        /* Glow Text - Reset global overrides to match Hendra positioning */
+        .glow-text {
+            margin-bottom: 0;
+            line-height: normal;
+        }
+
+        /* Offer Title */
+        .offer-title {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 60px;
+            color: #01EFF0;
+            text-shadow:
+                0 0 20px rgba(224, 27, 180, 0.8),
+                0 4px 8px rgba(224, 27, 180, 0.8);
+            letter-spacing: 5px;
+            margin-bottom: 40px;
+            max-width: 1000px;
+            text-align: center;
+            position: absolute;
+            bottom: 500px;
+        }
+
+        /* Card Container */
+        .card-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: absolute;
+            top: 380px;
+        }
+
+        /* Cat Animation - positioned behind card */
+        .cat-animation {
+            position: absolute;
+            top: -150px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 450px;
+            height: auto;
+            z-index: 5;
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.4));
+            transform: translate(-314.667px, 288px) scale(1) !important;
+        }
+
+        /* Offer Card Wrapper */
+        .offer-card-wrapper {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Card Background */
+        .offer-card-bg {
+            width: 1080px;
+            height: auto;
+            filter: drop-shadow(0 10px 40px rgba(255, 100, 150, 0.4));
+            transform: translate(-21.3333px, 365.333px) scale(1) !important;
+        }
+
+        /* Dynamic Badge Positions */
+        .badge-top-left {
+            position: absolute;
+            left: -30px;
+            top: 50px;
+            width: 120px;
+            height: auto;
+            z-index: 25;
+        }
+
+        .badge-top-right,
+        .last-chance-badge {
+            position: absolute;
+            right: -140px;
+            top: 50px;
+            width: 120px;
+            height: auto;
+            z-index: 25;
+        }
+
+        .badge-bottom-left {
+            position: absolute;
+            left: -30px;
+            bottom: 40px;
+            width: 100px;
+            height: auto;
+            z-index: 25;
+        }
+
+        .badge-bottom-right,
+        .super-deal-badge {
+            position: absolute;
+            right: -30px;
+            bottom: 40px;
+            width: 100px;
+            height: auto;
+            z-index: 25;
+        }
+
+        /* Hidden badge when no icon from database */
+        .badge-hidden {
+            display: none !important;
+        }
+
+        /* Card Text Overlay */
+        .card-text-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        /* RB Amount */
+        .rb-amount {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 72px;
+            color: #182c4f;
+            margin-bottom: 10px;
+        }
+
+        .rb-unit {
+            font-size: 36px;
+            color: #182c4f;
+        }
+
+        /* DAPAT Section */
+        .dapat-section {
+            text-align: center;
+        }
+
+        .dapat-label {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 24px;
+            color: #ffffff;
+            letter-spacing: 2px;
+        }
+
+        .tizo-amount {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 96px;
+            color: #acfcff;
+            text-shadow:
+                0 0 20px rgba(51, 255, 249, 0.5),
+                0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .tizo-unit {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 36px;
+            color: #acfcff;
+            letter-spacing: 10px;
+            margin-top: 10px;
+        }
+
+
+        .tap-hint {
+            position: absolute;
+            bottom: 450px;
+            width: 100%;
+            text-align: center;
+            left: 0;
+            font-family: 'Nulshock', sans-serif;
+            font-size: 32px;
+            color: rgba(255, 255, 255, 0.9);
+            letter-spacing: 3px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* No Active Message */
+        .no-active-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Nulshock', sans-serif;
+            color: #ffffff;
+            background: rgba(0, 0, 0, 0.65);
+            padding: 30px 40px;
+            border-radius: 18px;
+            text-align: center;
+            letter-spacing: 2px;
+            z-index: 50;
+        }
+
+        /* RB Row for Snacks */
+        .rb-row {
+            font-size: 90px;
+            color: #182c4f;
+            letter-spacing: 4px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            text-transform: uppercase;
+        }
+
+        /* Free Snack Icon */
+        .free-snack-icon {
+            position: absolute;
+            left: -130px;
+            top: -60px;
+            width: 150px;
+            height: auto;
+            z-index: 5;
+            transform: rotate(-6deg);
+            filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.4));
+        }
+
+        /* Card Visual */
+        .card-visual {
+            width: 1080px;
+            height: auto;
+            filter: drop-shadow(0 20px 50px rgba(255, 100, 180, 0.5));
+            transform: translate(-21.3333px, 365.333px) scale(1) !important;
+        }
+
+        /* Card Copy */
+        .card-copy {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-top: 60px;
+            pointer-events: none;
+        }
+
+        /* Tizo Amount for Snacks */
+        .card-copy .tizo-amount {
+            font-size: 90px;
+            color: #33fff9;
+            text-shadow:
+                0 0 30px rgba(51, 255, 249, 0.6),
+                0 12px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Snack Footer */
+        .snack-footer {
+            margin-top: 15px;
+            font-size: 110px;
+            color: #33fff9;
+            letter-spacing: 8px;
+        }
+
+        .snack-footer span {
+            display: block;
+            font-size: 60px;
+            letter-spacing: 6px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <!-- Loading Overlay - shows progress during asset preload -->
+    <div id="loading-overlay"
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999;">
+        <img src="timezone-branding.png" alt="Timezone" style="width: 300px; margin-bottom: 40px; opacity: 0.9;">
+        <img src="loading.gif" alt="Loading..." style="max-width: 120px; max-height: 120px; margin-bottom: 30px;">
+        <div id="loading-text"
+            style="font-family: 'Nulshock', Arial, sans-serif; color: #33fff9; font-size: 24px; letter-spacing: 3px; margin-bottom: 20px;">
+            LOADING ASSETS...</div>
+        <div
+            style="width: 300px; height: 8px; background: rgba(255,255,255,0.2); border-radius: 4px; overflow: hidden;">
+            <div id="loading-progress-bar"
+                style="width: 0%; height: 100%; background: linear-gradient(90deg, #33fff9, #00d4ff); border-radius: 4px; transition: width 0.3s ease;">
+            </div>
+        </div>
+        <div id="loading-percent"
+            style="font-family: Arial, sans-serif; color: rgba(255,255,255,0.7); font-size: 16px; margin-top: 15px;">0%
+        </div>
+    </div>
+
+    <div class="screensaver-container" style="opacity: 0;" bis_skin_checked="1">
+        <!-- Video Backgrounds -->
+        <video class="bg-video hidden" id="bg-ood" autoplay="" loop="" muted="" playsinline="">
+            <source src="OOD-BACKGROUND.mp4" type="video/mp4">
+        </video>
+        <video class="bg-video hidden" id="bg-ooh" autoplay="" loop="" muted="" playsinline="">
+            <source src="OOH-BACKGROUND.mp4" type="video/mp4">
+        </video>
+        <video class="bg-video hidden" id="bg-snacks" autoplay="" loop="" muted="" playsinline="">
+            <source src="free-snacks-bg.mp4" type="video/mp4">
+        </video>
+
+        <!-- OOD Slide -->
+        <div class="offer-slide hidden" id="slide-ood" style="display: none;">
+            <!-- Timezone Logo -->
+            <div class="logo-section editable" data-id="logo-section">
+                <img src="timezone-branding.png" alt="Timezone" class="logo-img">
+
+                <h1 id="main-text-ood" class="glow-text editable" data-id="main-text-ood"
+                    style="z-index: 9; position: relative; white-space: pre-line; transform: translate(0px, -25.2px) scale(1.6); font-weight: bold">
+                    ISI SALDOMU<br />DI SINI!
+                </h1>
+            </div>
+
+            <!-- Offer Title -->
+            <h1 class="offer-title editable" data-id="offer-title-ood">OFFER OF THE DAY</h1>
+
+            <!-- Card Container -->
+            <div class="card-container editable" data-id="card-container-ood">
+                <!-- Cat Animation -->
+                <img src="cat-screensaver.gif" alt="Cat" class="cat-animation editable" data-id="cat-ood">
+
+                <!-- Offer Card Wrapper -->
+                <div class="offer-card-wrapper">
+                    <!-- Top Left Badge (dynamic from DB) 
+                    <img id="badge-top-left-ood" alt="Badge" class="badge-top-left editable badge-hidden" data-id="badge-top-left-ood">-->
+
+                    <!-- Top Right Badge (dynamic from DB) 
+                    <img id="badge-top-right-ood" alt="Badge" class="badge-top-right editable badge-hidden" data-id="badge-top-right-ood">-->
+
+                    <!-- Card Background -->
+                    <img src="ooh-card.png" alt="Offer Card" class="offer-card-bg editable" data-id="offer-card-ood">
+
+                    <!-- Card Text Overlay -->
+                    <div class="card-text-overlay editable" data-id="card-text-ood"
+                        style="transform: translate(-53.3333px, 338.667px) scale(1);">
+                        <div class="rb-amount editable" data-id="rb-amount-ood">
+                            <span id="rb-value-ood">120</span><span class="rb-unit" id="rb-unit-ood">RB</span>
+                        </div>
+                        <div class="dapat-section">
+                            <div class="dapat-label editable" data-id="dapat-label-ood">DAPATKAN</div>
+                            <div>
+                                <span class="tizo-amount editable" data-id="tizo-amount-ood"
+                                    id="tizo-value-ood">140</span>
+                                <span class="tizo-unit">TIZO</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Left Badge (dynamic from DB) 
+                    <img id="badge-bottom-left-ood" alt="Badge" class="badge-bottom-left editable badge-hidden" data-id="badge-bottom-left-ood">-->
+
+                    <!-- Bottom Right Badge (dynamic from DB)
+                    <img id="badge-bottom-right-ood" alt="Badge" class="badge-bottom-right editable badge-hidden" data-id="badge-bottom-right-ood"> -->
+                </div>
+            </div>
+
+            <!-- Tap Hint -->
+            <div class="tap-hint editable" data-id="tap-hint">TAP TO CONTINUE</div>
+        </div>
+
+        <!-- OOH Slide -->
+        <div class="offer-slide" id="slide-ooh" style="display: none;">
+            <!-- Timezone Logo -->
+            <div class="logo-section editable" data-id="logo-section-ooh">
+                <img src="timezone-branding.png" alt="Timezone" class="logo-img">
+                <h1 id="main-text-ooh" class="glow-text editable" data-id="main-text-ooh"
+                    style="z-index: 9; position: relative; transform: translate(0px, -25.2px) scale(1.6); white-space: pre-line; font-weight: bold">
+                    ISI SALDOMU<br />DI SINI!
+                </h1>
+
+            </div>
+
+            <!-- Offer Title -->
+            <h1 class="offer-title editable" data-id="offer-title-ooh">OFFER OF THE HOUR</h1>
+
+            <!-- Card Container -->
+            <div class="card-container editable" data-id="card-container-ooh">
+                <!-- Cat Animation -->
+                <img src="cat-screensaver.gif" alt="Cat" class="cat-animation editable" data-id="cat-ooh">
+
+                <!-- Offer Card Wrapper -->
+                <div class="offer-card-wrapper">
+                    <!-- Top Left Badge (dynamic from DB) 
+                    <img id="badge-top-left-ooh" alt="Badge" class="badge-top-left editable badge-hidden" data-id="badge-top-left-ooh">-->
+
+                    <!-- Top Right Badge (dynamic from DB) 
+                    <img id="badge-top-right-ooh" alt="Badge" class="badge-top-right editable badge-hidden" data-id="badge-top-right-ooh">-->
+
+
+                    <!-- Card Background -->
+                    <img src="ooh-card.png" alt="Offer Card" class="offer-card-bg editable" data-id="offer-card-ooh">
+
+                    <!-- Card Text Overlay -->
+                    <div class="card-text-overlay editable" data-id="card-text-ooh"
+                        style="transform: translate(-53.3333px, 338.667px) scale(1);">
+                        <div class="rb-amount editable" data-id="rb-amount-ooh">
+                            <span id="rb-value-ooh">100</span><span class="rb-unit" id="rb-unit-ooh">RB</span>
+                        </div>
+                        <div class="dapat-section">
+                            <div class="dapat-label editable" data-id="dapat-label-ooh">DAPATKAN</div>
+                            <div>
+                                <span class="tizo-amount editable" data-id="tizo-amount-ooh"
+                                    id="tizo-value-ooh">110</span>
+                                <span class="tizo-unit">TIZO</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Left Badge (dynamic from DB) -->
+                    <img id="badge-bottom-left-ooh" alt="Badge" class="badge-bottom-left editable badge-hidden"
+                        data-id="badge-bottom-left-ooh">
+
+                    <!-- Bottom Right Badge (dynamic from DB)
+                    <img id="badge-bottom-right-ooh" alt="Badge" class="badge-bottom-right editable badge-hidden" data-id="badge-bottom-right-ooh"> -->
+
+                </div>
+            </div>
+
+            <!-- Tap Hint -->
+            <div class="tap-hint editable" data-id="tap-hint-ooh">TAP TO CONTINUE</div>
+        </div>
+
+        <!-- Snacks Slide -->
+        <div class="offer-slide hidden" id="slide-snacks" bis_skin_checked="1">
+            <!-- Timezone Logo -->
+            <div class="logo-section editable" data-id="logo-section-snacks" bis_skin_checked="1">
+                <img src="timezone-branding.png" alt="Timezone" class="logo-img">
+
+                <h1 id="main-text-snacks" class="glow-text editable" data-id="main-text-snacks"
+                    style="z-index: 9; position: relative; white-space: pre-line; transform: translate(0px, -25.2px) scale(1.6); font-weight: bold">
+                    ISI SALDOMU<br />DI SINI!
+                </h1>
+            </div>
+
+            <!-- Offer Title -->
+            <h1 class="offer-title editable" data-id="offer-title-snacks">here is free snacks</h1>
+
+            <!-- Card Container -->
+            <div class="card-container editable" data-id="card-container-snacks" bis_skin_checked="1">
+                <!-- Free Snack Icon -->
+
+
+                <!-- Cat Animation -->
+                <img src="cat-screensaver.gif" alt="Cat" class="cat-animation editable" data-id="cat-ooh"
+                    style="transform: translate(-314.667px, 288px) scale(1);">
+
+                <!-- Offer Card Wrapper -->
+                <div class="offer-card-wrapper" bis_skin_checked="1">
+                    <!-- Card Background -->
+                    <img src="" alt="Free snack card" class="card-visual editable" data-id="card-visual"
+                        style="transform: translate(13.3333px, 20px) scale(1.2);">
+
+                    <!-- Card Text Overlay -->
+                    <div class="card-copy" bis_skin_checked="1" style="display: none;">
+                        <div class="rb-row editable" data-id="rb-row" bis_skin_checked="1">
+                            <span id="rb-value-snacks">400</span>
+                            <span class="rb-unit" id="rb-unit-snacks">RB</span>
+                        </div>
+                        <div class="dapat-label editable" data-id="dapat-label-snacks" bis_skin_checked="1">DAPATKAN
+                        </div>
+                        <div class="tizo-amount editable" data-id="tizo-amount-snacks" id="tizo-value-snacks">480</div>
+                        <div class="tizo-unit editable" data-id="tizo-unit-snacks" bis_skin_checked="1">TIZO</div>
+                        <div class="snack-footer editable" data-id="snack-footer-snacks" bis_skin_checked="1">SNACK
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tap Hint -->
+            <div class="tap-hint editable" data-id="tap-hint-snacks" bis_skin_checked="1">TAP TO CONTINUE</div>
+        </div>
+    </div>
+
+    <script src="page-transition.js"></script>
+    <script src="asset-preloader.js"></script>
+    <script src="api-config.js"></script>
+    <script src="auto-reload.js"></script>
+    <script src="background-music.js"></script>
+    <script src="language.js"></script>
+    <script>
+        // Preload all assets on first visit
+        async function initializeApp() {
+            const progressBar = document.getElementById('loading-progress-bar');
+            const progressText = document.getElementById('loading-percent');
+            const loadingText = document.getElementById('loading-text');
+
+            // Update progress UI
+            const updateProgress = (percent) => {
+                if (progressBar) progressBar.style.width = percent + '%';
+                if (progressText) progressText.textContent = percent + '%';
+                if (percent >= 100 && loadingText) {
+                    loadingText.textContent = 'READY!';
+                }
+            };
+
+            // Preload assets if not already done
+            if (!window.AssetPreloader.isReady()) {
+                await window.AssetPreloader.preloadAll(updateProgress);
+            } else {
+                updateProgress(100);
+            }
+
+            // Also prefetch API data
+            await window.AssetPreloader.prefetchApiData();
+
+            // Now initialize the screensaver
+            await fetchOffers();
+
+            // Show the screensaver container INSTANTLY
+            const container = document.querySelector('.screensaver-container');
+            if (container) {
+                container.style.opacity = '1';
+            }
+        }
+
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryFilter = urlParams.get('category')?.toLowerCase();
+
+        // Initialize Language
+        const currentLang = getCurrentLanguage();
+        const tapHintText = currentLang === 'id' ? 'TEKAN UNTUK MELANJUTKAN' : 'TAP TO CONTINUE';
+
+        // Update all tap hint elements
+        document.querySelectorAll('.tap-hint').forEach(el => {
+            el.textContent = tapHintText;
+        });
+
+        let currentSlide = 'ood'; // Start with OOD
+        let availableSlides = []; // Global to store available slides
+        let autoTransitionInterval;
+
+        // Handle category filter
+        if (categoryFilter === 'ood') {
+            currentSlide = 'ood';
+            // Hide OOH and Snacks elements
+            document.getElementById('bg-ooh').classList.add('hidden');
+            document.getElementById('slide-ooh').classList.add('hidden');
+            document.getElementById('slide-snacks').classList.add('hidden');
+            // Show OOD
+            document.getElementById('bg-ood').classList.remove('hidden');
+            document.getElementById('slide-ood').classList.remove('hidden');
+        } else if (categoryFilter === 'ooh') {
+            currentSlide = 'ooh';
+            // Hide OOD and Snacks elements
+            document.getElementById('bg-ood').classList.add('hidden');
+            document.getElementById('slide-ood').classList.add('hidden');
+            document.getElementById('slide-snacks').classList.add('hidden');
+            // Show OOH (already default)
+        } else if (categoryFilter === 'snacks') {
+            currentSlide = 'snacks';
+            // Hide OOD and OOH elements
+            document.getElementById('bg-ood').classList.add('hidden');
+            document.getElementById('slide-ood').classList.add('hidden');
+            document.getElementById('bg-ooh').classList.add('hidden');
+            document.getElementById('slide-ooh').classList.add('hidden');
+            // Show Snacks
+            document.getElementById('slide-snacks').classList.remove('hidden');
+        }
+
+        // Fetch offer data from database (or use prefetched cache)
+        async function fetchOffers() {
+            try {
+                // Helper function to update badge icon
+                function updateBadgeIcon(elementId, iconData) {
+                    const badgeEl = document.getElementById(elementId);
+                    if (badgeEl) {
+                        if (iconData && iconData.trim() !== '' && !iconData.startsWith('data:')) {
+                            // Normalize filename: replace spaces with hyphens, remove % characters
+                            const normalizedIcon = iconData.replace(/ /g, '').replace(/-/g, '').replace(/_/g, '').replace(/%/g, '').replace(/\s+/g, '');
+                            badgeEl.src = `./corner-icons/${normalizedIcon}`;
+                            badgeEl.classList.remove('badge-hidden');
+                        } else {
+                            badgeEl.classList.add('badge-hidden');
+                        }
+                    }
+                }
+
+                // Check for prefetched cache from welcome page (valid for 5 seconds)
+                // Use ?refresh=true to bypass cache for admin testing
+                const forceRefresh = urlParams.get('refresh') === 'true';
+                let cachedData = null;
+                if (!forceRefresh) {
+                    try {
+                        const cacheStr = sessionStorage.getItem('screensaver_cache');
+                        if (cacheStr) {
+                            cachedData = JSON.parse(cacheStr);
+                            // Cache is valid for 5 seconds only
+                            if (Date.now() - cachedData.timestamp > 5000) {
+                                cachedData = null;
+                                sessionStorage.removeItem('screensaver_cache');
+                            } else {
+                                console.log('Using prefetched screensaver data from cache');
+                            }
+                        }
+                    } catch (e) {
+                        cachedData = null;
+                    }
+                } else {
+                    console.log('Force refresh - bypassing cache');
+                    sessionStorage.removeItem('screensaver_cache');
+                }
+
+                // Fetch OOD offer (use cache or fetch fresh)
+                let oodData = cachedData?.ood;
+                if (!oodData) {
+                    const oodResponse = await fetch(getApiUrl('/api/offers?category=OOD'));
+                    if (oodResponse.ok) oodData = await oodResponse.json();
+                }
+                let hasOODOffers = false;
+                if (oodData) {
+                    if (oodData.success && oodData.offers && oodData.offers.length > 0) {
+                        hasOODOffers = true;
+                        const offer = oodData.offers[0];
+                        const costInRb = Math.round(parseFloat(offer.cost) / 1000);
+                        const tizoCredit = Math.round(parseFloat(offer.tizo_credit));
+                        const rbValueEl = document.getElementById('rb-value-ood');
+                        const rbUnitEl = document.getElementById('rb-unit-ood');
+                        if (typeof formatAndUpdateRbDisplay === 'function') {
+                            formatAndUpdateRbDisplay(rbValueEl, rbUnitEl, costInRb);
+                        } else {
+                            rbValueEl.textContent = costInRb;
+                        }
+                        document.getElementById('tizo-value-ood').textContent = tizoCredit;
+
+                        // Update offer title dynamically
+                        if (offer.product_name) {
+                            const titleEl = document.querySelector('[data-id="offer-title-ood"]');
+                            if (titleEl) titleEl.textContent = offer.product_name;
+                        }
+
+                        // Use captured offer card image if available
+                        if (offer.offer_card_image && offer.offer_card_image.trim() !== '') {
+                            const cardEl = document.querySelector('[data-id="offer-card-ood"]');
+                            if (cardEl) {
+                                cardEl.src = offer.offer_card_image;
+                                // Hide text overlay since image already has text
+                                const textOverlay = document.querySelector('[data-id="card-text-ood"]');
+                                if (textOverlay) textOverlay.style.display = 'none';
+                            }
+                        }
+
+                        console.log('OOD offer loaded:', { rb: costInRb, tizo: tizoCredit, hasCardImage: !!(offer.offer_card_image), cardElFound: !!document.querySelector('[data-id="offer-card-ood"]') });
+                    }
+                }
+
+                // Fetch OOH offer (use cache or fetch fresh)
+                let oohData = cachedData?.ooh;
+                if (!oohData) {
+                    const oohResponse = await fetch(getApiUrl('/api/offers?category=OOH'));
+                    if (oohResponse.ok) oohData = await oohResponse.json();
+                }
+                let hasOOHOffers = false;
+                if (oohData) {
+                    if (oohData.success && oohData.offers && oohData.offers.length > 0) {
+                        hasOOHOffers = true;
+                        const offer = oohData.offers[0];
+                        const costInRb = Math.round(parseFloat(offer.cost) / 1000);
+                        const tizoCredit = Math.round(parseFloat(offer.tizo_credit));
+                        const rbValueEl = document.getElementById('rb-value-ooh');
+                        const rbUnitEl = document.getElementById('rb-unit-ooh');
+                        if (typeof formatAndUpdateRbDisplay === 'function') {
+                            formatAndUpdateRbDisplay(rbValueEl, rbUnitEl, costInRb);
+                        } else {
+                            rbValueEl.textContent = costInRb;
+                        }
+                        document.getElementById('tizo-value-ooh').textContent = tizoCredit;
+
+                        // Update offer title dynamically
+                        if (offer.product_name) {
+                            const titleEl = document.querySelector('[data-id="offer-title-ooh"]');
+                            if (titleEl) titleEl.textContent = offer.product_name;
+                        }
+
+                        // Use captured offer card image if available
+                        if (offer.offer_card_image && offer.offer_card_image.trim() !== '') {
+                            const cardEl = document.querySelector('[data-id="offer-card-ooh"]');
+                            if (cardEl) {
+                                cardEl.src = offer.offer_card_image;
+                                // Hide text overlay since image already has text
+                                const textOverlay = document.querySelector('[data-id="card-text-ooh"]');
+                                if (textOverlay) textOverlay.style.display = 'none';
+                            }
+                        }
+
+                        console.log('OOH offer loaded:', { rb: costInRb, tizo: tizoCredit, hasCardImage: !!(offer.offer_card_image) });
+                    }
+                }
+
+                // Fetch Snacks offer (use cache or fetch fresh)
+                let snacksData = cachedData?.snacks;
+                if (!snacksData) {
+                    const snacksResponse = await fetch(getApiUrl('/api/offers?category=Snacks'));
+                    if (snacksResponse.ok) snacksData = await snacksResponse.json();
+                }
+                let hasSnacksOffers = false;
+                if (snacksData) {
+                    if (snacksData.success && snacksData.offers && snacksData.offers.length > 0) {
+                        hasSnacksOffers = true;
+                        const offer = snacksData.offers[0];
+                        const costInRb = Math.round(parseFloat(offer.cost) / 1000);
+                        const tizoCredit = Math.round(parseFloat(offer.tizo_credit));
+                        const rbValueEl = document.getElementById('rb-value-snacks');
+                        const rbUnitEl = document.getElementById('rb-unit-snacks');
+                        if (typeof formatAndUpdateRbDisplay === 'function') {
+                            formatAndUpdateRbDisplay(rbValueEl, rbUnitEl, costInRb);
+                        } else {
+                            rbValueEl.textContent = costInRb;
+                        }
+                        document.getElementById('tizo-value-snacks').textContent = tizoCredit;
+
+                        // Update offer title dynamically
+                        if (offer.product_name) {
+                            const titleEl = document.querySelector('[data-id="offer-title-snacks"]');
+                            if (titleEl) titleEl.textContent = offer.product_name;
+                        }
+
+                        // Use captured offer card image if available
+                        if (offer.offer_card_image && offer.offer_card_image.trim() !== '') {
+                            const cardEl = document.querySelector('[data-id="card-visual"]');
+                            if (cardEl) {
+                                cardEl.src = offer.offer_card_image;
+                                // Hide text overlay since image already has text
+                                const cardCopy = document.querySelector('.card-copy');
+                                if (cardCopy) cardCopy.style.display = 'none';
+                            }
+                        }
+
+                        console.log('Snacks offer loaded:', { rb: costInRb, tizo: tizoCredit, hasCardImage: !!(offer.offer_card_image) });
+                    }
+                }
+
+                // If no active offers for any category, redirect to welcome page
+
+                /*
+
+                if (!hasOODOffers && !hasOOHOffers && !hasSnacksOffers) {
+                    window.location.href = 'welcome.html';
+                    return;
+                }
+*/
+
+
+                // Adjust slide behavior based on available offers
+                availableSlides = [];
+                if (hasOODOffers) availableSlides.push('ood');
+                if (hasOOHOffers) availableSlides.push('ooh');
+                if (hasSnacksOffers) availableSlides.push('snacks');
+
+                // Hide slides that don't have offers
+                if (!hasOODOffers) {
+                    document.getElementById('slide-ood').style.display = 'none';
+                    document.getElementById('bg-ood').classList.add('hidden');
+                }
+                if (!hasOOHOffers) {
+                    document.getElementById('slide-ooh').style.display = 'none';
+                    document.getElementById('bg-ooh').classList.add('hidden');
+                }
+                if (!hasSnacksOffers) {
+                    document.getElementById('slide-snacks').style.display = 'none';
+                }
+
+                // Set and SHOW the first available slide
+                currentSlide = availableSlides[0] || 'ood';
+
+                // Hide all backgrounds first
+                document.getElementById('bg-ood').classList.add('hidden');
+                document.getElementById('bg-ooh').classList.add('hidden');
+                document.getElementById('bg-snacks').classList.add('hidden');
+
+                // Show the correct slide based on what's available
+                if (currentSlide === 'snacks' && hasSnacksOffers) {
+                    document.getElementById('slide-snacks').classList.remove('hidden');
+                    document.getElementById('slide-snacks').style.display = '';
+                    // Use dedicated snacks background
+                    document.getElementById('bg-snacks').classList.remove('hidden');
+                } else if (currentSlide === 'ood' && hasOODOffers) {
+                    document.getElementById('slide-ood').classList.remove('hidden');
+                    document.getElementById('slide-ood').style.display = '';
+                    document.getElementById('bg-ood').classList.remove('hidden');
+                } else if (currentSlide === 'ooh' && hasOOHOffers) {
+                    document.getElementById('slide-ooh').classList.remove('hidden');
+                    document.getElementById('slide-ooh').style.display = '';
+                    document.getElementById('bg-ooh').classList.remove('hidden');
+                }
+
+                console.log('Available slides:', availableSlides, 'Current slide:', currentSlide);
+
+                // Hide loading overlay now that data is loaded and slides are ready
+                const loadingOverlay = document.getElementById('loading-overlay');
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'none';
+                }
+
+                // Debug: Log slide visibility
+                const slideOod = document.getElementById('slide-ood');
+                console.log('OOD slide state:', {
+                    display: slideOod.style.display,
+                    hasHiddenClass: slideOod.classList.contains('hidden'),
+                    opacity: getComputedStyle(slideOod).opacity,
+                    visibility: getComputedStyle(slideOod).visibility
+                });
+
+                // If only one category has offers, stop auto-transition
+                if (availableSlides.length <= 1) {
+                    stopAutoTransition();
+                }
+
+                // Fade in the page now that initial setup is done
+                const container = document.querySelector('.screensaver-container');
+                if (container) {
+                    // Small timeout to ensure transition triggers
+                    setTimeout(() => {
+                        container.style.opacity = '1';
+
+                        // Notify kiosk-shell of initial background
+                        try {
+                            if (window.parent && window.parent !== window) {
+                                window.parent.postMessage({
+                                    type: 'switchBackground',
+                                    background: currentSlide  // 'ood' by default
+                                }, '*');
+                                console.log('Sent initial background to shell:', currentSlide);
+                            }
+                        } catch (e) { }
+                    }, 100);
+                }
+            } catch (error) {
+                console.log('Using default offer values:', error);
+            }
+        }
+
+        // Toggle between available slides
+        function toggleSlide() {
+            if (availableSlides.length <= 1) return;
+
+            const currentSlideEl = document.getElementById('slide-' + currentSlide);
+            const currentBgEl = document.getElementById('bg-' + currentSlide);
+
+            // Determine next slide dynamically
+            const currentIndex = availableSlides.indexOf(currentSlide);
+            const nextIndex = (currentIndex + 1) % availableSlides.length;
+            const nextSlideStr = availableSlides[nextIndex];
+
+            const nextSlideEl = document.getElementById('slide-' + nextSlideStr);
+            const nextBgEl = document.getElementById('bg-' + nextSlideStr);
+
+            // 1. Fade OUT current slide
+            if (currentSlideEl) {
+                currentSlideEl.style.transition = 'opacity 0.5s ease';
+                currentSlideEl.style.opacity = '0';
+            }
+
+            // Wait for fade out
+            setTimeout(() => {
+                // 2. Hide current
+                if (currentSlideEl) currentSlideEl.classList.add('hidden');
+                if (currentBgEl) currentBgEl.classList.add('hidden');
+
+                // 3. Notify kiosk-shell to switch background (if running in iframe)
+                try {
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({
+                            type: 'switchBackground',
+                            background: nextSlideStr
+                        }, '*');
+                        console.log('Sent background switch to shell:', nextSlideStr);
+                    }
+                } catch (e) { }
+
+                // 4. Prepare next (show but keep transparent)
+                if (nextSlideEl) {
+                    nextSlideEl.classList.remove('hidden');
+                    nextSlideEl.style.transition = 'opacity 0.5s ease';
+                    nextSlideEl.style.opacity = '0';
+                    nextSlideEl.style.display = ''; // Ensure display is not none
+                }
+                if (nextBgEl) nextBgEl.classList.remove('hidden');
+
+                // 5. Fade IN next
+                setTimeout(() => {
+                    if (nextSlideEl) nextSlideEl.style.opacity = '1';
+                    currentSlide = nextSlideStr;
+                    console.log('Transitioned to slide:', currentSlide);
+                }, 50);
+
+            }, 500); // Wait 500ms for fade out
+        }
+
+        // Start auto-transition every 5 seconds (3 sec visible + transition time)
+        function startAutoTransition() {
+            autoTransitionInterval = setInterval(toggleSlide, 5000);
+        }
+
+        // Stop auto-transition
+        function stopAutoTransition() {
+            if (autoTransitionInterval) {
+                clearInterval(autoTransitionInterval);
+            }
+        }
+
+
+        function handleClick(event) {
+            // Don't navigate if in edit mode
+            if (window.isEditModeActive && window.isEditModeActive()) return;
+
+            // Stop the auto-transition and navigate to welcome page
+            stopAutoTransition();
+            PageTransition.navigateTo('welcome.html');
+        }
+
+        // Initialize application with preloading
+        document.addEventListener('DOMContentLoaded', async function () {
+            await initializeApp();
+            startAutoTransition();
+            document.addEventListener('click', handleClick);
+            document.addEventListener('touchstart', handleClick); // Handle touch events as well
+        });
+
+        // Initialize edit mode
+
+    </script>
+
+
+</body>
+
+</html>

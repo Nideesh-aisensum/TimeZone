@@ -1,0 +1,403 @@
+/* View Transition API - Smooth page transitions (Chrome 111+) */
+@view-transition {
+    navigation: auto;
+}
+
+/* Customize the transition animation */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 0.2s;
+    animation-timing-function: ease-in-out;
+}
+
+::view-transition-old(root) {
+    animation-name: fade-out;
+}
+
+::view-transition-new(root) {
+    animation-name: fade-in;
+}
+
+@keyframes fade-out {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@font-face {
+    font-family: 'Nulshock';
+    src: url('nulshock/nulshock-light.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Nulshock';
+    src: url('nulshock/nulshock-heavy.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Nulshock', sans-serif;
+    font-weight: normal;
+    overflow: hidden;
+}
+
+.container {
+    width: 1080px;
+    height: 1920px;
+    /* Video background is added in HTML */
+    background-color: transparent;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* Video Background */
+.video-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1080px;
+    height: 1920px;
+    object-fit: cover;
+    z-index: 0;
+}
+
+/* Language Selector */
+.language-selector {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+#lang-btn {
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 30px;
+    color: white;
+    padding: 15px 40px;
+    font-family: 'Nulshock', sans-serif;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    backdrop-filter: blur(5px);
+}
+
+.dropdown-content {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    overflow: hidden;
+    min-width: 200px;
+}
+
+.dropdown-content div {
+    color: white;
+    padding: 20px 40px;
+    font-size: 24px;
+    cursor: pointer;
+    text-align: center;
+    font-family: 'Nulshock', sans-serif;
+}
+
+.dropdown-content div:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.hidden {
+    display: none;
+}
+
+/* Main Content - Base styles only, page-specific styles should override via inline */
+.content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* padding-top: 10%; - Removed to prevent override of page-specific padding */
+}
+
+.logo {
+    width: 700px;
+    height: auto;
+    margin-bottom: 30px;
+    object-fit: contain;
+}
+
+/* Global Timezone Branding - Universal size */
+.timezone-branding {
+    width: 700px;
+    height: auto;
+    object-fit: contain;
+    transform: scale(1.5);
+}
+
+.glow-text {
+    color: white;
+    font-size: 3rem;
+    text-align: center;
+    line-height: 1.1;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.3);
+    margin-bottom: 20px;
+    z-index: 10;
+}
+
+.character-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    margin-top: -20px;
+}
+
+.character {
+    width: 80%;
+    max-width: 400px;
+    height: auto;
+    object-fit: contain;
+}
+
+.button-wrapper {
+    position: relative;
+    width: 70%;
+    max-width: 300px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10%;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.button-wrapper:active {
+    transform: scale(0.95);
+}
+
+.button-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.button-text {
+    position: relative;
+    z-index: 1;
+    color: white;
+    font-size: 1.5rem;
+    letter-spacing: 2px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Responsive adjustments */
+@media (max-height: 700px) {
+    .glow-text {
+        font-size: 2rem;
+    }
+
+    .logo {
+        width: 50%;
+    }
+}
+
+/* Edit Mode Styles */
+.edit-toggle {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    cursor: pointer;
+    padding: 10px;
+}
+
+.red-dot {
+    width: 20px;
+    height: 20px;
+    background: #ff3b3b;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(255, 59, 59, 0.5);
+    transition: all 0.3s ease;
+}
+
+.edit-toggle:hover .red-dot {
+    transform: scale(1.2);
+    box-shadow: 0 0 15px rgba(255, 59, 59, 0.8);
+}
+
+.edit-toggle.active .red-dot {
+    background: #00ff88;
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.8);
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.edit-controls {
+    position: absolute;
+    top: 60px;
+    left: 20px;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    padding: 15px;
+    backdrop-filter: blur(10px);
+}
+
+.control-label {
+    color: #00ff88;
+    font-size: 12px;
+    margin-bottom: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.size-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.size-controls button {
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.size-controls button:hover {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+#size-display {
+    color: white;
+    font-size: 14px;
+    min-width: 50px;
+    text-align: center;
+}
+
+.reset-btn {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    background: rgba(255, 59, 59, 0.5);
+    color: white;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.reset-btn:hover {
+    background: rgba(255, 59, 59, 0.8);
+}
+
+/* Editable elements in edit mode */
+.editable {
+    transition: outline 0.2s, box-shadow 0.2s;
+}
+
+.editable.edit-active {
+    cursor: move;
+    outline: 2px dashed rgba(255, 255, 255, 0.3);
+    outline-offset: 2px;
+}
+
+.editable.edit-active:hover {
+    outline-color: rgba(0, 255, 136, 0.5);
+}
+
+.editable.selected {
+    outline: 2px solid #00ff88 !important;
+    box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+}
+
+/* Back Button - Global Styling */
+.back-button {
+    position: absolute;
+    top: 31px;
+    left: 30px;
+    max-width: 200px;
+    height: auto;
+    cursor: pointer;
+    z-index: 100;
+    transition: transform 0.2s, filter 0.2s;
+}
+
+.back-button:hover {
+    filter: brightness(1.2);
+}
+
+.back-button:active {
+    filter: brightness(0.9);
+}
+
+/* Legacy support for div-wrapped back buttons */
+.back-button img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}

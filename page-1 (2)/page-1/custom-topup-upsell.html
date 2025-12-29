@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=1080, initial-scale=1.0" />
+  <title>Timezone - Custom Topup Upsell</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /* Fixed for 1080x1920 resolution */
+    html,
+    body {
+      overflow: hidden;
+    }
+
+    .container {
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+    }
+
+    .content {
+      padding: 60px 50px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+    }
+
+    /* Back Button */
+
+    /* Selected Offer Card */
+    .selected-offer-section {
+      margin-top: 80px;
+      margin-bottom: 20px;
+      margin-left: -10px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .selected-offer-card {
+      position: relative;
+      width: 380px;
+      border-radius: 25px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .selected-offer-card:hover {
+      transform: scale(1.03);
+    }
+
+    .selected-offer-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .selected-offer-card .selection-overlay {
+      display: none;
+    }
+
+    .selected-offer-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+      pointer-events: none;
+    }
+
+    .offer-top {
+      text-align: center;
+    }
+
+    .offer-rb-value {
+      font-family: "Nulshock", sans-serif;
+      font-size: 65px;
+      color: #392969;
+      font-weight: bold;
+    }
+
+    .offer-rb-unit {
+      font-family: "Nulshock", sans-serif;
+      font-size: 30px;
+      color: #392969;
+    }
+
+    .offer-bottom {
+      text-align: center;
+    }
+
+    .offer-gets {
+      font-family: "Nulshock", sans-serif;
+      font-size: 20px;
+      color: #f9c0d8;
+      letter-spacing: 3px;
+      margin-bottom: 5px;
+    }
+
+    .offer-tizo-value {
+      font-family: "Nulshock", sans-serif;
+      font-size: 55px;
+      color: #f9c0d8;
+      font-weight: bold;
+    }
+
+    .offer-tizo-unit {
+      font-family: "Nulshock", sans-serif;
+      font-size: 30px;
+      color: #f9c0d8;
+    }
+
+    /* Great Choice Message */
+    .message-section {
+      text-align: center;
+      margin: 50px 0;
+      padding: 0 40px;
+    }
+
+    .great-choice {
+      font-family: "Nulshock", sans-serif;
+      font-size: 48px;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+      margin-bottom: 10px;
+    }
+
+    .special-offers-text {
+      font-family: "Nulshock", sans-serif;
+      font-size: 24px;
+      color: #b8f5ff;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      line-height: 1.4;
+    }
+
+    /* Additional Offers Section */
+    .additional-offers {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .additional-offer-card {
+      position: relative;
+      width: 420px;
+      border-radius: 20px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .additional-offer-card:hover {
+      transform: scale(1.03);
+    }
+
+    .additional-tizo-unit {
+      font-size: 50px;
+    }
+
+    /* Selected card uses only the overlay image, no extra borders */
+    .selected-offer-card,
+    .selected-offer-card.selected,
+    .selected-offer-card img,
+    .additional-offer-card,
+    .additional-offer-card.selected,
+    .additional-offer-card img {
+      outline: none !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    .selected-offer-card:focus,
+    .selected-offer-card.selected:focus,
+    .additional-offer-card:focus,
+    .additional-offer-card.selected:focus {
+      outline: none !important;
+    }
+
+    .selection-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      display: none !important;
+      z-index: 10;
+    }
+
+    .additional-offer-card.selected .selection-overlay,
+    .selected-offer-card.selected .selection-overlay {
+      display: block !important;
+    }
+
+    .additional-offer-card img:not(.selection-overlay) {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .additional-offer-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 15px;
+      pointer-events: none;
+    }
+
+    .additional-rb {
+      font-family: "Nulshock", sans-serif;
+      font-size: 60px;
+      color: #1a1a2e;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .additional-rb .unit {
+      font-size: 22px;
+    }
+
+    .additional-bottom {
+      text-align: center;
+    }
+
+    .additional-gets {
+      font-family: "Nulshock", sans-serif;
+      font-size: 20px;
+      color: #ffd700;
+      letter-spacing: 3px;
+    }
+
+    .additional-tizo {
+      font-family: "Nulshock", sans-serif;
+      font-size: 48px;
+      color: #00d4ff;
+      font-weight: bold;
+    }
+
+    .additional-tizo .unit {
+      font-size: 24px;
+    }
+
+    /* Second upsell card uses same colors as offer 1 */
+
+    /* Next Button */
+    .next-button {
+      position: relative;
+      width: 500px;
+      height: 100px;
+      cursor: pointer;
+      margin: auto auto 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.2s;
+    }
+
+    .next-button:hover {
+      transform: translateY(-4px);
+    }
+
+    .next-button:active {
+      transform: scale(0.95);
+    }
+
+    .next-button img {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .next-button-text {
+      position: relative;
+      z-index: 1;
+      font-family: "Nulshock", sans-serif;
+      font-size: 36px;
+      color: white;
+      letter-spacing: 2px;
+      text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Base styles for editable elements */
+    .selected-offer-content .editable,
+    .additional-offer-content .editable,
+    .offer-top .editable,
+    .offer-bottom .editable,
+    .additional-rb .editable,
+    .additional-bottom .editable,
+    .additional-tizo .editable,
+    .additional-rb span,
+    .additional-tizo span {
+      display: inline-block;
+      position: relative;
+    }
+
+    /* Edit Mode Support */
+    .edit-mode-active .selected-offer-content,
+    .edit-mode-active .additional-offer-content,
+    .edit-mode-active .offer-top,
+    .edit-mode-active .offer-bottom,
+    .edit-mode-active .additional-rb,
+    .edit-mode-active .additional-bottom,
+    .edit-mode-active .additional-tizo {
+      pointer-events: auto !important;
+    }
+
+    .edit-mode-active .editable:hover {
+      outline: 2px dashed rgba(255, 255, 255, 0.5) !important;
+    }
+
+    .edit-mode-active .editable.edit-active {
+      outline: 2px solid rgba(255, 255, 255, 0.8) !important;
+      pointer-events: auto !important;
+      cursor: move !important;
+    }
+
+    .badge-icon {
+      display: none !important;
+    }
+
+    /* Card selection blackout effect */
+    .selection-made .selected-offer-card:not(.selected),
+    .selection-made .additional-offer-card:not(.selected) {
+      filter: brightness(0.4) grayscale(0.5);
+      opacity: 1;
+      transition: all 0.3s ease;
+    }
+
+    .selection-made .selected-offer-card.selected,
+    .selection-made .additional-offer-card.selected {
+      filter: none;
+      opacity: 1;
+      transition: all 0.3s ease;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Video Background -->
+    <video class="video-bg" autoplay loop muted playsinline>
+      <source src="other-bg.mp4" type="video/mp4" />
+    </video>
+    <!-- Back Button -->
+    <img src="back-button.png" alt="Back" class="back-button" onclick="window.history.back()" />
+
+    <!-- Home Button -->
+    <img src="home.png" alt="Home" class="editable added-element" data-id="home-button" onclick="goHome()"
+      style="max-width: 200px; height: auto; position: absolute; top: 31px; right: 30px; z-index: 50; cursor: pointer;">
+
+    <div class="content">
+      <!-- Selected Offer Card -->
+      <div class="selected-offer-section">
+        <div class="selected-offer-card editable" id="selected-offer" data-id="selected-offer"
+          onclick="selectOfferCard(this)" style="transform: translate(2.66678px, 18.6666px) scale(1.6)">
+          <img class="selection-overlay" src="SELECTED-small-box.png" alt="Selected" />
+          <img id="selected-card-img" src="SMALL-BUTTON-pink.png" alt="Selected Offer" data-no-text-edit="true" />
+          <div class="selected-offer-content">
+            <div class="offer-top" style="transform: translate(0, -12px)"><span class="offer-rb-value"
+                id="selected-rb">120</span><span class="offer-rb-unit" id="selected-rb-unit">RB</span></div>
+            <div class="offer-bottom">
+              <div class="offer-gets" style="transform: translate(0, -3px)">DAPAT</div>
+              <div style="transform: translate(0, -20px)"><span class="offer-tizo-value"
+                  id="selected-tizo">135</span><span class="offer-tizo-unit">TIZO</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Great Choice Message -->
+      <div class="message-section editable" data-id="message-section" style="transform: translate(-5px, 50px) scale(1)">
+        <h1 class="great-choice editable" data-id="great-choice" style="transform: translate(0px, 0px) scale(1)">PILIHAN
+          BAGUS!</h1>
+        <p class="special-offers-text editable" data-id="special-offers-text"
+          style="transform: translate(0px, 0px) scale(1)">
+          KAMU PUNYA <span id="offers-count">2</span><br />PENAWARAN SPESIAL<br />LAGI UNTUK KAMU!
+        </p>
+      </div>
+
+      <!-- Additional Offers -->
+      <div class="additional-offers" id="additional-offers">
+        <!-- Offer 1 -->
+        <div class="additional-offer-card editable" id="additional-offer-1" data-id="additional-offer-1"
+          onclick="selectAdditionalOffer(this)" data-offer-id="upsell-1" data-cost="150000" data-tizo-credit="175"
+          style="transform: translate(29.3331px, 450px) scale(1.6); margin-left: -50px">
+          <img class="selection-overlay" src="SELECTED-small-box.png" alt="Selected" />
+          <img id="additional-img-1" src="SMALL-BUTTON-purple.png" alt="Special Offer" data-no-text-edit="true" />
+          <div class="additional-offer-content">
+            <div class="additional-rb" style="transform: translate(0, -12px)"><span id="additional-rb-1">150</span><span
+                class="unit" id="additional-rb-1-unit">RB</span></div>
+            <div class="additional-bottom">
+              <div class="additional-gets" style="transform: translate(0px, 0px)">DAPAT</div>
+              <div class="additional-tizo" style="transform: translate(0, -3px)"><span id="additional-tizo-1"
+                  class="additional-tizo-unit">175</span><span class="unit">TIZO</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Offer 2 -->
+        <div class="additional-offer-card editable" id="additional-offer-2" data-id="additional-offer-2"
+          onclick="selectAdditionalOffer(this)" data-offer-id="upsell-2" data-cost="200000" data-tizo-credit="230"
+          style="transform: translate(18.6667px, -230.667px) scale(1.6); margin-left: -40px">
+          <img class="selection-overlay" src="SELECTED-small-box.png" alt="Selected" />
+          <img id="additional-img-2" src="SMALL-BUTTON-ORANGE.png" alt="Special Offer" data-no-text-edit="true" />
+          <div class="additional-offer-content">
+            <div class="additional-rb" style="transform: translate(0, -12px)"><span id="additional-rb-2">200</span><span
+                class="unit" id="additional-rb-2-unit">RB</span></div>
+            <div class="additional-bottom">
+              <div class="additional-gets" style="transform: translate(0px, 0px)">DAPAT</div>
+              <div class="additional-tizo" style="transform: translate(0, -3px)"><span id="additional-tizo-2"
+                  class="additional-tizo-unit">230</span><span class="unit">TIZO</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next Button -->
+      <div class="next-button editable" data-id="next-button" onclick="handleNext()" style="transform: scale(1)">
+        <img src="button.png" alt="Next Button" />
+        <span class="next-button-text editable" data-id="next-button-text">SELANJUTNYA</span>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="shell-connector.js"></script>
+  <script src="api-config.js"></script>
+  <script src="session-manager.js"></script>
+  <script src="language.js"></script>
+  <script src="currency-formatter.js?v=2"></script>
+
+  <script>
+    let customTopupData = null;
+    let selectedAdditionalOffer = null;
+    let clickAudio = null;
+
+    // Initialize audio when page loads
+    function initAudio() {
+      try {
+        clickAudio = new Audio("./click.mp3");
+        clickAudio.preload = "auto";
+        clickAudio.volume = 0.8;
+      } catch (error) {
+        console.warn("Could not load click audio:", error);
+      }
+    }
+
+    // Play click sound function
+    function playClickSound() {
+      try {
+        if (clickAudio) {
+          clickAudio.currentTime = 0;
+          clickAudio.play().catch((error) => {
+            console.warn("Could not play click sound:", error);
+          });
+        }
+      } catch (error) {
+        console.warn("Error playing click sound:", error);
+      }
+    }
+
+    // Language translations
+    const translations = {
+      en: {
+        greatChoice: "INTERESTING CHOICE!",
+        specialOffers: '2 MORE OFFERS FOR YOU',
+        notInterested: "SKIPPED BONUS?<br>STILL A GREAT CHOICE",
+        smartMove: "SMART MOVE!<br>BONUS PICKED",
+        topOffer: "AWESOME PICK!<br>MAX BONUS PICKED",
+        gets: "GETS",
+        nextBtn: "NEXT",
+      },
+      id: {
+        greatChoice: "PILIHAN MENARIK!",
+        specialOffers: '2 PENAWARAN LAGI UNTUKMU',
+        notInterested: "NGGAK MAU BONUS?<br>TETAP PILIHAN YANG BAGUS",
+        smartMove: "PILIHAN TEPAT!<br>BONUS SUDAH DIAMBIL",
+        topOffer: "PILIHAN KEREN!<br>KAMU DAPAT BONUS MAKSIMAL",
+        gets: "DAPAT",
+        nextBtn: "SELANJUTNYA",
+      },
+    };
+
+    let currentLang = getCurrentLanguage();
+
+    function getCardType() {
+      // Get user's card type from session
+      const session = typeof getSession === 'function' ? getSession() : null;
+      let userCardType = 'Red'; // Fallback
+
+      if (session && session.selectedCard) {
+        const map = {
+          'red': 'Red',
+          'blue': 'Blue',
+          'gold': 'Gold',
+          'platinum': 'Platinum',
+          'silver': 'Platinum'
+        };
+        userCardType = map[session.selectedCard.toLowerCase()] || 'Red';
+        if (session.selectedCard === 'new_user') userCardType = 'Red';
+      } else {
+        // Try localStorage fallback
+        const storedCard = localStorage.getItem('selectedCard');
+        if (storedCard) {
+          const map = { 'red': 'Red', 'blue': 'Blue', 'gold': 'Gold', 'platinum': 'Platinum', 'silver': 'Platinum' };
+          userCardType = map[storedCard.toLowerCase()] || 'Red';
+        }
+      }
+      return userCardType;
+    }
+
+    function goBack() {
+      if (window.isEditModeActive && window.isEditModeActive()) return;
+      window.location.href = "custom-topup.html";
+    }
+
+    function loadCustomTopupData() {
+      // Get custom topup data from localStorage
+      const storedAmount = localStorage.getItem("customTopUpAmount");
+      const storedTizo = localStorage.getItem("customTopUpTizo");
+
+      if (storedAmount && storedTizo) {
+        customTopupData = {
+          amount: parseFloat(storedAmount),
+          tizo: parseInt(storedTizo),
+        };
+        updateCustomTopupDisplay();
+        generateUpsellOffers();
+      } else {
+        console.log("No custom topup data found");
+        customTopupData = { amount: 120000, tizo: 135 };
+        updateCustomTopupDisplay();
+        generateUpsellOffers();
+      }
+    }
+
+    function updateCustomTopupDisplay() {
+      if (!customTopupData) return;
+
+      const costInRb = Math.round(customTopupData.amount / 1000);
+      const tizoCredit = customTopupData.tizo;
+
+      const rbValueEl = document.getElementById("selected-rb");
+      const rbUnitEl = document.getElementById("selected-rb-unit");
+      if (typeof formatAndUpdateRbDisplay === 'function') {
+        formatAndUpdateRbDisplay(rbValueEl, rbUnitEl, costInRb);
+      } else {
+        rbValueEl.textContent = costInRb;
+      }
+      document.getElementById("selected-tizo").textContent = tizoCredit;
+    }
+
+    async function generateUpsellOffers() {
+      if (!customTopupData) return;
+
+      const baseAmountRb = Math.round(customTopupData.amount / 1000); // Convert to Rb
+
+      try {
+        // Fetch upsell offers from database API
+        const cardType = getCardType();
+        console.log(`Fetching upsell offers for ${baseAmountRb} RB, Card Type: ${cardType}`);
+        const response = await fetch(getApiUrl(`/api/custom-topup-upsell?rb=${baseAmountRb}&cardType=${cardType}`));
+        const data = await response.json();
+
+        if (data.success) {
+          // Update the custom topup display with calculated TIZO from server
+          document.getElementById("selected-tizo").textContent = data.customTizo;
+          customTopupData.tizo = data.customTizo;
+
+          // Update offer 1 with database values
+          const upsell1Rb = data.upsellBox1.rb;
+          const upsell1Tizo = data.upsellBox1.tizo;
+          const rbValueEl1 = document.getElementById("additional-rb-1");
+          const rbUnitEl1 = document.getElementById("additional-rb-1-unit");
+          if (typeof formatAndUpdateRbDisplay === 'function') {
+            formatAndUpdateRbDisplay(rbValueEl1, rbUnitEl1, upsell1Rb);
+          } else {
+            rbValueEl1.textContent = upsell1Rb;
+          }
+          document.getElementById("additional-tizo-1").textContent = upsell1Tizo;
+          const card1 = document.getElementById("additional-offer-1");
+          card1.dataset.cost = upsell1Rb * 1000; // Convert back to Rupiah
+          card1.dataset.tizoCredit = upsell1Tizo;
+
+          // Update offer 2 with database values
+          const upsell2Rb = data.upsellBox2.rb;
+          const upsell2Tizo = data.upsellBox2.tizo;
+          const rbValueEl2 = document.getElementById("additional-rb-2");
+          const rbUnitEl2 = document.getElementById("additional-rb-2-unit");
+          if (typeof formatAndUpdateRbDisplay === 'function') {
+            formatAndUpdateRbDisplay(rbValueEl2, rbUnitEl2, upsell2Rb);
+          } else {
+            rbValueEl2.textContent = upsell2Rb;
+          }
+          document.getElementById("additional-tizo-2").textContent = upsell2Tizo;
+          const card2 = document.getElementById("additional-offer-2");
+          card2.dataset.cost = upsell2Rb * 1000; // Convert back to Rupiah
+          card2.dataset.tizoCredit = upsell2Tizo;
+
+          console.log("✅ Loaded upsell offers from database:", data);
+        } else {
+          console.warn("⚠️ API returned error, using fallback calculation");
+          generateUpsellOffersFallback();
+        }
+      } catch (error) {
+        console.error("❌ Failed to fetch upsell offers from API:", error);
+        generateUpsellOffersFallback();
+      }
+    }
+
+    // Fallback function if API is unavailable
+    function generateUpsellOffersFallback() {
+      if (!customTopupData) return;
+
+      const baseAmount = customTopupData.amount;
+
+      // Fallback: Round up to nearest 50 Rb for upsell offers
+      const baseRb = Math.round(baseAmount / 1000);
+      const upsell1Rb = Math.ceil(baseRb / 50) * 50;
+      const upsell2Rb = upsell1Rb + 50;
+
+      // Simple TIZO calculation: +50 and +100 from original
+      const baseTizo = customTopupData.tizo;
+      const upsell1Tizo = baseTizo + 50;
+      const upsell2Tizo = baseTizo + 100;
+
+      // Update offer 1
+      const rb1El = document.getElementById("additional-rb-1");
+      const unit1El = document.getElementById("additional-rb-1-unit");
+      if (typeof formatAndUpdateRbDisplay === 'function') {
+        formatAndUpdateRbDisplay(rb1El, unit1El, upsell1Rb);
+      } else {
+        rb1El.textContent = upsell1Rb;
+      }
+      document.getElementById("additional-tizo-1").textContent = upsell1Tizo;
+      const card1 = document.getElementById("additional-offer-1");
+      card1.dataset.cost = upsell1Rb * 1000;
+      card1.dataset.tizoCredit = upsell1Tizo;
+
+      // Update offer 2
+      const rb2El = document.getElementById("additional-rb-2");
+      const unit2El = document.getElementById("additional-rb-2-unit");
+      if (typeof formatAndUpdateRbDisplay === 'function') {
+        formatAndUpdateRbDisplay(rb2El, unit2El, upsell2Rb);
+      } else {
+        rb2El.textContent = upsell2Rb;
+      }
+      document.getElementById("additional-tizo-2").textContent = upsell2Tizo;
+      const card2 = document.getElementById("additional-offer-2");
+      card2.dataset.cost = upsell2Rb * 1000;
+      card2.dataset.tizoCredit = upsell2Tizo;
+    }
+
+    function selectOfferCard(cardEl) {
+      // Play click sound effect
+      playClickSound();
+
+      if (window.isEditModeActive && window.isEditModeActive()) return;
+
+      // Remove selection from all cards
+      document.querySelectorAll(".selected-offer-card, .additional-offer-card").forEach((c) => c.classList.remove("selected"));
+
+      // Select this card
+      cardEl.classList.add("selected");
+      selectedAdditionalOffer = null; // User is keeping original selection
+
+      // Add selection-made class to content for blackout effect
+      document.querySelector(".content").classList.add("selection-made");
+
+      // Update message based on selection
+      updateMessageForSelection(cardEl);
+    }
+
+    function selectAdditionalOffer(cardEl) {
+      // Play click sound effect
+      playClickSound();
+
+      if (window.isEditModeActive && window.isEditModeActive()) return;
+
+      // Remove selection from all cards
+      document.querySelectorAll(".selected-offer-card, .additional-offer-card").forEach((c) => c.classList.remove("selected"));
+
+      // Select this one
+      cardEl.classList.add("selected");
+      selectedAdditionalOffer = {
+        offerId: cardEl.dataset.offerId,
+        cost: cardEl.dataset.cost,
+        tizoCredit: cardEl.dataset.tizoCredit,
+      };
+
+      // Add selection-made class to content for blackout effect
+      document.querySelector(".content").classList.add("selection-made");
+
+      // Update message based on selection
+      updateMessageForSelection(cardEl);
+    }
+
+    function updateMessageForSelection(selectedCard) {
+      const t = translations[currentLang];
+      const greatChoiceEl = document.querySelector(".great-choice");
+
+      if (!selectedCard) {
+        // No selection - show initial message
+        greatChoiceEl.innerHTML = t.greatChoice;
+        return;
+      }
+
+      const cardId = selectedCard.id;
+
+      if (cardId === "selected-offer") {
+        // Top card selected - user not interested in upsells
+        greatChoiceEl.innerHTML = t.notInterested;
+      } else if (cardId === "additional-offer-1") {
+        // First upsell card selected - smart move
+        greatChoiceEl.innerHTML = t.smartMove;
+      } else if (cardId === "additional-offer-2") {
+        // Second upsell card selected - top offer
+        greatChoiceEl.innerHTML = t.topOffer;
+      }
+
+      // Hide special offers text when a selection is made
+      const specialOffersEl = document.querySelector(".special-offers-text");
+      if (specialOffersEl) {
+        specialOffersEl.style.display = "none";
+      }
+    }
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      const data = translations[lang];
+
+      document.querySelector(".great-choice").textContent = data.greatChoice;
+      document.querySelector(".great-choice").textContent = data.greatChoice;
+      const specialOffersEl = document.querySelector(".special-offers-text");
+      if (specialOffersEl) {
+        specialOffersEl.innerHTML = data.specialOffers;
+        specialOffersEl.style.display = "block";
+      }
+      document.querySelector(".offer-gets").textContent = data.gets;
+      document.querySelectorAll(".additional-gets").forEach((el) => (el.textContent = data.gets));
+      document.querySelector(".next-button-text").textContent = data.nextBtn;
+    }
+
+    function handleNext() {
+      if (window.isEditModeActive && window.isEditModeActive()) return;
+
+      // Clear any stale splitTopup data since this is custom topup (not a card upgrade)
+      // This prevents old card upgrade data from showing on summary page
+      updateSession({ splitTopup: null });
+
+      // If user selected an upsell offer, update the topup data
+      if (selectedAdditionalOffer) {
+        localStorage.setItem("topupAmount", selectedAdditionalOffer.cost);
+        localStorage.setItem("topupTizo", selectedAdditionalOffer.tizoCredit);
+        localStorage.setItem("customTopUpAmount", selectedAdditionalOffer.cost);
+        localStorage.setItem("customTopUpTizo", selectedAdditionalOffer.tizoCredit);
+
+        // Update session
+        updateSession({
+          offerCost: parseFloat(selectedAdditionalOffer.cost),
+          offerTizo: parseFloat(selectedAdditionalOffer.tizoCredit),
+        });
+      } else {
+        // Keep original custom topup
+        localStorage.setItem("topupAmount", customTopupData.amount);
+        localStorage.setItem("topupTizo", customTopupData.tizo);
+
+        updateSession({
+          offerCost: customTopupData.amount,
+          offerTizo: customTopupData.tizo,
+        });
+      }
+
+      // Save source page for back navigation and navigate to scratch card
+      updateSession({ scratchCardSource: "custom-topup-upsell" });
+      window.location.href = "scratch-card.html";
+    }
+
+    // Initialize page
+    document.addEventListener("DOMContentLoaded", () => {
+      initAudio();
+      loadCustomTopupData();
+      applyLanguage(currentLang);
+    });
+
+    // Initialize edit mode
+    if (typeof initEditMode === 'function') {
+
+    }
+  </script>
+</body>
+
+</html>

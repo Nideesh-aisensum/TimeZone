@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>80mm Thermal Print Test</title>
+    <style>
+        /* General page styling */
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .controls {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+        }
+
+        .controls button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+
+        .controls button:active {
+            transform: translateY(0);
+        }
+
+        /* 80mm thermal paper container */
+        .thermal-paper {
+            background: white;
+            width: 80mm;
+            /* Height is auto - will expand based on content */
+            padding: 10mm 5mm;
+            margin: 80px auto 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Print-specific styles */
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                background: white;
+            }
+
+            .controls {
+                display: none !important;
+            }
+
+            .thermal-paper {
+                width: 80mm;
+                margin: 0;
+                padding: 5mm;
+                box-shadow: none;
+                page-break-after: avoid;
+            }
+
+            /* 80mm paper size */
+            @page {
+                size: 80mm auto;
+                margin: 0;
+            }
+        }
+
+        /* Receipt content styling */
+        .receipt-header {
+            text-align: center;
+            border-bottom: 2px dashed #000;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+
+        .receipt-header h1 {
+            margin: 0 0 5px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .receipt-header p {
+            margin: 2px 0;
+            font-size: 10px;
+        }
+
+        .receipt-body {
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 4px 0;
+        }
+
+        .receipt-row.bold {
+            font-weight: bold;
+            border-top: 1px dashed #000;
+            padding-top: 6px;
+            margin-top: 6px;
+        }
+
+        .receipt-footer {
+            text-align: center;
+            border-top: 2px dashed #000;
+            padding-top: 8px;
+            margin-top: 12px;
+            font-size: 10px;
+        }
+
+        .qr-code {
+            width: 100px;
+            height: 100px;
+            margin: 10px auto;
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: #999;
+        }
+
+        .barcode {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .barcode-img {
+            width: 180px;
+            height: 50px;
+            background: repeating-linear-gradient(90deg,
+                    #000 0px,
+                    #000 2px,
+                    #fff 2px,
+                    #fff 4px);
+            margin: 5px auto;
+        }
+
+        .barcode-number {
+            font-size: 10px;
+            letter-spacing: 2px;
+        }
+
+        .divider {
+            border-top: 1px dashed #000;
+            margin: 8px 0;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .small {
+            font-size: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="controls">
+        <button onclick="window.print()">🖨️ Print Test Receipt</button>
+    </div>
+
+    <div class="thermal-paper">
+        <!-- Receipt Header -->
+        <div class="receipt-header">
+            <h1>TEST RECEIPT</h1>
+            <p>Thermal Printer Test - 80mm</p>
+            <p>Sample Business Name</p>
+            <p>123 Test Street, City, State 12345</p>
+            <p>Tel: (555) 123-4567</p>
+        </div>
+
+        <!-- Receipt Body -->
+        <div class="receipt-body">
+            <p class="small">Transaction ID: <span id="txnId"></span></p>
+            <p class="small">Date: <span id="currentDate"></span></p>
+            <p class="small">Time: <span id="currentTime"></span></p>
+
+            <div class="divider"></div>
+
+            <p><strong>ITEMS PURCHASED:</strong></p>
+
+            <div class="receipt-row">
+                <span>Test Item 1</span>
+                <span>$10.00</span>
+            </div>
+            <div class="receipt-row">
+                <span>Test Item 2 x 2</span>
+                <span>$25.00</span>
+            </div>
+            <div class="receipt-row">
+                <span>Test Item 3</span>
+                <span>$15.50</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="receipt-row">
+                <span>Subtotal:</span>
+                <span>$50.50</span>
+            </div>
+            <div class="receipt-row">
+                <span>Tax (8%):</span>
+                <span>$4.04</span>
+            </div>
+            <div class="receipt-row bold">
+                <span>TOTAL:</span>
+                <span>$54.54</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="receipt-row">
+                <span>Payment Method:</span>
+                <span>CASH</span>
+            </div>
+            <div class="receipt-row">
+                <span>Amount Paid:</span>
+                <span>$60.00</span>
+            </div>
+            <div class="receipt-row">
+                <span>Change:</span>
+                <span>$5.46</span>
+            </div>
+        </div>
+
+        <!-- Barcode -->
+        <div class="barcode">
+            <div class="barcode-img"></div>
+            <div class="barcode-number">0123456789012</div>
+        </div>
+
+        <!-- QR Code placeholder -->
+        <div class="qr-code">
+            [QR CODE]
+        </div>
+
+        <!-- Receipt Footer -->
+        <div class="receipt-footer">
+            <p><strong>THANK YOU FOR YOUR PURCHASE!</strong></p>
+            <p class="small">This is a test print for 80mm thermal paper</p>
+            <p class="small">Visit us at: www.example.com</p>
+            <p class="small">-----------------------------------</p>
+            <p class="small">Font Test: ABCDEFGHIJKLMNOPQRSTUVWXYZ</p>
+            <p class="small">0123456789 !@#$%^&*()</p>
+            <p class="small">-----------------------------------</p>
+            <p class="small" id="printerInfo"></p>
+        </div>
+    </div>
+
+    <script>
+        // Generate transaction ID
+        function generateTxnId() {
+            return 'TXN-' + Date.now().toString(36).toUpperCase();
+        }
+
+        // Format current date and time
+        function updateDateTime() {
+            const now = new Date();
+
+            const dateOptions = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            };
+            const timeOptions = {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            };
+
+            document.getElementById('currentDate').textContent =
+                now.toLocaleDateString('en-US', dateOptions);
+            document.getElementById('currentTime').textContent =
+                now.toLocaleTimeString('en-US', timeOptions);
+            document.getElementById('txnId').textContent = generateTxnId();
+
+            // Add printer info
+            document.getElementById('printerInfo').textContent =
+                'Printed: ' + now.toLocaleString('en-US');
+        }
+
+        // Update on page load
+        updateDateTime();
+
+        // Disable context menu
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Print shortcut
+        document.addEventListener('keydown', function (e) {
+            if (e.ctrlKey && e.key === 'p') {
+                e.preventDefault();
+                window.print();
+                return false;
+            }
+        });
+    </script>
+</body>
+
+</html>

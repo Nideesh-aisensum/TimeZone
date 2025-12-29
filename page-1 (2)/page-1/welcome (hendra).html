@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timezone Welcome</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container" style="transition: opacity 0.5s ease; opacity: 1;" bis_skin_checked="1">
+        <!-- Video Background -->
+        <video class="video-bg" autoplay="" loop="" muted="" playsinline="">
+            <source src="other-bg.mp4" type="video/mp4">
+        </video>
+        <div class="language-selector" bis_skin_checked="1">
+            <button id="lang-btn" onclick="toggleLanguage()" fdprocessedid="7p3nyl">
+                <span id="current-lang">Bahasa</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+            </button>
+            <div id="lang-dropdown" class="dropdown-content hidden" bis_skin_checked="1">
+                <div onclick="setLanguage('en')" bis_skin_checked="1">English</div>
+                <div onclick="setLanguage('id')" bis_skin_checked="1">Bahasa</div>
+            </div>
+        </div>
+
+
+        <div class="content" bis_skin_checked="1">
+            <img src="timezone-branding.png" alt="Timezone Logo" class="logo timezone-branding editable" data-id="logo"
+                style="z-index: -1; position: relative;">
+
+            <h1 id="main-text" class="glow-text editable" data-id="main-text"
+                style="z-index: 9;position: relative;transform: translate(0px, -25.2px) scale(1.6);font-weight: bold;">
+                ISI SALDOMU<br>DI SINI!</h1>
+
+            <div class="character-wrapper editable" data-id="character"
+                style="transform: translate(0px, -40px) scale(2.5);" bis_skin_checked="1">
+                <img src="cat-character.gif" alt="Character" class="character">
+            </div>
+
+            <div class="button-wrapper editable" data-id="button" onclick="handleStart()"
+                style="transform: translate(6px, 21px) scale(1.7) !important;" bis_skin_checked="1">
+                <img src="button.png" alt="Start Button" class="button-bg">
+                <span id="button-text" class="button-text">MULAI</span>
+            </div>
+            <img src="timezone-branding.png" alt="Added Image" class="timezone-branding editable added-element"
+                data-id="added-1-1765031274303"
+                style="position: absolute;top: 50%;left: 49%;z-index: 50;transform: translate(calc(-50% + 5.33337px), calc(-50% - 634.667px)) scale(1.5);width: 300px;">
+        </div>
+    </div>
+
+    <script src="api-config.js"></script>
+    <script src="auto-reload.js"></script>
+    <script src="session-manager.js"></script>
+    <script src="language.js"></script>
+    <script>
+        // Start fresh session ONLY if:
+        // 1. Coming from screensaver (fresh start)
+        // 2. No existing session
+        // 3. User explicitly clicked home/restart button (marked in localStorage)
+        const referrer = document.referrer || '';
+        const isFromScreensaver = referrer.includes('screensaver');
+        const isExplicitRestart = localStorage.getItem('tizo_restart') === 'true';
+        const existingSession = getSession();
+
+        if (isFromScreensaver || !existingSession || isExplicitRestart) {
+            startNewSession(true);
+            localStorage.removeItem('tizo_restart'); // Clear restart flag
+            console.log('Started fresh session (from screensaver or explicit restart)');
+        } else {
+            // User navigated back - preserve their session
+            setCurrentPage('welcome');
+            console.log('Preserved existing session for back navigation');
+        }
+        const translations = {
+            en: {
+                main: "TOP-UP<br>HERE!",
+                button: "START",
+                langLabel: "English"
+            },
+            id: {
+                main: "ISI SALDOMU<br>DI SINI!",
+                button: "MULAI",
+                langLabel: "Bahasa"
+            }
+        };
+
+        let currentLang = getCurrentLanguage();
+
+        function toggleLanguage() {
+            const dropdown = document.getElementById('lang-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function applyLanguage(lang) {
+            currentLang = lang;
+            const data = translations[lang];
+
+            document.getElementById('main-text').innerHTML = data.main;
+            document.getElementById('button-text').textContent = data.button;
+            document.getElementById('current-lang').textContent = data.langLabel;
+        }
+
+        function setLanguage(lang) {
+            saveLanguage(lang);
+            applyLanguage(lang);
+            document.getElementById('lang-dropdown').classList.add('hidden');
+        }
+
+        function handleStart() {
+            if (window.isEditModeActive && window.isEditModeActive()) return;
+            window.location.href = 'welcome2.html';
+        }
+
+        // Close dropdown when clicking outside
+        window.onclick = function (event) {
+            if (!event.target.matches('#lang-btn') && !event.target.closest('#lang-btn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (!openDropdown.classList.contains('hidden')) {
+                        openDropdown.classList.add('hidden');
+                    }
+                }
+            }
+        }
+
+        // Initialize edit mode
+        // initEditMode({ pageId: 'welcome' });
+
+        // Apply saved language preference
+        applyLanguage(currentLang);
+
+        // Idle detection - redirect to screensaver after 10 seconds of inactivity
+        let idleTimeout;
+        const IDLE_TIME = 10000; // 3 seconds for testing
+
+        function resetIdleTimer(e) {
+            // console.log('Resetting idle timer due to:', e?.type);
+            clearTimeout(idleTimeout);
+            // Only set idle timer if not in edit mode
+            if (!window.isEditModeActive || !window.isEditModeActive()) {
+                idleTimeout = setTimeout(function () {
+                    console.log('Idle timeout reached! Redirecting...');
+                    const container = document.querySelector('.container');
+                    if (container) {
+                        container.style.opacity = '0';
+                        setTimeout(() => {
+                            window.location.href = 'screensaver.html';
+                        }, 500);
+                    } else {
+                        window.location.href = 'screensaver.html';
+                    }
+                }, IDLE_TIME);
+            }
+        }
+
+        // Reset timer on any user activity
+        ['mousemove', 'mousedown', 'keypress', 'touchstart', 'scroll', 'click'].forEach(function (event) {
+            document.addEventListener(event, resetIdleTimer, true);
+        });
+
+        // Start the idle timer
+        resetIdleTimer();
+
+        // Prefetch screensaver data in background so it's ready when navigating
+        async function prefetchScreensaverData() {
+            try {
+                const [oodRes, oohRes, snacksRes] = await Promise.all([
+                    fetch(getApiUrl('/api/offers?category=OOD')),
+                    fetch(getApiUrl('/api/offers?category=OOH')),
+                    fetch(getApiUrl('/api/offers?category=Snacks'))
+                ]);
+
+                const cache = {
+                    timestamp: Date.now(),
+                    ood: oodRes.ok ? await oodRes.json() : null,
+                    ooh: oohRes.ok ? await oohRes.json() : null,
+                    snacks: snacksRes.ok ? await snacksRes.json() : null
+                };
+
+                sessionStorage.setItem('screensaver_cache', JSON.stringify(cache));
+                console.log('Screensaver data prefetched and cached');
+            } catch (e) {
+                console.log('Prefetch failed, screensaver will fetch directly:', e);
+            }
+        }
+
+        // Start prefetching immediately
+        prefetchScreensaverData();
+    </script>
+
+
+
+</body>
+
+</html>

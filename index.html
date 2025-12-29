@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiosk Application</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            /* Disable text selection */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .content {
+            text-align: center;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        h1 {
+            font-size: 5rem;
+            font-weight: 300;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.02); }
+        }
+
+        .hint {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 0.8rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content">
+            <h1>Test Text</h1>
+        </div>
+    </div>
+    <div class="hint">Press Ctrl+Shift+Q to exit</div>
+
+    <script>
+        // Disable right-click context menu
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Disable keyboard shortcuts that could close/minimize
+        document.addEventListener('keydown', function(e) {
+            // Block F11 (toggle fullscreen)
+            if (e.key === 'F11') {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Block Alt+F4
+            if (e.altKey && e.key === 'F4') {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Block Alt+Tab (as much as possible)
+            if (e.altKey && e.key === 'Tab') {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Block Escape key
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Block Windows key combinations
+            if (e.metaKey) {
+                e.preventDefault();
+                return false;
+            }
+
+            // Block Ctrl+W (close tab)
+            if (e.ctrlKey && e.key === 'w') {
+                e.preventDefault();
+                return false;
+            }
+
+            // Block Ctrl+F4
+            if (e.ctrlKey && e.key === 'F4') {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Disable drag and drop
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+
+        // Disable double-click text selection
+        document.addEventListener('dblclick', function(e) {
+            e.preventDefault();
+            return false;
+        });
+    </script>
+</body>
+</html>

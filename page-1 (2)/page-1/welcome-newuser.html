@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timezone - New User Offer</title>
+    <link rel="stylesheet" href="style.css">
+
+
+    <style>
+        /* Fixed for 1080x1920 resolution - NO SCROLLING */
+        html,
+        body {
+            overflow: hidden;
+        }
+
+        .container {
+            width: 1080px;
+            height: 1920px;
+            overflow: hidden;
+        }
+
+        .content {
+            padding: 80px 50px 40px;
+            justify-content: flex-start;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        /* Header Section with Card GIF */
+        .header-section {
+            display: flex;
+            align-items: flex-start;
+            width: 100%;
+            margin-bottom: 30px;
+            gap: 15px;
+        }
+
+        .card-gif {
+            width: 200px;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .header-text {
+            flex: 1;
+            text-align: right;
+            padding-top: 10px;
+        }
+
+        .upgrade-subtitle {
+            color: #b8f5ff;
+            font-size: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            font-family: 'Nulshock', 'Michroma', sans-serif;
+        }
+
+        .elite-title {
+            font-family: 'Nulshock', 'Michroma', sans-serif;
+            font-size: 60px;
+            color: #ffffff;
+            text-shadow: 0 0 30px rgba(0, 150, 255, 0.5);
+            line-height: 1.1;
+            text-transform: uppercase;
+        }
+
+        .now-text {
+            color: #fff;
+            font-size: 44px;
+            font-family: 'Nulshock', 'Michroma', sans-serif;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Offer Card Section - matching screensaver styling */
+        .offer-card {
+            position: relative;
+            width: 550px;
+            margin: 0 auto 30px;
+        }
+
+        .offer-card-bg {
+            width: 100%;
+            height: auto;
+            /* filter: drop-shadow(0 10px 40px rgba(0, 100, 255, 0.4)); */
+        }
+
+        .offer-card-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+
+        /* RB Amount - matching screensaver */
+        .rb-amount {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 72px;
+            color: #182c4f;
+            margin-bottom: 20px;
+        }
+
+        .rb-unit {
+            font-size: 36px;
+            color: #182c4f;
+        }
+
+        /* DAPAT text - matching screensaver */
+        .dapat-text {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 24px;
+            color: #ffffff;
+            letter-spacing: 2px;
+            margin: 5px 0;
+        }
+
+        /* TIZO Amount - matching screensaver */
+        .tizo-amount {
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .tizo-number {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 96px;
+            color: #acfcff;
+            text-shadow:
+                0 0 20px rgba(51, 255, 249, 0.5),
+                0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .tizo-label {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 36px;
+            color: #acfcff;
+            letter-spacing: 10px;
+        }
+
+        /* Old TIZO strikethrough styling */
+        .old-tizo {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 32px;
+            color: rgba(172, 252, 255, 0.4);
+            text-decoration: line-through;
+            text-decoration-color: #dc2626;
+            text-decoration-thickness: 3px;
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            margin-bottom: 5px;
+        }
+
+        .old-tizo-number {
+            font-size: inherit;
+        }
+
+        .old-tizo-unit {
+            font-size: 0.5em;
+            margin-left: 3px;
+        }
+
+        /* Countdown Section */
+        .countdown-section {
+            width: 600px;
+            margin: 0 auto 25px;
+            text-align: center;
+        }
+
+        .berakhir-text {
+            color: #b8f5ff;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 12px;
+        }
+
+        .countdown-image {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        /* Info Text Section */
+        .info-section {
+            text-align: center;
+            margin: 70px 0 20px 0;
+            padding: 0 60px;
+            max-width: 750px;
+        }
+
+        .info-text {
+            color: #ffffff;
+            font-size: 18px;
+            letter-spacing: 1px;
+            line-height: 1.2em;
+            font-weight: bold;
+            /* margin-bottom: 8px; */
+        }
+
+        /* CTA Button Section */
+        .cta-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: auto;
+            padding-bottom: 50px;
+        }
+
+        .cta-button-wrapper {
+            position: relative;
+            width: 50%;
+            max-width: 380px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.1s;
+            margin-bottom: 25px;
+        }
+
+        .cta-button-wrapper:hover {
+            transform: translateY(-4px);
+        }
+
+        .cta-button-wrapper:active {
+            transform: scale(0.95);
+        }
+
+        .cta-button-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        .cta-button-text {
+            position: relative;
+            z-index: 1;
+            color: white;
+            font-family: 'Nulshock', sans-serif;
+            font-size: 24px;
+            letter-spacing: 2px;
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .skip-link {
+            color: #fff;
+            font-size: 18px;
+
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: color 0.2s;
+        }
+
+        .skip-link:hover {
+            color: #ffffff;
+        }
+
+        /* 500 Tickets Animation - subtle glow pulse to draw attention (no transform to keep editable) */
+        @keyframes ticketsPulse {
+
+            0%,
+            100% {
+                /* filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.4)); */
+            }
+
+            50% {
+                /* filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.8)) drop-shadow(0 0 50px rgba(255, 200, 0, 0.5)); */
+            }
+        }
+
+        .tickets-animated {
+            animation: ticketsPulse 1.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container" bis_skin_checked="1">
+        <!-- Video Background -->
+        <video class="video-bg" autoplay="" loop="" muted="" playsinline="">
+            <source src="other-bg.mp4" type="video/mp4">
+        </video>
+        <!-- Back Button -->
+        <img src="back-button.png" alt="Back" class="back-button" onclick="goBack()">
+
+        <!-- Home Button -->
+        <img src="home.png" alt="Home" class="editable added-element" data-id="home-button" onclick="goHome()"
+            style="max-width: 200px; height: auto; position: absolute; top: 31px; right: 30px; /*transform: translate(calc(-50% + 412.67px), calc(-50% - 792px)) scale(0.9);*/ z-index: 50; cursor: pointer;">
+
+        <div class="content" bis_skin_checked="1">
+            <!-- Header with Card GIF and Title -->
+            <div class="header-section" bis_skin_checked="1">
+                <img src="card-gif.gif" alt="Blue Elite Card" class="card-gif editable" data-id="card-gif"
+                    style="transform: translate(74.6668px, 189.333px) scale(2.4);">
+                <div class="header-text" bis_skin_checked="1">
+                    <p id="upgrade-text" class="upgrade-subtitle editable" data-id="upgrade-text"
+                        style="color: rgb(255, 255, 255);transform: translate(170px, 178.666px) scale(1.7);font-weight: normal;max-width: 500px;text-align: center;">
+                        LANGSUNG UPGRADE KE</p>
+                    <h1 class="elite-title editable" data-id="elite-title"
+                        style="color: rgb(255, 250, 250);transform: translate(165px, 194.667px) scale(1.1);font-weight: normal;max-width: 500px;text-align: center;">
+                        BLUE
+                        ELITE</h1>
+                    <p id="now-text" class="now-text editable" data-id="now-text"
+                        style="font-weight: normal !important;transform: translate(160px, 218.667px) scale(1.1);max-width: 500px;text-align: center;">
+                        SEKARANG!</p>
+                </div>
+            </div>
+
+            <!-- Offer Card - matching screensaver styling -->
+            <div class="offer-card editable" data-id="offer-card" style="transform: translate(0, 344px) scale(2);"
+                bis_skin_checked="1">
+                <img src="SMALL-BUTTON-BLUE.png" alt="Offer Background" class="offer-card-bg">
+                <div class="offer-card-content" bis_skin_checked="1">
+                    <div class="rb-amount editable" data-id="rb-amount" bis_skin_checked="1"
+                        style="transform: translate(-5.33334px, 0px) scale(1); font-weight: bold;">
+                        <span id="rb-value">600</span><span class="rb-unit" id="rb-unit">Rb</span>
+                    </div>
+                    <p class="dapat-text editable" id="dapat-text" data-id="dapat-text"
+                        style="transform: translate(5.33331px, -2.66675px) scale(1.1); font-weight: normal; text-align: center;">
+                        DAPAT</p>
+                    <div class="tizo-amount" bis_skin_checked="1">
+                        <span class="tizo-number editable" data-id="tizo-number" id="tizo-value"
+                            style="transform: translate(-48px, -5px) scale(0.8);text-align: justify;font-weight: bold;z-index: 30;position: relative;">1350</span>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Countdown Section -->
+
+
+            <!-- Info Text -->
+            <div class="info-section editable" data-id="info-section"
+                style="transform: translate(0, 749.333px) scale(1.6);text-align: center;" bis_skin_checked="1">
+                <p class="info-text" id="info-text-1">RP 1000 = 1 TIZO.</p>
+                <p class="info-text" id="info-text-2">GUNAKAN TIZO UNTUK MEMAINKAN GAME FAVORITMU.</p>
+            </div>
+
+            <!-- CTA Button -->
+            <div class="cta-section" bis_skin_checked="1">
+                <div class="cta-button-wrapper editable" data-id="cta-button" onclick="handleGrabOffer()"
+                    style="transform: translate(6px, -20px) scale(1.3) !important; bottom: 80px; position: absolute;   right: 100px;"
+                    bis_skin_checked="1">
+                    <img src="button.png" alt="Button" class="cta-button-bg">
+                    <span id="cta-text" class="cta-button-text">KLAIM SEKARANG</span>
+                </div>
+
+                <div class="cta-section" bis_skin_checked="1">
+                    <div class="cta-button-wrapper editable" data-id="cta-button" onclick="handleSkip()"
+                        style="transform: translate(6px, -20px) scale(1.3) !important; bottom: 80px; position: absolute;   left: 100px;"
+                        bis_skin_checked="1">
+                        <img src="button.png" alt="Button" class="cta-button-bg">
+                        <span id="skip-text" class="skip-link editable" data-id="skip-link" onclick="handleSkip()"
+                            style="transform: translate(0, -2px) scale(1.3);">LEWATI DULU</span>
+
+                    </div>
+
+
+                </div>
+
+
+                <img src="500-tickets.png" alt="Added Image" class="editable added-element tickets-animated"
+                    data-id="added-1-1765384562311"
+                    style="max-width: 200px;height: auto;position: absolute;top: 50%;left: 50%;z-index: 50;transform: translate(calc(-50% + 7.2279px), calc(-50% + 340.612px)) scale(3.2);">
+                <p class="editable added-element added-text old-tizo" data-id="text-1-1765427733445"
+                    style="position: absolute;top: 48%;left: 50%;transform: translate(calc(-50% - 37.6666px), calc(-50% - 37.3333px)) scale(2);z-index: 50;font-family: Nulshock, sans-serif;font-size: 1.5rem;text-align: center;margin: 0px;max-width: 80%;color: rgba(172, 252, 255, 0.5) !important;text-decoration: line-through 3px rgb(220, 38, 38) !important;">
+                    600</p>
+                <p class="editable added-element added-text old-tizo" data-id="text-2-1765428135540"
+                    style="position: absolute;top: 48%;left: 50%;transform: translate(calc(-50% + 78px), calc(-50% - 30px)) scale(1.1);z-index: 50;font-family: Nulshock, sans-serif;font-size: 1.5rem;text-align: center;margin: 0px;max-width: 80%;color: rgba(172, 252, 255, 0.5) !important;text-decoration: line-through 3px rgb(220, 38, 38) !important;">
+                    TIZO</p>
+                <p class="editable added-element added-text" data-id="text-1-1765428994694"
+                    style="position: absolute;top: 50%;left: 50%;transform: translate(calc(-50% + 225px), calc(-50% + 42.6667px)) scale(2.6);z-index: 50;font-family: Nulshock, sans-serif;font-size: 1.5rem;color: rgb(255, 255, 255);text-align: center;margin: 0px;max-width: 80%;">
+                    TIZO</p>
+                <p class="editable added-element added-text" data-id="text-1-1765459240485" id="free-gift-value"
+                    style="position: absolute;top: 52%;left: 50%;transform: translate(calc(-50% + 10.6666px), calc(-50% + 295.667px)) scale(5.2);z-index: 50;font-family: Nulshock, sans-serif;font-size: 10px;color: #acfcff;text-align: center;margin: 0px;max-width: 80%;font-weight: bold !important; display:block; max-width: 50px; text-align: center;">
+                    <span id="free-gift-prefix">FREE</span> 500 TICKETS
+                </p>
+                <!--   <p class="editable added-element added-text" data-id="text-2-1765459336851" id="gratis-tiket" style="position: absolute;top: 50%;left: 50%;transform: translate(calc(-50% + 8.00006px), calc(-50% + 400.333px)) scale(1.2);z-index: 50;font-family: Nulshock, sans-serif;font-size: 1.5rem;color: rgb(242, 202, 2);text-align: center;margin: 0px;max-width: 80%;font-weight: bold !important;">gratis TIket</p> -->
+            </div>
+        </div>
+
+
+        <script src="shell-connector.js"></script>
+        <script src="api-config.js"></script>
+        <script src="session-manager.js"></script>
+        <script src="language.js"></script>
+        <script src="currency-formatter.js"></script>
+        <script>
+            // Set current page in session and mark as new user flow
+            setCurrentPage('welcome-newuser');
+            updateSession({ isNewPlayer: true });
+
+            const translations = {
+                en: {
+                    upgradeText: "UPGRADE STRAIGHT TO",
+                    nowText: "NOW!",
+                    priceText: "600Rb",
+                    dapatText: "GETS",
+                    berakhirText: "ENDS IN",
+                    infoText1: "RP 1000 = 1 TIZO",
+                    infoText2: "USE TIZOS TO PLAY YOUR FAVOURITE GAMES.",
+                    ctaText: "GRAB THIS",
+                    skipText: "SKIP THIS",
+                    gratisTiket: "free tickets",
+                    freePrefix: "FREE",
+                    langLabel: "English"
+                },
+                id: {
+                    upgradeText: "LANGSUNG UPGRADE KE",
+                    nowText: "SEKARANG!",
+                    priceText: "600Rb",
+                    dapatText: "DAPAT",
+                    berakhirText: "BERAKHIR DALAM",
+                    infoText1: "RP 1000 = 1 TIZO.",
+                    infoText2: "GUNAKAN TIZO UNTUK MEMAINKAN GAME FAVORITMU.",
+                    ctaText: "KLAIM SEKARANG",
+                    skipText: "LEWATI DULU",
+                    gratisTiket: "gratis tiket",
+                    freePrefix: "GRATIS",
+                    langLabel: "Bahasa"
+                }
+            };
+
+            let currentLang = getCurrentLanguage();
+
+            function toggleLanguage() {
+                const dropdown = document.getElementById('lang-dropdown');
+                dropdown.classList.toggle('hidden');
+            }
+
+            function applyLanguage(lang) {
+                currentLang = lang;
+                const data = translations[lang];
+
+                document.getElementById('upgrade-text').textContent = data.upgradeText;
+                document.getElementById('now-text').textContent = data.nowText;
+                if (document.getElementById('price-text')) {
+                    document.getElementById('price-text').textContent = data.priceText;
+                }
+                document.getElementById('dapat-text').textContent = data.dapatText;
+                if (document.getElementById('berakhir-text')) {
+                    document.getElementById('berakhir-text').textContent = data.berakhirText;
+                }
+                document.getElementById('info-text-1').textContent = data.infoText1;
+                document.getElementById('info-text-2').textContent = data.infoText2;
+                document.getElementById('cta-text').innerHTML = data.ctaText;
+                document.getElementById('skip-text').textContent = data.skipText;
+                const gratisTiketEl = document.getElementById('gratis-tiket');
+                if (gratisTiketEl) gratisTiketEl.textContent = data.gratisTiket;
+                const freePrefixEl = document.getElementById('free-gift-prefix');
+                if (freePrefixEl) freePrefixEl.textContent = data.freePrefix;
+                const langEl = document.getElementById('current-lang');
+                if (langEl) langEl.textContent = data.langLabel;
+            }
+
+            function setLanguage(lang) {
+                saveLanguage(lang);
+                applyLanguage(lang);
+                document.getElementById('lang-dropdown').classList.add('hidden');
+            }
+
+            // Dynamically adjust TIZO value font size based on digit count
+            function adjustTizoFontSize(element) {
+                if (!element) return;
+
+                const text = element.textContent || element.innerText;
+                const length = text.length;
+
+                // Get the current transform from style
+                const currentStyle = element.style.transform || '';
+                const scaleMatch = currentStyle.match(/scale\(([^)]+)\)/);
+                const translateMatch = currentStyle.match(/translate\(([^)]+)\)/);
+
+                // Base scale for 4 digits (like 1350)
+                let baseScale = 0.8;
+
+                // Reduce scale based on digit count
+                if (length <= 4) {
+                    baseScale = 0.8;  // 4 digits - normal size
+                } else if (length === 5) {
+                    baseScale = 0.65; // 5 digits - smaller
+                } else if (length === 6) {
+                    baseScale = 0.55; // 6 digits - even smaller
+                } else {
+                    baseScale = 0.45; // 7+ digits - smallest
+                }
+
+                // Preserve translate if it exists, update scale
+                const translate = translateMatch ? `translate(${translateMatch[1]})` : 'translate(18.2766px, -17.1705px)';
+                element.style.transform = `${translate} scale(${baseScale})`;
+            }
+
+            function handleGrabOffer() {
+                // Prevent action if edit mode is active
+                if (window.isEditModeActive && window.isEditModeActive()) {
+                    return;
+                }
+                console.log('Grab Offer clicked');
+
+                // Get the offer values from the page
+                const rbValue = document.getElementById('rb-value');
+                const tizoValue = document.getElementById('tizo-value');
+
+                const offerCostInRb = rbValue ? parseInt(rbValue.textContent) : 700;
+                const offerTizo = tizoValue ? parseInt(tizoValue.textContent) : 700;
+                const offerCost = offerCostInRb * 1000;
+
+                // Get existing gift data from session (set by fetchNewUserOffer)
+                const session = typeof getSession === 'function' ? getSession() : null;
+                const existingGift = session?.newUserGift || '';
+                const existingGiftDetails = session?.newUserGiftDetails || '';
+
+                // Save the new user offer to session, preserving gift data
+                updateSession({
+                    selectedCard: 'blue', // New users get blue card
+                    offerCost: offerCost,
+                    offerTizo: offerTizo,
+                    isNewPlayer: true,
+                    newUserGift: existingGift,
+                    newUserGiftDetails: existingGiftDetails,
+                    selectedCardCount: 1 // Default to 1 card for new user blue card
+                });
+
+                console.log('New user offer saved:', { offerCost, offerTizo, gift: existingGift, giftDetails: existingGiftDetails });
+
+                // Save source page for back navigation and navigate to scratch card
+                updateSession({ scratchCardSource: 'welcome-newuser' });
+                window.location.href = 'scratch-card.html';
+            }
+
+            function handleSkip() {
+                // Prevent action if edit mode is active
+                if (window.isEditModeActive && window.isEditModeActive()) {
+                    return;
+                }
+                console.log('Skip clicked - going to welcomeredcard page');
+                // Navigate to welcomeredcard page first
+                window.location.href = 'welcomeredcard.html';
+            }
+
+            // Close dropdown when clicking outside
+            window.onclick = function (event) {
+                if (!event.target.matches('#lang-btn') && !event.target.closest('#lang-btn')) {
+                    var dropdowns = document.getElementsByClassName("dropdown-content");
+                    for (var i = 0; i < dropdowns.length; i++) {
+                        var openDropdown = dropdowns[i];
+                        if (!openDropdown.classList.contains('hidden')) {
+                            openDropdown.classList.add('hidden');
+                        }
+                    }
+                }
+            }
+
+            function goBack() {
+                if (window.isEditModeActive && window.isEditModeActive()) return;
+                window.location.href = 'welcome2.html';
+            }
+
+            function goHome() {
+                if (window.isEditModeActive && window.isEditModeActive()) return;
+                window.location.href = 'welcome.html';
+            }
+
+            // Fetch new user offer from database
+            async function fetchNewUserOffer() {
+                try {
+                    // const response = await fetch('https://timezone.aisensum.com/api/offers?cardType=new_user');
+
+                    const response = await fetch(getApiUrl('/api/offers?cardType=new_user_blue'));
+                    const data = await response.json();
+
+                    if (data.success && data.offers && data.offers.length > 0) {
+                        // Get the first offer (highest cost since sorted DESC)
+                        const offer = data.offers[0];
+
+                        // Convert cost from database (e.g., 600000.00) to RB format (e.g., 600)
+                        const costInRb = Math.round(parseFloat(offer.cost) / 1000);
+
+                        // Get TIZO credit value
+                        const tizoCredit = Math.round(parseFloat(offer.tizo_credit));
+
+                        // Update the RB value element
+                        const rbValueEl = document.getElementById('rb-value');
+                        const rbUnitEl = document.getElementById('rb-unit');
+                        if (rbValueEl) {
+                            const formatted = formatRbValue(costInRb);
+                            rbValueEl.textContent = formatted.value;
+                            if (rbUnitEl) rbUnitEl.textContent = formatted.unit;
+                        }
+
+                        // Update the TIZO value element
+                        const tizoValueEl = document.getElementById('tizo-value');
+                        if (tizoValueEl) {
+                            tizoValueEl.textContent = tizoCredit;
+                            adjustTizoFontSize(tizoValueEl);
+                        }
+
+                        // Update free gift display if gift exists
+                        const gift = offer.gift || 'Nil';
+                        const giftDetails = offer.gift_details || '';
+
+                        if (gift && gift !== 'Nil' && giftDetails) {
+                            // Update the gift text while preserving the FREE/GRATIS prefix
+                            const freeGiftEl = document.getElementById('free-gift-value');
+                            const freePrefixEl = document.getElementById('free-gift-prefix');
+                            if (freeGiftEl && freePrefixEl) {
+                                // Get current prefix text (FREE or GRATIS based on language)
+                                const prefixText = freePrefixEl.textContent;
+                                // Set innerHTML to preserve the span structure
+                                freeGiftEl.innerHTML = `<span id="free-gift-prefix">${prefixText}</span> ${giftDetails}`;
+                            }
+
+                            // Store gift data in session for later use
+                            updateSession({
+                                newUserGift: gift,
+                                newUserGiftDetails: giftDetails
+                            });
+                        }
+
+                        // Store offer data in session
+                        updateSession({
+                            isNewPlayer: true,
+                            selectedCard: 'blue',
+                            offerCost: parseFloat(offer.cost),
+                            offerTizo: tizoCredit
+                        });
+
+                        console.log('New user offer loaded:', { costInRb, tizoCredit, gift, giftDetails });
+                    } else {
+                        console.log('No new user offers found in database');
+                    }
+                } catch (error) {
+                    console.error('Error fetching new user offer:', error);
+                }
+            }
+
+            // Countdown Timer - counts down from 59:59
+            let countdownMinutes = 59;
+            let countdownSeconds = 59;
+            let countdownInterval = null;
+
+            function startCountdown() {
+                // Update display initially
+                updateCountdownDisplay();
+
+                countdownInterval = setInterval(() => {
+                    if (countdownSeconds > 0) {
+                        countdownSeconds--;
+                    } else if (countdownMinutes > 0) {
+                        countdownMinutes--;
+                        countdownSeconds = 59;
+                    } else {
+                        // Reset to 59:59 when it reaches 00:00
+                        countdownMinutes = 59;
+                        countdownSeconds = 59;
+                    }
+                    updateCountdownDisplay();
+                }, 1000);
+            }
+
+            function updateCountdownDisplay() {
+                const minutesEl = document.getElementById('countdown-minutes');
+                const secondsEl = document.getElementById('countdown-seconds');
+
+                if (minutesEl) {
+                    minutesEl.textContent = countdownMinutes.toString().padStart(2, '0');
+                }
+                if (secondsEl) {
+                    secondsEl.textContent = countdownSeconds.toString().padStart(2, '0');
+                }
+            }
+
+            // Direct initialization for SPA
+            (async function () {
+                // Apply language immediately
+                applyLanguage(currentLang);
+
+                // Adjust TIZO font if element exists
+                const tizoEl = document.getElementById('tizo-value');
+                if (tizoEl) adjustTizoFontSize(tizoEl);
+
+                // Fetch data
+                await fetchNewUserOffer();
+
+                // Start countdown
+                startCountdown();
+
+                // Play shining sound
+                try {
+                    const shiningAudio = new Audio('Shining.mp3');
+                    shiningAudio.volume = 0.6;
+                    shiningAudio.play().catch(e => console.log('Audio autoplay blocked:', e));
+                } catch (e) { }
+            })();
+        </script>
+</body>
+
+</html>

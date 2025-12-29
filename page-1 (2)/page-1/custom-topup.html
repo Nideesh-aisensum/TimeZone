@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+
+
+
+
+
+</head>
+
+<body class="" __processed_29b223cb-1e8f-4099-87a9-04fee2d2e580__="true"
+    bis_register="W3sibWFzdGVyIjp0cnVlLCJleHRlbnNpb25JZCI6ImVwcGlvY2VtaG1ubGJoanBsY2drb2ZjaWllZ29tY29uIiwiYWRibG9ja2VyU3RhdHVzIjp7IkRJU1BMQVkiOiJkaXNhYmxlZCIsIkZBQ0VCT09LIjoiZGlzYWJsZWQiLCJUV0lUVEVSIjoiZGlzYWJsZWQiLCJSRURESVQiOiJkaXNhYmxlZCIsIlBJTlRFUkVTVCI6ImRpc2FibGVkIiwiSU5TVEFHUkFNIjoiZGlzYWJsZWQiLCJUSUtUT0siOiJkaXNhYmxlZCIsIkxJTktFRElOIjoiZGlzYWJsZWQiLCJDT05GSUciOiJkaXNhYmxlZCJ9LCJ2ZXJzaW9uIjoiMi4wLjM1Iiwic2NvcmUiOjIwMDM1fV0="
+    __processed_eb541a80-78b7-4be5-980d-2cefe58fd60d__="true"><plasmo-csui></plasmo-csui>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <title>Timezone - Custom Top Up</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Fixed for 1080x1920 resolution - NO SCROLLING */
+        html,
+        body {
+            overflow: hidden;
+        }
+
+        .container {
+            width: 1080px;
+            height: 1920px;
+            overflow: hidden;
+        }
+
+        .content {
+            padding-top: 0;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            position: relative;
+        }
+
+
+        .page-title {
+            color: white;
+            font-size: 72px;
+            text-align: center;
+            margin-top: 180px;
+            margin-bottom: 40px;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            line-height: 1.15;
+            font-family: 'Nulshock', 'Arial Black', sans-serif;
+        }
+
+        /* Custom Top Up Container */
+        .custom-container {
+            position: relative;
+            width: 820px;
+            background-image: url('Custom-top-up-bg.png');
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            padding: 60px 80px 70px;
+            margin-bottom: 100px;
+        }
+
+        .custom-title {
+            font-family: 'Nulshock', 'Arial Black', sans-serif;
+            font-size: 48px;
+            color: white;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-bottom: 25px;
+            margin-top: 40px;
+        }
+
+        .amount-bar-wrapper {
+            position: relative;
+            width: 100%;
+            height: 110px;
+            margin-bottom: 12px;
+            z-index: 60;
+        }
+
+        .amount-bar-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: fill;
+        }
+
+        .amount-bar-text {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            padding: 0 40px;
+            z-index: 60;
+        }
+
+        .amount-rp {
+            font-family: 'Nulshock', 'Arial Black', sans-serif;
+            font-size: 52px;
+            color: #ffffff;
+            font-weight: bold;
+            margin-right: 20px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .amount-value {
+            font-family: 'Nulshock', 'Arial Black', sans-serif;
+            font-size: 58px;
+            color: #ffffff;
+            font-weight: bold;
+            flex: 1;
+            text-align: right;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .max-amount-text {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 16px;
+            font-style: italic;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            margin-bottom: 35px;
+            line-height: 1.4;
+            margin-top: 35px;
+        }
+
+        .dapat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 0 20px;
+        }
+
+        .dapat-label {
+            font-family: 'Nulshock', 'Arial Black', sans-serif;
+            font-size: 32px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .tizo-display {
+            display: flex;
+            align-items: baseline;
+        }
+
+        .tizo-value {
+            font-family: 'Nulshock', 'Arial Black', sans-serif;
+            font-size: 72px;
+            background: linear-gradient(180deg, #00ffff 0%, #00aaff 50%, #0066ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tizo-unit {
+            font-family: 'Nulshock', 'Arial Black', sans-serif;
+            font-size: 36px;
+            color: #00d4ff;
+            margin-left: 10px;
+        }
+
+        /* Numpad - 4 columns x 3 rows */
+        .numpad-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0px;
+        }
+
+        .numpad-btn {
+            position: relative;
+            width: 100%;
+            height: 110px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .numpad-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .numpad-btn:active {
+            transform: scale(0.95);
+        }
+
+        .numpad-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding-top: 10px;
+        }
+
+        .numpad-btn span {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Nulshock', 'Arial Black', sans-serif;
+            font-size: 48px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+        }
+
+        .numpad-btn.backspace span {
+            display: none;
+        }
+
+        /* Continue Button */
+        .continue-button {
+            position: relative;
+            width: 500px;
+            height: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px auto 40px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .continue-button:hover {
+            transform: translateY(-3px);
+        }
+
+        .continue-button:active {
+            transform: scale(0.95);
+        }
+
+        .continue-button img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .continue-button span {
+            position: relative;
+            z-index: 1;
+            color: white;
+            font-size: 36px;
+            letter-spacing: 2px;
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+            font-family: 'Nulshock', sans-serif;
+        }
+
+        /* Disabled state for continue button */
+        .continue-button.disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .continue-button.disabled:hover {
+            transform: none;
+        }
+
+        /* Error state for amount display */
+        .amount-value.below-minimum {
+            color: #ff6b6b !important;
+            text-shadow: 0 0 10px rgba(255, 100, 100, 0.5), 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
+        }
+
+        /* Minimum amount warning text */
+        .min-warning {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 14px;
+            color: #ff6b6b;
+            text-align: center;
+            margin-top: 8px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .min-warning.visible {
+            opacity: 1;
+        }
+    </style>
+    <style type="text/css" id="mytempCss">
+        ._8mqQwQ {
+            display: none;
+        }
+
+        ._1TWLMK.icF5zO {
+            opacity: 0.01;
+        }
+    </style>
+
+    <div class="container" bis_skin_checked="1">
+        <!-- Video Background -->
+        <video class="video-bg" autoplay="" loop="" muted="" playsinline="">
+            <source src="other-bg.mp4" type="video/mp4">
+        </video>
+        <!-- Back Button -->
+        <img src="back-button.png" alt="Back" class="back-button" onclick="window.history.back()">
+
+        <!-- Home Button -->
+        <img src="home.png" alt="Home" class="editable added-element" data-id="home-button" onclick="goHome()"
+            style="max-width: 200px; height: auto; position: absolute; top: 31px; right: 30px; z-index: 50; cursor: pointer;">
+
+        <div class="content" bis_skin_checked="1">
+            <h1 id="page-title" class="page-title editable" data-id="title"
+                style="transform: translate(0px, 98.6667px) scale(1);">PLEASE ENTER<br>YOUR AMOUNT</h1>
+
+            <!-- Custom Top Up Container -->
+            <div class="custom-container editable" data-id="custom-container"
+                style="transform: translate(-6.10352e-05px, 202.667px) scale(1.2);" bis_skin_checked="1">
+                <div class="custom-title" id="custom-title" bis_skin_checked="1">CUSTOM TOP UP</div>
+
+                <!-- Amount Display - Shows XX.000,- format -->
+                <div class="amount-bar-wrapper" style="position: relative; overflow: visible;" bis_skin_checked="1">
+                    <!-- Amount bar image (z-index 1, below text) -->
+                    <img src="amount-bar.png" alt="Amount Bar" class="editable" data-id="amount-bar-img"
+                        style="position: absolute;top: 50%;left: 50%;transform: translate(-349.333px, -112px) scale(1.2);z-index: 1;width: 100%;height: auto;display: none;">
+                    <!-- Text Overlay (z-index 10, above image) -->
+                    <div class="amount-bar-text editable" data-id="amount-bar-text"
+                        style="z-index: 540; position: relative; transform: translate(-3.05176e-05px, -5.33331px) scale(1.1);"
+                        bis_skin_checked="1">
+                        <span class="amount-rp">Rp</span>
+                        <span class="amount-value" id="amount-display">0.000,-</span>
+                    </div>
+                    <!-- Minimum amount warning -->
+                    <p class="min-warning" id="min-warning">Minimum: 10.000,-</p>
+                </div>
+
+                <!-- DAPAT and TIZO display -->
+                <div class="dapat-row" bis_skin_checked="1">
+                    <span class="dapat-label" id="dapat-label">GET</span>
+                    <div class="tizo-display" bis_skin_checked="1">
+                        <span class="tizo-value" id="tizo-value">0</span>
+                        <span class="tizo-unit">TIZO</span>
+                    </div>
+                </div>
+
+                <!-- Number Pad - 4 columns x 3 rows -->
+                <div class="numpad-grid" bis_skin_checked="1">
+                    <!-- Row 1: 7, 8, 9, Backspace -->
+                    <button class="numpad-btn" onclick="inputNumber('7')" fdprocessedid="omsirk">
+                        <img src="Number-button.png" alt="7">
+                        <span>7</span>
+                    </button>
+                    <button class="numpad-btn" onclick="inputNumber('8')" fdprocessedid="svlyj">
+                        <img src="Number-button.png" alt="8">
+                        <span>8</span>
+                    </button>
+                    <button class="numpad-btn" onclick="inputNumber('9')" fdprocessedid="ce43y">
+                        <img src="Number-button.png" alt="9">
+                        <span>9</span>
+                    </button>
+                    <button class="numpad-btn backspace" onclick="backspace()" fdprocessedid="qdk774">
+                        <img src="backspace.png" alt="Backspace">
+                    </button>
+
+                    <!-- Row 2: 4, 5, 6, 0 -->
+                    <button class="numpad-btn" onclick="inputNumber('4')" fdprocessedid="73evp">
+                        <img src="Number-button.png" alt="4">
+                        <span>4</span>
+                    </button>
+                    <button class="numpad-btn" onclick="inputNumber('5')" fdprocessedid="xw9bki">
+                        <img src="Number-button.png" alt="5">
+                        <span>5</span>
+                    </button>
+                    <button class="numpad-btn" onclick="inputNumber('6')" fdprocessedid="0tlykm">
+                        <img src="Number-button.png" alt="6">
+                        <span>6</span>
+                    </button>
+                    <button class="numpad-btn" onclick="inputNumber('0')" fdprocessedid="eqze5">
+                        <img src="Number-button.png" alt="0">
+                        <span>0</span>
+                    </button>
+
+                    <!-- Row 3: 1, 2, 3 -->
+                    <button class="numpad-btn" onclick="inputNumber('1')" fdprocessedid="btamgq">
+                        <img src="Number-button.png" alt="1">
+                        <span>1</span>
+                    </button>
+                    <button class="numpad-btn" onclick="inputNumber('2')" fdprocessedid="e7eb7">
+                        <img src="Number-button.png" alt="2">
+                        <span>2</span>
+                    </button>
+                    <button class="numpad-btn" onclick="inputNumber('3')" fdprocessedid="mccont">
+                        <img src="Number-button.png" alt="3">
+                        <span>3</span>
+                    </button>
+                </div>
+
+                <!-- Max Amount Text - at bottom of box -->
+                <p class="max-amount-text" id="max-text">*Maksimal nominal custom: 2.000.000,-<br>Untuk jumlah lebih
+                    dari itu, silakan hubungi kasir.</p>
+            </div>
+
+            <!-- Continue Button -->
+            <div class="continue-button editable" data-id="continue-btn" onclick="handleContinue()"
+                style="transform: translate(0px, 253.333px) scale(1);" bis_skin_checked="1">
+                <img src="button.png" alt="Continue Button">
+                <span id="continue-text">CONTINUE</span>
+            </div>
+            <!-- Large amount bar image (user positioned) -->
+        </div>
+    </div>
+
+    <!-- Upgrade Popup (Blue/Gold/Platinum) -->
+    <div id="upgrade-popup" class="upgrade-popup hidden" bis_skin_checked="1">
+        <div class="upgrade-popup-overlay" onclick="closeUpgradePopup()" bis_skin_checked="1"></div>
+        <div class="upgrade-popup-content editable" data-id="popup-content" bis_skin_checked="1"
+            style="transform: translate(0px, 0px) scale(1.1);">
+            <button class="popup-close-btn editable" data-id="popup-close-btn" onclick="closeUpgradePopup()"
+                fdprocessedid="8nf9xj">
+                <img src="x-button.png" alt="Close" class="editable" data-id="popup-close-img"
+                    style="transform: translate(0px, 0px) scale(2.1);">
+            </button>
+            <img src="Custom-top-up-bg.png" alt="Background" class="popup-bg editable" data-id="popup-bg">
+            <div class="popup-inner" bis_skin_checked="1">
+                <img src="card-gif.gif" alt="Card" class="popup-card-gif editable" data-id="popup-card-gif"
+                    id="popup-card-img" style="transform: translate(-10.6666px, 45.3334px) scale(1.5);">
+                <div class="popup-text" bis_skin_checked="1">
+                    <span class="popup-message editable" data-id="popup-message" id="popup-message">YOU HAVE
+                        BEEN<br>UPGRADED TO</span>
+                    <span class="popup-card-name editable" data-id="popup-card-name" id="popup-card-name">BLUE
+                        ELITE!</span>
+                    <span class="popup-bonus-info" id="popup-bonus-info"></span>
+                </div>
+                <div class="popup-button editable" data-id="popup-button" onclick="goToWelcomeNewUser()"
+                    bis_skin_checked="1">
+                    <img src="button.png" alt="Next Button" class="editable" data-id="popup-button-img"
+                        style="transform: translate(-5.33325px, 266.667px) scale(1.2);">
+                    <span id="popup-btn-text" class="editable" data-id="popup-btn-text">NEXT</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* 600rb Upgrade Popup Styles */
+        .upgrade-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .upgrade-popup.hidden {
+            display: none;
+        }
+
+        .upgrade-popup-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+        }
+
+        .upgrade-popup-content {
+            position: relative;
+            width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .popup-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 70px;
+            height: 70px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 10001;
+            padding: 0;
+            transition: transform 0.2s ease;
+        }
+
+        .popup-close-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .popup-close-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .popup-bg {
+            width: 100%;
+            height: auto;
+        }
+
+        .popup-inner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 60px 40px 50px;
+        }
+
+        .popup-card-gif {
+            width: 420px;
+            height: auto;
+            margin-bottom: 35px;
+        }
+
+        .popup-text {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            text-align: center;
+        }
+
+        .popup-message {
+            font-family: 'Nulshock', 'Arial Black', sans-serif;
+            font-size: 42px;
+            color: #33fff9;
+            text-align: center;
+            line-height: 1.25;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .popup-card-name {
+            font-family: 'Nulshock', 'Arial Black', sans-serif;
+            font-size: 55px;
+            color: #33fff9;
+            text-shadow: 0 0 20px rgba(51, 255, 249, 0.8), 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-top: 8px;
+        }
+
+        .popup-card-name.gold {
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .popup-card-name.platinum {
+            color: #e5e4e2;
+            text-shadow: 0 0 20px rgba(229, 228, 226, 0.8), 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .popup-bonus-info {
+            font-family: 'Nulshock', 'Arial Black', sans-serif;
+            font-size: 32px;
+            color: #00ff88;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.6), 2px 2px 4px rgba(0, 0, 0, 0.5);
+            margin-top: 15px;
+        }
+
+        /* Popup button - matching other pages style */
+        .popup-button {
+            position: relative;
+            margin-top: 35px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .popup-button:hover {
+            transform: scale(1.08);
+        }
+
+        .popup-button img {
+            width: 350px;
+            height: auto;
+            filter: drop-shadow(0 4px 15px rgba(0, 200, 255, 0.4));
+        }
+
+        .popup-button span {
+            position: absolute;
+            top: 49%;
+            left: 49%;
+            transform: translate(-50%, 690%);
+            font-family: 'Nulshock', 'Arial Black', sans-serif;
+            font-size: 30px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            letter-spacing: 2px;
+        }
+
+        button.numpad-btn.backspace {
+            background: #2a2aea;
+            border-radius: 20px;
+            height: 81px !important;
+            width: 140px;
+            margin-top: 18px;
+            margin-left: 10px;
+        }
+    </style>
+
+
+    <script src="shell-connector.js"></script>
+    <script src="api-config.js"></script>
+    <script src="session-manager.js"></script>
+    <script src="language.js"></script>
+
+    <script>
+        const translations = {
+            en: {
+                title: "PLEASE ENTER<br>YOUR AMOUNT",
+                customTitle: "CUSTOM TOP UP",
+                maxText: "*Minimum: 10.000,- | Maximum: 2.000.000,-<br>For higher amount please contact the cashier",
+                dapatLabel: "GET",
+                continueBtn: "CONTINUE",
+                langLabel: "English",
+                popupMessage: "YOU HAVE BEEN<br>UPGRADED TO",
+                popupBtn: "NEXT"
+            },
+            id: {
+                title: "SILAHKAN KETIK<br>NOMINAL ANDA",
+                customTitle: "CUSTOM TOP UP",
+                maxText: "*Minimum: 10.000,- | Maksimum: 2.000.000,-<br>Untuk jumlah lebih dari itu, silakan hubungi kasir.",
+                dapatLabel: "DAPAT",
+                continueBtn: "SELANJUTNYA",
+                langLabel: "Bahasa",
+                popupMessage: "ANDA TELAH<br>DI-UPGRADE MENJADI",
+                popupBtn: "SELANJUTNYA"
+            }
+        };
+
+        let currentLang = getCurrentLanguage();
+        // Amount is stored in thousands (e.g., 80 = 80,000 Rp)
+        let currentAmount = ''; // Start empty, user must enter at least 10k
+        const MIN_AMOUNT_THOUSANDS = 10; // Min 10,000 (10 thousands)
+        const MAX_AMOUNT_THOUSANDS = 2000; // Max 2,000,000 (2000 thousands)
+
+        // Cache for upsell_offers data from database (sorted descending by topup_rb)
+        let upsellOffersCache = null;
+
+        // Cache for new user offers (Blue, Gold, Platinum) with actual TIZO values from database
+        let newUserOffersCache = {
+            blue: { costRb: 600, tizo: 1200 },    // Fallback defaults
+            gold: { costRb: 1200, tizo: 2500 },   // Fallback defaults
+            platinum: { costRb: 2000, tizo: 5000 } // Fallback defaults
+        };
+
+        /**
+         * Fetch TIZO rates from database (offers table)
+         * Fetches offers for all card types and caches them
+         */
+        async function fetchTizoRates() {
+            if (upsellOffersCache) return upsellOffersCache;
+
+            try {
+                // Fetch offers for all card types (Red, Blue, Gold, Platinum)
+                const cardTypes = ['Red', 'Blue', 'Gold', 'Platinum'];
+                let allOffers = [];
+
+                for (const cardType of cardTypes) {
+                    try {
+                        const response = await fetch(getApiUrl(`/api/offers?cardType=${cardType}`));
+                        const data = await response.json();
+                        if (data.success && data.offers) {
+                            // Map offers to uniform format and add card_type
+                            const mappedOffers = data.offers.map(o => ({
+                                card_type: cardType,
+                                topup_rb: Math.round(parseFloat(o.cost) / 1000), // Convert cost to RB (thousands)
+                                tizo_value: Math.round(parseFloat(o.tizo_credit))
+                            }));
+                            allOffers = allOffers.concat(mappedOffers);
+                            console.log(`✅ Loaded ${cardType} offers:`, mappedOffers.length, 'entries');
+                        }
+                    } catch (err) {
+                        console.warn(`⚠️ Could not fetch ${cardType} offers:`, err.message);
+                    }
+                }
+
+                // Sort descending by topup_rb for greedy breakdown
+                upsellOffersCache = allOffers.sort((a, b) => b.topup_rb - a.topup_rb);
+                console.log('✅ Total TIZO rates loaded:', upsellOffersCache.length, 'entries');
+                return upsellOffersCache;
+            } catch (error) {
+                console.error('❌ Failed to fetch TIZO rates:', error);
+            }
+            return null;
+        }
+
+        /**
+         * Fetch new user offers from database to get actual TIZO values
+         * for Blue, Gold, and Platinum new user cards
+         */
+        async function fetchNewUserOffers() {
+            const cardTypes = ['blue', 'gold', 'platinum'];
+
+            for (const cardType of cardTypes) {
+                try {
+                    const response = await fetch(getApiUrl(`/api/offers?cardType=new_user_${cardType}`));
+                    const data = await response.json();
+
+                    if (data.success && data.offers && data.offers.length > 0) {
+                        const offer = data.offers[0];
+                        const costRb = Math.round(parseFloat(offer.cost) / 1000);
+                        const tizo = Math.round(parseFloat(offer.tizo_credit));
+
+                        newUserOffersCache[cardType] = { costRb, tizo };
+                        console.log(`✅ Loaded New User ${cardType} offer:`, costRb, 'Rb =', tizo, 'TIZO');
+                    }
+                } catch (error) {
+                    console.error(`❌ Failed to fetch New User ${cardType} offer:`, error);
+                    // Keep using fallback defaults
+                }
+            }
+        }
+
+
+        /**
+         * Calculate TIZO for custom topup amounts based on Card Tier
+         * 
+         * Logic:
+         * 1. Get user's active card type (Red, Blue, Gold, Platinum).
+         * 2. Filter offers to ONLY those matching the card type.
+         * 3. Greedy allocation: distinct largest offers first.
+         * 4. Remainder < smallest offer gets 1:1 ratio.
+         */
+        function calculateCustomTizo(amountRb) {
+            let totalTizo = 0;
+            let remaining = amountRb;
+            let breakdownParts = []; // Track breakdown for console logging
+
+            // Get user's card type from session
+            const session = typeof getSession === 'function' ? getSession() : null;
+            // Default to 'Red' if no session (e.g. direct access or error) -> but typically there should be a card selected.
+            // Map session card names (lowercase) to DB card types (Title Case)
+            let userCardType = 'Red'; // Fallback
+            if (session && session.selectedCard) {
+                const map = {
+                    'red': 'Red',
+                    'blue': 'Blue',
+                    'gold': 'Gold',
+                    'platinum': 'Platinum',
+                    'silver': 'Platinum' // Handle legacy Silver as Platinum if needed
+                };
+                userCardType = map[session.selectedCard.toLowerCase()] || 'Red';
+
+                // Special case: New Player might have 'new_user' or null, treat as Red for custom topup?
+                // The requirements say "Red card users (welcome card)".
+                if (session.selectedCard === 'new_user') userCardType = 'Red';
+            } else {
+                // Try localStorage fallback
+                const storedCard = localStorage.getItem('selectedCard');
+                if (storedCard) {
+                    const map = { 'red': 'Red', 'blue': 'Blue', 'gold': 'Gold', 'platinum': 'Platinum', 'silver': 'Platinum' };
+                    userCardType = map[storedCard.toLowerCase()] || 'Red';
+                }
+            }
+
+            console.log(`[TIZO Calculator] Card: ${userCardType}, Amount: ${amountRb} RB`);
+
+            if (upsellOffersCache && upsellOffersCache.length > 0) {
+                // Filter offers for this specific card type
+                // AND ensure we only pick offers that fit into the remaining amount
+                // Sort descending to prioritize largest bundles
+                // Note: The API returns all offers. We must filter by card_type matches.
+
+                // Data comes from /api/upsell-offers-all which now has card_type
+                const validOffers = upsellOffersCache
+                    .filter(o => o.card_type === userCardType)
+                    .sort((a, b) => b.topup_rb - a.topup_rb);
+
+                // Log available offers
+                console.log(`[TIZO Calculator] Available offers for ${userCardType}:`,
+                    validOffers.map(o => `${o.topup_rb}RB=${o.tizo_value}TIZO`).join(', '));
+
+                // Greedy allocation
+                for (const offer of validOffers) {
+                    while (remaining >= offer.topup_rb) {
+                        totalTizo += offer.tizo_value;
+                        remaining -= offer.topup_rb;
+                        breakdownParts.push(`${offer.topup_rb}RB=${offer.tizo_value}`);
+                    }
+                }
+            }
+
+            // Remainder gets 1:1 ratio
+            if (remaining > 0) {
+                totalTizo += remaining;
+                breakdownParts.push(`${remaining}RB=${remaining} (1:1)`);
+            }
+
+            // Log the full breakdown
+            const breakdownStr = breakdownParts.join(' + ') + ` = ${totalTizo} TIZO`;
+            console.log(`[TIZO Calculator] ${amountRb} RB Breakdown: ${breakdownStr}`);
+
+            return totalTizo;
+        }
+
+        function goBack() {
+            if (window.isEditModeActive && window.isEditModeActive()) return;
+            window.location.href = 'offers-selection.html';
+        }
+
+        function formatNumberWithDots(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function updateDisplay() {
+            const amountDisplay = document.getElementById('amount-display');
+            const tizoValue = document.getElementById('tizo-value');
+            const minWarning = document.getElementById('min-warning');
+            const continueBtn = document.querySelector('.continue-button');
+
+            if (currentAmount === '' || currentAmount === '0') {
+                // Show 0.000,- when empty
+                amountDisplay.textContent = '0.000,-';
+                tizoValue.textContent = '0';
+            } else {
+                const numThousands = parseInt(currentAmount);
+                // Display shows the thousands value with .000 suffix locked
+                // e.g., 80 -> 80.000,-
+                amountDisplay.textContent = formatNumberWithDots(numThousands) + '.000,-';
+
+                // Calculate TIZO using the tiered formula
+                const tizoAmount = calculateCustomTizo(numThousands);
+                tizoValue.textContent = tizoAmount;
+            }
+
+            // Check if below minimum and update visual state
+            const numValue = currentAmount === '' ? 0 : parseInt(currentAmount);
+            const isBelowMinimum = numValue < MIN_AMOUNT_THOUSANDS;
+
+            // Toggle error state on amount display
+            if (isBelowMinimum) {
+                amountDisplay.classList.add('below-minimum');
+                minWarning.classList.add('visible');
+                continueBtn.classList.add('disabled');
+            } else {
+                amountDisplay.classList.remove('below-minimum');
+                minWarning.classList.remove('visible');
+                continueBtn.classList.remove('disabled');
+            }
+        }
+
+        function inputNumber(num) {
+            if (window.isEditModeActive && window.isEditModeActive()) return;
+
+            // Prevent leading zeros
+            if (currentAmount === '' && num === '0') {
+                return;
+            }
+
+            const newAmount = currentAmount + num;
+            const numValue = parseInt(newAmount);
+
+            // Check max amount (2000 = 2,000,000 Rp)
+            if (numValue > MAX_AMOUNT_THOUSANDS) {
+                return;
+            }
+
+            // Limit to 4 digits (max 2000)
+            if (newAmount.length > 4) {
+                return;
+            }
+
+            currentAmount = newAmount;
+            updateDisplay();
+        }
+
+        function backspace() {
+            if (window.isEditModeActive && window.isEditModeActive()) return;
+
+            if (currentAmount.length > 0) {
+                currentAmount = currentAmount.slice(0, -1);
+                updateDisplay();
+            }
+        }
+
+        function handleContinue() {
+            if (window.isEditModeActive && window.isEditModeActive()) return;
+
+            const amountValue = currentAmount === '' ? 0 : parseInt(currentAmount);
+            if (amountValue < MIN_AMOUNT_THOUSANDS) {
+                // Button should be disabled, but just in case
+                return;
+            }
+
+            // Store the custom amount in actual Rupiah (thousands * 1000)
+            const amountThousands = parseInt(currentAmount);
+            const actualAmount = amountThousands * 1000;
+            const tizoAmount = calculateCustomTizo(amountThousands);
+
+            localStorage.setItem('customTopUpAmount', actualAmount);
+            localStorage.setItem('customTopUpTizo', tizoAmount);
+            localStorage.setItem('topupAmount', actualAmount);
+            localStorage.setItem('topupTizo', tizoAmount);
+
+            console.log('Custom amount:', actualAmount, 'TIZO:', tizoAmount);
+
+            // Check if user is a new player (popup only for new users)
+            const session = typeof getSession === 'function' ? getSession() : null;
+            const isNewPlayer = (session && session.isNewPlayer) || localStorage.getItem('isNewPlayer') === 'true';
+
+            // Show upgrade popup based on amount tier (only for new players)
+            // Use actual TIZO values from database cache
+            if (isNewPlayer) {
+                const platOffer = newUserOffersCache.platinum;
+                const goldOffer = newUserOffersCache.gold;
+                const blueOffer = newUserOffersCache.blue;
+
+                if (amountThousands >= platOffer.costRb) {
+                    // Platinum threshold - go directly to platinum card page
+                    storeSplitTopupData('platinum', platOffer.costRb, platOffer.tizo, amountThousands);
+                    window.location.href = 'welcome-platinum-card.html';
+                    return;
+                } else if (amountThousands >= goldOffer.costRb) {
+                    // Gold threshold - go directly to gold card page
+                    storeSplitTopupData('gold', goldOffer.costRb, goldOffer.tizo, amountThousands);
+                    window.location.href = 'welcome-gold-card.html';
+                    return;
+                } else if (amountThousands >= blueOffer.costRb) {
+                    // Blue Elite threshold - go directly to blue card page
+                    storeSplitTopupData('blue', blueOffer.costRb, blueOffer.tizo, amountThousands);
+                    window.location.href = 'welcome-blue-card.html';
+                    return;
+                } else {
+                    // New user but below Blue threshold - go to upsell page to show options
+                    // Save custom top-up data to session
+                    if (typeof updateSession === 'function') {
+                        updateSession({
+                            offerCost: actualAmount,
+                            offerTizo: tizoAmount,
+                            customAmount: actualAmount,
+                            splitTopup: null, // Clear any stale upgrade data
+                            scratchCardSource: 'custom-topup'
+                        });
+                    }
+                    window.location.href = 'custom-topup-upsell.html';
+                    return;
+                }
+            }
+
+            // Navigate to custom topup upsell page (for existing users)
+            // Exception: If at maximum amount (2JT), go directly to scratch card - no upsell possible
+            if (amountThousands >= MAX_AMOUNT_THOUSANDS) {
+                // Maximum amount reached - no upsell, go directly to scratch card
+                if (typeof updateSession === 'function') {
+                    updateSession({
+                        offerCost: actualAmount,
+                        offerTizo: tizoAmount,
+                        customAmount: actualAmount,
+                        scratchCardSource: 'custom-topup'
+                    });
+                }
+                console.log('Maximum amount reached - skipping upsell, going to scratch card');
+                window.location.href = 'scratch-card.html';
+            } else {
+                window.location.href = 'custom-topup-upsell.html';
+            }
+        }
+
+        // Helper function to store split topup data in session
+        function storeSplitTopupData(cardType, amountRb, tizoBonus, totalAmountRb) {
+            const remainingRb = totalAmountRb - amountRb;
+            const remainingTizo = remainingRb > 0 ? remainingRb : 0;
+
+            if (typeof updateSession === 'function') {
+                updateSession({
+                    splitTopup: {
+                        hasCardUpgrade: true,
+                        cardType: cardType,
+                        cardOfferCost: amountRb * 1000,
+                        cardOfferTizo: tizoBonus,
+                        customCost: remainingRb > 0 ? remainingRb * 1000 : 0,
+                        customTizo: remainingRb > 0 ? remainingTizo : 0
+                    }
+                });
+                console.log('Split topup stored:', {
+                    cardType,
+                    cardOfferCost: amountRb * 1000,
+                    cardOfferTizo: tizoBonus,
+                    customCost: remainingRb * 1000,
+                    customTizo: remainingTizo
+                });
+            }
+
+            localStorage.setItem('upgradeCardType', cardType);
+        }
+
+        function showUpgradePopup(cardType = 'blue', amountRb = 600, tizoBonus = 1200) {
+            const popup = document.getElementById('upgrade-popup');
+            const data = translations[currentLang];
+            const cardImg = document.getElementById('popup-card-img');
+            const cardName = document.getElementById('popup-card-name');
+            const bonusInfo = document.getElementById('popup-bonus-info');
+
+            // Calculate split amounts (card offer + remaining custom)
+            const totalAmountRb = parseInt(currentAmount);
+            const remainingRb = totalAmountRb - amountRb;
+            // For new users, remaining amount above card offer uses 1:1 ratio (no percentage bonus)
+            const remainingTizo = remainingRb > 0 ? remainingRb : 0;
+
+            // Store split data in session for later display on summary page
+            if (typeof updateSession === 'function') {
+                updateSession({
+                    splitTopup: {
+                        hasCardUpgrade: true,
+                        cardType: cardType,
+                        cardOfferCost: amountRb * 1000,
+                        cardOfferTizo: tizoBonus,
+                        customCost: remainingRb > 0 ? remainingRb * 1000 : 0,
+                        customTizo: remainingRb > 0 ? remainingTizo : 0
+                    }
+                });
+                console.log('Split topup stored:', {
+                    cardType,
+                    cardOfferCost: amountRb * 1000,
+                    cardOfferTizo: tizoBonus,
+                    customCost: remainingRb * 1000,
+                    customTizo: remainingTizo
+                });
+            }
+
+            // Update popup text based on language
+            document.getElementById('popup-message').innerHTML = data.popupMessage;
+            document.getElementById('popup-btn-text').textContent = data.popupBtn;
+
+            // Reset card name classes
+            cardName.classList.remove('gold', 'platinum');
+
+            // Configure popup based on card type
+            if (cardType === 'platinum') {
+                cardImg.src = 'silver-card.png';
+                cardName.textContent = 'PLATINUM!';
+                cardName.classList.add('platinum');
+                bonusInfo.textContent = amountRb + 'RB = ' + tizoBonus + ' TIZO';
+            } else if (cardType === 'gold') {
+                cardImg.src = 'gold-card.png';
+                cardName.textContent = 'GOLD!';
+                cardName.classList.add('gold');
+                bonusInfo.textContent = amountRb + 'RB = ' + tizoBonus + ' TIZO';
+            } else {
+                // Blue Elite (default)
+                cardImg.src = 'card-gif.gif';
+                cardName.textContent = 'BLUE ELITE!';
+                bonusInfo.textContent = amountRb + 'RB = ' + tizoBonus + ' TIZO';
+            }
+
+            // Store the card type for navigation
+            localStorage.setItem('upgradeCardType', cardType);
+
+            popup.classList.remove('hidden');
+        }
+
+        function closeUpgradePopup() {
+            const popup = document.getElementById('upgrade-popup');
+            popup.classList.add('hidden');
+        }
+
+        function goToWelcomeNewUser() {
+            // Navigate to the appropriate welcome page based on card type
+            const cardType = localStorage.getItem('upgradeCardType') || 'blue';
+
+            if (cardType === 'platinum') {
+                window.location.href = 'welcome-platinum-card.html';
+            } else if (cardType === 'gold') {
+                window.location.href = 'welcome-gold-card.html';
+            } else {
+                window.location.href = 'welcome-blue-card.html';
+            }
+        }
+
+        function toggleLanguage() {
+            const dropdown = document.getElementById('lang-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function applyLanguage(lang) {
+            currentLang = lang;
+            const data = translations[lang];
+
+            document.getElementById('page-title').innerHTML = data.title;
+            document.getElementById('custom-title').textContent = data.customTitle;
+            document.getElementById('max-text').innerHTML = data.maxText;
+            document.getElementById('dapat-label').textContent = data.dapatLabel;
+            document.getElementById('continue-text').textContent = data.continueBtn;
+            const langEl = document.getElementById('current-lang');
+            if (langEl) langEl.textContent = data.langLabel;
+        }
+
+        function setLanguage(lang) {
+            saveLanguage(lang);
+            applyLanguage(lang);
+            document.getElementById('lang-dropdown').classList.add('hidden');
+        }
+
+        // Close dropdown when clicking outside
+        window.onclick = function (event) {
+            if (!event.target.matches('#lang-btn') && !event.target.closest('#lang-btn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (!openDropdown.classList.contains('hidden')) {
+                        openDropdown.classList.add('hidden');
+                    }
+                }
+            }
+        }
+
+        // Initialize
+        async function init() {
+            // Fetch TIZO rates from database first
+            await fetchTizoRates();
+
+            // Fetch new user offers for accurate TIZO values (if this is a new user session)
+            const session = typeof getSession === 'function' ? getSession() : null;
+            const isNewPlayer = (session && session.isNewPlayer) || localStorage.getItem('isNewPlayer') === 'true';
+            if (isNewPlayer) {
+                await fetchNewUserOffers();
+            }
+
+            applyLanguage(currentLang);
+            updateDisplay();
+
+        }
+
+        init();
+    </script>
+
+
+    <span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span><span id="PING_IFRAME_FORM_DETECTION"
+        style="display: none;"></span>
+</body>
+
+</html>

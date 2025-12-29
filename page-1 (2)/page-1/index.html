@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <title>Timezone Kiosk</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 1080px;
+            height: 1920px;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        /* Persistent Background Video */
+        #persistent-video-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 1080px;
+            height: 1920px;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        /* Content Container - Pages are injected here */
+        #page-content {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 1080px;
+            height: 1920px;
+            z-index: 10;
+            background: transparent;
+        }
+
+        /* Loading Overlay */
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.5s;
+        }
+
+        #loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #loading img {
+            width: 300px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Persistent Video Background -->
+    <video id="persistent-video-bg" autoplay loop muted playsinline>
+        <source src="other-bg.mp4" type="video/mp4">
+    </video>
+
+    <!-- Page Content Container -->
+    <div id="page-content"></div>
+
+    <!-- Initial Loading Screen -->
+    <div id="loading">
+        <img src="timezone-branding.png" alt="Loading">
+    </div>
+
+    <!-- Global Scripts -->
+    <!-- Add any shared libraries here if needed (e.g., jquery if used by pages) -->
+
+    <!-- SPA Router -->
+
+    <script src="shell-connector.js"></script>
+    <script src="spa-router.js"></script>
+
+    <script>
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', () => {
+            const video = document.getElementById('persistent-video-bg');
+            const loading = document.getElementById('loading');
+
+            // Wait for video to be ready before showing first page
+            const startApp = () => {
+                // Navigate to initial page
+                // Check if hash exists, else default to welcome.html
+                const initialPage = window.location.hash.slice(1) || 'welcome.html';
+
+                // Preload critical pages
+                SpaRouter.prefetchAll([
+                    'welcome.html',
+                    'welcome-newuser.html',
+                    'screensaver.html'
+                ]);
+
+                // Go!
+                SpaRouter.navigate(initialPage).then(() => {
+                    setTimeout(() => {
+                        loading.classList.add('hidden');
+                    }, 500);
+                });
+            };
+
+            if (video.readyState >= 3) {
+                startApp();
+            } else {
+                video.addEventListener('canplay', startApp, { once: true });
+                // Fallback if video fails
+                video.addEventListener('error', startApp, { once: true });
+                setTimeout(startApp, 2000); // 2s timeout
+            }
+        });
+    </script>
+</body>
+
+</html>
