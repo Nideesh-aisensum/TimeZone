@@ -142,6 +142,37 @@
       text-transform: uppercase;
       letter-spacing: 2px;
       line-height: 1.4;
+      font-weight: bold;
+    }
+
+    /* You Chose Text styling */
+    .you-chose-text {
+      font-family: "Nulshock", sans-serif;
+      font-size: 38px;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 190px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+    }
+
+    /* Pick One Text styling */
+    .pick-one-text {
+      font-family: "Nulshock", sans-serif;
+      font-size: 32px;
+      color: #00d4ff;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-weight: bold;
+      text-align: center;
+      margin-top: 230px;
+      margin-bottom: 15px;
+      text-shadow: 0 0 15px rgba(0, 212, 255, 0.4);
+      position: relative;
+      z-index: 100;
     }
 
     /* Additional Offers Section */
@@ -370,8 +401,11 @@
       style="max-width: 200px; height: auto; position: absolute; top: 31px; right: 30px; z-index: 50; cursor: pointer;">
 
     <div class="content">
+      <!-- You Chose Text -->
+      <p class="you-chose-text" id="you-chose-text">INI PILIHAN MU</p>
+
       <!-- Selected Offer Card -->
-      <div class="selected-offer-section">
+      <div class="selected-offer-section" style="margin-top: 10px;">
         <div class="selected-offer-card editable" id="selected-offer" data-id="selected-offer"
           onclick="selectOfferCard(this)" style="transform: translate(2.66678px, 18.6666px) scale(1.6)">
           <img class="selection-overlay" src="SELECTED-small-box.png" alt="Selected" />
@@ -435,6 +469,9 @@
         </div>
       </div>
 
+      <!-- Pick One Text -->
+      <p class="pick-one-text" id="pick-one-text">PILIH SATU</p>
+
       <!-- Next Button -->
       <div class="next-button editable" data-id="next-button" onclick="handleNext()" style="transform: scale(1)">
         <img src="button.png" alt="Next Button" />
@@ -483,8 +520,10 @@
     // Language translations
     const translations = {
       en: {
-        greatChoice: "INTERESTING CHOICE!",
-        specialOffers: '2 MORE OFFERS FOR YOU',
+        youChose: "YOUR CHOSEN OPTION",
+        greatChoice: "HERE ARE 2 MORE",
+        specialOffers: 'SPECIAL OFFERS',
+        pickOne: "PICK ONE",
         notInterested: "SKIPPED BONUS?<br>STILL A GREAT CHOICE",
         smartMove: "SMART MOVE!<br>BONUS PICKED",
         topOffer: "AWESOME PICK!<br>MAX BONUS PICKED",
@@ -492,8 +531,10 @@
         nextBtn: "NEXT",
       },
       id: {
-        greatChoice: "PILIHAN MENARIK!",
-        specialOffers: '2 PENAWARAN LAGI UNTUKMU',
+        youChose: "INI PILIHAN MU",
+        greatChoice: "INI 2 LAGI",
+        specialOffers: 'PENAWARAN SPESIAL',
+        pickOne: "PILIH SATU",
         notInterested: "NGGAK MAU BONUS?<br>TETAP PILIHAN YANG BAGUS",
         smartMove: "PILIHAN TEPAT!<br>BONUS SUDAH DIAMBIL",
         topOffer: "PILIHAN KEREN!<br>KAMU DAPAT BONUS MAKSIMAL",
@@ -750,7 +791,12 @@
       currentLang = lang;
       const data = translations[lang];
 
-      document.querySelector(".great-choice").textContent = data.greatChoice;
+      // Update "you chose" text
+      const youChoseEl = document.getElementById("you-chose-text");
+      if (youChoseEl) {
+        youChoseEl.textContent = data.youChose;
+      }
+
       document.querySelector(".great-choice").textContent = data.greatChoice;
       const specialOffersEl = document.querySelector(".special-offers-text");
       if (specialOffersEl) {
@@ -760,6 +806,12 @@
       document.querySelector(".offer-gets").textContent = data.gets;
       document.querySelectorAll(".additional-gets").forEach((el) => (el.textContent = data.gets));
       document.querySelector(".next-button-text").textContent = data.nextBtn;
+
+      // Update pick one text
+      const pickOneEl = document.getElementById("pick-one-text");
+      if (pickOneEl) {
+        pickOneEl.textContent = data.pickOne;
+      }
     }
 
     function handleNext() {
