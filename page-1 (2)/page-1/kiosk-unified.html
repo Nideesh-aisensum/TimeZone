@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <title>Timezone Kiosk - Unified Shell</title>
+
+    <!-- Global Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Unified Kiosk Styles -->
+    <style>
+        /* ===== GLOBAL RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 1080px;
+            height: 1920px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        /* ===== GLOBAL VIDEO BACKGROUNDS ===== */
+        .global-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 1080px;
+            height: 1920px;
+            object-fit: cover;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .global-video.active {
+            opacity: 1;
+        }
+
+        /* ===== VIEWS CONTAINER ===== */
+        #views-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 1080px;
+            height: 1920px;
+            z-index: 10;
+            background: transparent;
+        }
+
+        /* ===== VIEW SECTIONS ===== */
+        .view-section {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 1080px;
+            height: 1920px;
+            z-index: 10;
+            background: transparent !important;
+            overflow: hidden;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* Force transparent backgrounds on view containers */
+        .view-section .container,
+        .view-section .screensaver-container {
+            background: transparent !important;
+            background-color: transparent !important;
+        }
+
+        /* ===== LOADING OVERLAY ===== */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        #loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #loading-overlay img {
+            width: 300px;
+            margin-bottom: 40px;
+        }
+
+        #loading-text {
+            font-family: 'Nulshock', Arial, sans-serif;
+            color: #33fff9;
+            font-size: 24px;
+            letter-spacing: 3px;
+        }
+
+        /* ===== COMMON ELEMENTS ===== */
+        .home-button-global {
+            max-width: 200px;
+            height: auto;
+            position: absolute;
+            top: 31px;
+            right: 30px;
+            z-index: 50;
+            cursor: pointer;
+        }
+
+        .back-button-global {
+            max-width: 200px;
+            height: auto;
+            position: absolute;
+            top: 31px;
+            left: 30px;
+            z-index: 50;
+            cursor: pointer;
+        }
+
+        /* ========================================
+           VIEW-SPECIFIC STYLES
+           Each view's CSS is scoped with #view-ID
+           ======================================== */
+
+        /* ===== VIEW: WELCOME ===== */
+        #view-welcome .content {
+            padding-top: 10%;
+        }
+
+        /* ===== VIEW: WELCOME2 ===== */
+        #view-welcome2 .content {
+            padding-top: 80px;
+            padding-bottom: 0;
+        }
+
+        #view-welcome2 .logo {
+            width: 550px;
+            height: auto;
+            margin-bottom: 30px;
+        }
+
+        #view-welcome2 .welcome-text {
+            color: #f5d742;
+            font-family: 'Nulshock', sans-serif;
+            font-size: 46px;
+            text-align: center;
+            margin-bottom: 50px;
+            letter-spacing: 4px;
+        }
+
+        #view-welcome2 .brand-title {
+            color: white;
+            font-size: 72px;
+            text-align: center;
+            margin-bottom: 60px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        #view-welcome2 .buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+            width: 600px;
+            margin-bottom: 50px;
+            align-items: center;
+            position: relative;
+            z-index: 20;
+        }
+
+        #view-welcome2 .menu-button-wrapper {
+            position: relative;
+            width: 100%;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        #view-welcome2 .menu-button-wrapper:hover {
+            transform: translateY(-4px);
+        }
+
+        #view-welcome2 .menu-button-wrapper:active {
+            transform: scale(0.95);
+        }
+
+        #view-welcome2 .menu-button-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        #view-welcome2 .menu-button-text {
+            position: relative;
+            z-index: 1;
+            color: white;
+            font-family: 'Nulshock', sans-serif;
+            font-size: 36px;
+            letter-spacing: 2px;
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        #view-welcome2 .static-cat {
+            width: 750px;
+            height: auto;
+            object-fit: contain;
+            margin-top: auto;
+        }
+
+        /* ===== VIEW: WELCOME-NEWPLAYER ===== */
+        #view-welcome-newplayer .content {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100%;
+            width: 100%;
+            padding-top: 35%;
+        }
+
+        #view-welcome-newplayer .greeting-title {
+            font-family: "Nulshock", sans-serif;
+            font-size: 70px;
+            font-weight: bold;
+            color: #ffffff;
+            text-align: center;
+            line-height: 1.1;
+            text-transform: uppercase;
+            margin-bottom: 8%;
+        }
+
+        #view-welcome-newplayer .welcome-text-newplayer {
+            font-family: "Nulshock", sans-serif;
+            font-size: 36px;
+            font-weight: normal;
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        #view-welcome-newplayer .timezone-logo-newplayer {
+            width: 100%;
+            max-width: 650px;
+            height: auto;
+            margin-bottom: 5%;
+            object-fit: contain;
+            margin-top: -120px;
+        }
+
+        #view-welcome-newplayer .cat-container-newplayer {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 800px;
+            height: 60%;
+            display: flex;
+            align-items: baseline;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        #view-welcome-newplayer .cat-image-newplayer {
+            width: 90%;
+            height: auto;
+            object-fit: contain;
+            object-position: bottom center;
+        }
+
+        /* ===== VIEW: ENJOY ===== */
+        #view-enjoy .content {
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+            padding-top: 60px;
+        }
+
+        #view-enjoy .branding-section {
+            margin-bottom: 30px;
+        }
+
+        #view-enjoy .branding-logo {
+            width: 250px;
+            height: auto;
+            margin-bottom: 30px;
+        }
+
+        #view-enjoy .timezone-branding-enjoy {
+            width: 300px;
+            height: auto;
+            margin-bottom: -55px;
+            margin-top: 160px;
+        }
+
+        #view-enjoy .header-section {
+            text-align: center;
+            margin-bottom: 0px;
+        }
+
+        #view-enjoy .header-title {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 100px;
+            background: linear-gradient(180deg, #ffffff 0%, #ffffff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+            filter: drop-shadow(0 0 30px rgba(255, 255, 255, 0.5)) drop-shadow(0 6px 10px rgba(255, 255, 255, 0.5));
+            letter-spacing: 5px;
+            line-height: 1.1;
+        }
+
+        #view-enjoy .banner-section {
+            margin-top: 70px;
+            margin-bottom: 90px;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #view-enjoy .banner-bg {
+            width: 900px;
+            height: auto;
+            object-fit: contain;
+        }
+
+        #view-enjoy .banner-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-family: 'Nulshock', sans-serif;
+            font-size: 24px;
+            color: #ffffff;
+            letter-spacing: 2px;
+            line-height: 1.5;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            width: 80%;
+        }
+
+        /* ===== VIEW: FEEDBACK ===== */
+        #view-feedback .content {
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+            padding-top: 60px;
+            background: transparent !important;
+        }
+
+        #view-feedback .branding-section {
+            margin-bottom: 40px;
+        }
+
+        #view-feedback .branding-logo {
+            width: 300px;
+            height: auto;
+            object-fit: contain;
+            margin-top: 120px;
+        }
+
+        #view-feedback .popup-container {
+            position: relative;
+            width: 900px;
+            height: 750px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        #view-feedback .popup-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            z-index: 1;
+        }
+
+        #view-feedback .popup-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            padding: 60px 50px 40px;
+        }
+
+        #view-feedback .header-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #view-feedback .header-title {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 65px;
+            background: linear-gradient(180deg, #ffff00 0%, #ffaa00 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(255, 255, 0, 0.5)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+            letter-spacing: 3px;
+            line-height: 1.2;
+        }
+
+        #view-feedback .header-subtitle {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 22px;
+            color: #b8f5ff;
+            letter-spacing: 2px;
+            margin-top: 20px;
+        }
+
+        #view-feedback .rating-section {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        #view-feedback .rating-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        #view-feedback .rating-item:hover {
+            transform: scale(1.1);
+        }
+
+        #view-feedback .rating-item.selected {
+            transform: scale(1.15);
+        }
+
+        #view-feedback .rating-icon {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            transition: all 0.2s ease;
+        }
+
+        #view-feedback .rating-label {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 14px;
+            color: #aaaaaa;
+            margin-top: 10px;
+            text-align: center;
+            max-width: 100px;
+        }
+
+        #view-feedback .rating-item.selected .rating-label {
+            color: #ffffff;
+        }
+
+        #view-feedback .submit-button {
+            position: relative;
+            width: 500px;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.1s;
+            margin-top: 80px;
+        }
+
+        #view-feedback .submit-button:hover {
+            transform: translateY(-4px);
+        }
+
+        #view-feedback .submit-button:active {
+            transform: scale(0.95);
+        }
+
+        #view-feedback .submit-button-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        #view-feedback .submit-button-text {
+            position: relative;
+            z-index: 1;
+            color: white;
+            font-family: 'Nulshock', sans-serif;
+            font-size: 28px;
+            letter-spacing: 2px;
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        #view-feedback .submit-button.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #view-feedback .submit-button.disabled:hover {
+            transform: none;
+        }
+
+        #view-feedback .powered-by {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        #view-feedback .powered-text {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 24px;
+            color: rgba(255, 255, 255, 0.6);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        #view-feedback .aisensum-logo {
+            width: 350px;
+            height: auto;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ===== GLOBAL VIDEO BACKGROUNDS (Loaded ONCE, Never Reload) ===== -->
+    <video id="bg-main" class="global-video active" autoplay loop muted playsinline>
+        <source src="other-bg.mp4" type="video/mp4">
+    </video>
+    <video id="bg-ood" class="global-video" autoplay loop muted playsinline>
+        <source src="OOD-BACKGROUND.mp4" type="video/mp4">
+    </video>
+    <video id="bg-ooh" class="global-video" autoplay loop muted playsinline>
+        <source src="OOH-BACKGROUND.mp4" type="video/mp4">
+    </video>
+    <video id="bg-snacks" class="global-video" autoplay loop muted playsinline>
+        <source src="free-snacks-bg.mp4" type="video/mp4">
+    </video>
+
+    <!-- ===== VIEWS CONTAINER ===== -->
+    <div id="views-container">
+
+        <!-- ===== VIEW: WELCOME ===== -->
+        <div id="view-welcome" class="view-section">
+            <div class="container">
+                <div class="language-selector">
+                    <button id="welcome-lang-btn" onclick="WelcomeView.toggleLanguage()">
+                        <span id="welcome-current-lang">Bahasa</span>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </button>
+                    <div id="welcome-lang-dropdown" class="dropdown-content hidden">
+                        <div onclick="WelcomeView.setLanguage('en')">English</div>
+                        <div onclick="WelcomeView.setLanguage('id')">Bahasa</div>
+                    </div>
+                </div>
+
+                <div class="content">
+                    <img src="timezone-branding.png" alt="Timezone Logo" class="logo timezone-branding"
+                        style="z-index: -1; position: relative;">
+
+                    <h1 id="welcome-main-text" class="glow-text"
+                        style="z-index: 9; position: relative; transform: translate(0px, -25.2px) scale(1.6); font-weight: bold;">
+                        ISI SALDOMU<br>DI SINI!</h1>
+
+                    <div class="character-wrapper" style="transform: translate(0px, -40px) scale(2.5);">
+                        <img src="cat-character.gif" alt="Character" class="character">
+                    </div>
+
+                    <div class="button-wrapper" onclick="WelcomeView.handleStart()"
+                        style="transform: translate(6px, 21px) scale(1.7) !important;">
+                        <img src="button.png" alt="Start Button" class="button-bg">
+                        <span id="welcome-button-text" class="button-text">MULAI</span>
+                    </div>
+
+                    <img src="timezone-branding.png" alt="Added Image" class="timezone-branding"
+                        style="position: absolute; top: 50%; left: 49%; z-index: 50; 
+                               transform: translate(calc(-50% + 5.33337px), calc(-50% - 634.667px)) scale(1.5); width: 300px;">
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== VIEW: WELCOME2 ===== -->
+        <div id="view-welcome2" class="view-section">
+            <div class="container">
+                <img src="back-button.png" alt="Back" class="back-button" onclick="KioskRouter.goBack()">
+                <img src="home.png" alt="Home" class="home-button-global" onclick="KioskRouter.goHome()">
+
+                <div class="content">
+                    <img src="timezone-branding.png" alt="Timezone Logo" class="logo timezone-branding"
+                        style="transform: translate(0, 243.333px) scale(1.5); z-index: 0; position: relative;">
+                    <p id="welcome2-welcome-text" class="welcome-text"
+                        style="transform: translate(0px, -95.667px) scale(1); font-weight: normal; color: rgb(255, 255, 255); text-align: left;">
+                        HALO! SELAMAT DATANG DI</p>
+
+                    <div class="buttons-container" style="transform: translate(0, 60px) scale(1) !important;">
+                        <div class="menu-button-wrapper" onclick="Welcome2View.handleNewPlayer()">
+                            <img src="button.png" alt="Button" class="menu-button-bg">
+                            <span id="welcome2-btn-new" class="menu-button-text">PEMAIN BARU</span>
+                        </div>
+                        <div class="menu-button-wrapper" onclick="Welcome2View.handleExistingPlayer()">
+                            <img src="button.png" alt="Button" class="menu-button-bg">
+                            <span id="welcome2-btn-existing" class="menu-button-text">PEMAIN LAMA</span>
+                        </div>
+                    </div>
+
+                    <img src="cat-character.gif" alt="Cat Character" class="static-cat"
+                        style="transform: translate(16px, -200.666px) scale(1.2);">
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== VIEW: WELCOME-NEWPLAYER ===== -->
+        <div id="view-welcome-newplayer" class="view-section">
+            <div class="container">
+                <div class="content">
+                    <h1 id="newplayer-greeting-text" class="greeting-title">HI,<br>PEMAIN BARU!</h1>
+                    <p id="newplayer-welcome-text" class="welcome-text-newplayer">Selamat datang di</p>
+                    <img src="timezone-branding.png" alt="TIMEZONE" class="timezone-logo-newplayer">
+                </div>
+                <div class="cat-container-newplayer">
+                    <img src="cat-character.gif" alt="Astronaut Cat" class="cat-image-newplayer">
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== VIEW: ENJOY ===== -->
+        <div id="view-enjoy" class="view-section">
+            <div class="container">
+                <img src="home.png" alt="Home" class="home-button-global" onclick="KioskRouter.goHome()">
+
+                <div class="content">
+                    <div class="branding-section">
+                        <img src="timezone-branding.png" alt="Timezone Logo" class="logo timezone-branding-enjoy">
+                    </div>
+
+                    <div class="header-section">
+                        <h1 id="enjoy-header-title" class="header-title">SELAMAT<br>BERMAIN!</h1>
+                    </div>
+
+                    <div class="banner-section">
+                        <img src="blue-banner.png" alt="Banner" class="banner-bg">
+                        <p id="enjoy-banner-text" class="banner-text">TUNJUKKAN STRUK INI KE KASIR UNTUK MENYELESAIKAN
+                            PEMBAYARAN</p>
+                    </div>
+
+                    <div class="character-wrapper" style="transform: translate(0px, -40px) scale(2.5);">
+                        <img src="cat-character.gif" alt="Cat Character" class="character">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== VIEW: FEEDBACK ===== -->
+        <div id="view-feedback" class="view-section">
+            <div class="container">
+                <img src="home.png" alt="Home" class="home-button-global" onclick="KioskRouter.goHome()">
+
+                <div class="content">
+                    <div class="branding-section" style="transform: translate(0px, 70px) scale(1);">
+                        <img src="timezone-branding.png" alt="Timezone" class="branding-logo timezone-branding">
+                    </div>
+
+                    <div class="popup-container" style="transform: translate(0, 140.333px) scale(1.4);">
+                        <img src="pop-up-summary.png" alt="Popup Background" class="popup-bg">
+
+                        <div class="popup-content">
+                            <div class="header-section" style="transform: translate(-8.00006px, 5.33337px) scale(0.6);">
+                                <h1 id="feedback-header-title" class="header-title">BERI NILAI<br>PENGALAMANMU</h1>
+                                <p id="feedback-header-subtitle" class="header-subtitle">TAP ICON UNTUK MEMBERIKAN
+                                    PENILAIAN</p>
+                            </div>
+
+                            <div class="rating-section" style="transform: translate(0px, 0px) scale(0.8);">
+                                <div class="rating-item" data-rating="1" onclick="FeedbackView.selectRating(1)">
+                                    <img id="feedback-rating-1" src="feedback-icons/angry.png" alt="Angry"
+                                        class="rating-icon">
+                                    <span id="feedback-label-1" class="rating-label">Sangat Tidak Puas</span>
+                                </div>
+                                <div class="rating-item" data-rating="2" onclick="FeedbackView.selectRating(2)">
+                                    <img id="feedback-rating-2" src="feedback-icons/sad.png" alt="Sad"
+                                        class="rating-icon">
+                                    <span id="feedback-label-2" class="rating-label">Tidak Puas</span>
+                                </div>
+                                <div class="rating-item" data-rating="3" onclick="FeedbackView.selectRating(3)">
+                                    <img id="feedback-rating-3" src="feedback-icons/ok.png" alt="OK"
+                                        class="rating-icon">
+                                    <span id="feedback-label-3" class="rating-label">Puas</span>
+                                </div>
+                                <div class="rating-item" data-rating="4" onclick="FeedbackView.selectRating(4)">
+                                    <img id="feedback-rating-4" src="feedback-icons/happy.png" alt="Happy"
+                                        class="rating-icon">
+                                    <span id="feedback-label-4" class="rating-label">Sangat Puas</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="submit-button disabled" onclick="FeedbackView.handleSubmit()"
+                        style="transform: translate(-5.33331px, 245.333px) scale(1.2);">
+                        <img src="button.png" alt="Button" class="submit-button-bg">
+                        <span id="feedback-submit-text" class="submit-button-text">KIRIM PENILAIAN</span>
+                    </div>
+                </div>
+
+                <div class="powered-by">
+                    <span class="powered-text">POWERED BY</span>
+                    <img src="aisensum-logo.png" alt="AISENSUM" class="aisensum-logo">
+                </div>
+            </div>
+        </div>
+
+        <!-- More views will be added here... -->
+        <!-- PLACEHOLDER: card-selection, offers-selection, scratch-card, etc. -->
+
+    </div><!-- End views-container -->
+
+    <!-- ===== LOADING SCREEN ===== -->
+    <div id="loading-overlay">
+        <img src="timezone-branding.png" alt="Loading">
+        <div id="loading-text">LOADING...</div>
+    </div>
+
+    <!-- ===== GLOBAL SCRIPTS (Loaded ONCE) ===== -->
+    <script src="api-config.js"></script>
+    <script src="language.js"></script>
+    <script src="session-manager.js"></script>
+    <script src="kiosk-router.js"></script>
+
+    <!-- ===== VIEW CONTROLLERS (Scoped) ===== -->
+
+    <!-- WELCOME VIEW -->
+    <script>
+        const WelcomeView = (function () {
+            const viewId = 'welcome';
+            let currentLang = 'id';
+            let idleTimeout;
+            const IDLE_TIME = 10000;
+
+            const translations = {
+                en: { main: "TOP-UP<br>HERE!", button: "START", langLabel: "English" },
+                id: { main: "ISI SALDOMU<br>DI SINI!", button: "MULAI", langLabel: "Bahasa" }
+            };
+
+            function applyLanguage(lang) {
+                currentLang = lang;
+                const data = translations[lang];
+                document.getElementById('welcome-main-text').innerHTML = data.main;
+                document.getElementById('welcome-button-text').textContent = data.button;
+                document.getElementById('welcome-current-lang').textContent = data.langLabel;
+            }
+
+            function toggleLanguage() {
+                document.getElementById('welcome-lang-dropdown').classList.toggle('hidden');
+            }
+
+            function setLanguage(lang) {
+                saveLanguage(lang);
+                applyLanguage(lang);
+                document.getElementById('welcome-lang-dropdown').classList.add('hidden');
+            }
+
+            function handleStart() {
+                KioskRouter.navigate('welcome2');
+            }
+
+            function resetIdleTimer() {
+                clearTimeout(idleTimeout);
+                if (KioskRouter.getCurrentView() === viewId) {
+                    idleTimeout = setTimeout(() => {
+                        KioskRouter.navigate('screensaver');
+                    }, IDLE_TIME);
+                }
+            }
+
+            function init() {
+                console.log('[WelcomeView] init');
+                currentLang = getCurrentLanguage();
+                applyLanguage(currentLang);
+                startNewSession(true);
+
+                // Start idle timer
+                resetIdleTimer();
+                document.addEventListener('mousemove', resetIdleTimer);
+                document.addEventListener('click', resetIdleTimer);
+                document.addEventListener('touchstart', resetIdleTimer);
+            }
+
+            function destroy() {
+                clearTimeout(idleTimeout);
+                document.removeEventListener('mousemove', resetIdleTimer);
+                document.removeEventListener('click', resetIdleTimer);
+                document.removeEventListener('touchstart', resetIdleTimer);
+            }
+
+            return {
+                init, destroy, handleStart, toggleLanguage, setLanguage
+            };
+        })();
+        KioskRouter.registerView('welcome', WelcomeView);
+    </script>
+
+    <!-- WELCOME2 VIEW -->
+    <script>
+        const Welcome2View = (function () {
+            const viewId = 'welcome2';
+            let currentLang = 'id';
+
+            const translations = {
+                en: { welcome: "HELLO! WELCOME TO", btnNew: "NEW PLAYER", btnExisting: "EXISTING PLAYER" },
+                id: { welcome: "HALO! SELAMAT DATANG DI", btnNew: "PEMAIN BARU", btnExisting: "PEMAIN LAMA" }
+            };
+
+            function applyLanguage(lang) {
+                currentLang = lang;
+                const data = translations[lang];
+                document.getElementById('welcome2-welcome-text').textContent = data.welcome;
+                document.getElementById('welcome2-btn-new').textContent = data.btnNew;
+                document.getElementById('welcome2-btn-existing').textContent = data.btnExisting;
+            }
+
+            function handleNewPlayer() {
+                updateSession({ isNewPlayer: true });
+                KioskRouter.navigate('welcome-newplayer');
+            }
+
+            function handleExistingPlayer() {
+                updateSession({ isNewPlayer: false });
+                KioskRouter.navigate('card-selection');
+            }
+
+            function init() {
+                console.log('[Welcome2View] init');
+                setCurrentPage('welcome2');
+                currentLang = getCurrentLanguage();
+                applyLanguage(currentLang);
+            }
+
+            function destroy() { }
+
+            return {
+                init, destroy, handleNewPlayer, handleExistingPlayer
+            };
+        })();
+        KioskRouter.registerView('welcome2', Welcome2View);
+    </script>
+
+    <!-- WELCOME-NEWPLAYER VIEW -->
+    <script>
+        const WelcomeNewplayerView = (function () {
+            const viewId = 'welcome-newplayer';
+            let currentLang = 'id';
+            let navigationTimer = null;
+
+            const translations = {
+                en: { greeting: "HI,<br>NEW PLAYER!", welcome: "Welcome to" },
+                id: { greeting: "HI,<br>PEMAIN BARU!", welcome: "Selamat datang di" }
+            };
+
+            function applyLanguage(lang) {
+                currentLang = lang;
+                const data = translations[lang];
+                document.getElementById('newplayer-greeting-text').innerHTML = data.greeting;
+                document.getElementById('newplayer-welcome-text').textContent = data.welcome;
+            }
+
+            function startNavigationTimer() {
+                if (navigationTimer) clearTimeout(navigationTimer);
+                navigationTimer = setTimeout(() => {
+                    KioskRouter.navigate('welcome-newuser');
+                }, 3000);
+            }
+
+            function init() {
+                console.log('[WelcomeNewplayerView] init');
+                currentLang = getCurrentLanguage();
+                applyLanguage(currentLang);
+                startNavigationTimer();
+            }
+
+            function destroy() {
+                if (navigationTimer) clearTimeout(navigationTimer);
+            }
+
+            return { init, destroy };
+        })();
+        KioskRouter.registerView('welcome-newplayer', WelcomeNewplayerView);
+    </script>
+
+    <!-- ENJOY VIEW -->
+    <script>
+        const EnjoyView = (function () {
+            const viewId = 'enjoy';
+            let currentLang = 'id';
+            let autoNavigateTimer = null;
+
+            const translations = {
+                en: { headerTitle: "ENJOY<br>PLAYING!", bannerText: "SHOW THIS RECEIPT TO THE CASHIER TO COMPLETE YOUR PAYMENT" },
+                id: { headerTitle: "SELAMAT<br>BERMAIN!", bannerText: "TUNJUKKAN STRUK INI KE KASIR UNTUK MENYELESAIKAN PEMBAYARAN" }
+            };
+
+            function applyLanguage(lang) {
+                currentLang = lang;
+                const data = translations[lang];
+                document.getElementById('enjoy-header-title').innerHTML = data.headerTitle;
+                document.getElementById('enjoy-banner-text').textContent = data.bannerText;
+            }
+
+            function init() {
+                console.log('[EnjoyView] init');
+                setCurrentPage('enjoy');
+                currentLang = getCurrentLanguage();
+                applyLanguage(currentLang);
+
+                // Auto-navigate to screensaver after 5 seconds
+                autoNavigateTimer = setTimeout(() => {
+                    KioskRouter.navigate('screensaver');
+                }, 5000);
+            }
+
+            function destroy() {
+                if (autoNavigateTimer) clearTimeout(autoNavigateTimer);
+            }
+
+            return { init, destroy };
+        })();
+        KioskRouter.registerView('enjoy', EnjoyView);
+    </script>
+
+    <!-- FEEDBACK VIEW -->
+    <script>
+        const FeedbackView = (function () {
+            const viewId = 'feedback';
+            let currentLang = 'id';
+            let selectedRating = null;
+
+            const translations = {
+                en: {
+                    headerTitle: "RATE YOUR<br>EXPERIENCE",
+                    headerSubtitle: "TAP A SMILEY TO DROP YOUR RATING...",
+                    label1: "Highly Dissatisfied", label2: "Dissatisfied", label3: "Somewhat Satisfied", label4: "Very Satisfied",
+                    submitText: "SUBMIT RATING"
+                },
+                id: {
+                    headerTitle: "BERI NILAI<br>PENGALAMANMU",
+                    headerSubtitle: "TAP ICON UNTUK MEMBERIKAN PENILAIAN",
+                    label1: "Sangat Tidak Puas", label2: "Tidak Puas", label3: "Puas", label4: "Sangat Puas",
+                    submitText: "KIRIM PENILAIAN"
+                }
+            };
+
+            const iconPaths = {
+                1: { normal: 'feedback-icons/angry.png', selected: 'feedback-icons/angry_selected.png' },
+                2: { normal: 'feedback-icons/sad.png', selected: 'feedback-icons/sad_selected.png' },
+                3: { normal: 'feedback-icons/ok.png', selected: 'feedback-icons/ok_selected.png' },
+                4: { normal: 'feedback-icons/happy.png', selected: 'feedback-icons/happy_selected.png' }
+            };
+
+            function applyLanguage(lang) {
+                currentLang = lang;
+                const data = translations[lang];
+                document.getElementById('feedback-header-title').innerHTML = data.headerTitle;
+                document.getElementById('feedback-header-subtitle').textContent = data.headerSubtitle;
+                document.getElementById('feedback-label-1').textContent = data.label1;
+                document.getElementById('feedback-label-2').textContent = data.label2;
+                document.getElementById('feedback-label-3').textContent = data.label3;
+                document.getElementById('feedback-label-4').textContent = data.label4;
+                document.getElementById('feedback-submit-text').textContent = data.submitText;
+            }
+
+            function selectRating(rating) {
+                // Reset all icons
+                for (let i = 1; i <= 4; i++) {
+                    document.getElementById('feedback-rating-' + i).src = iconPaths[i].normal;
+                    const item = KioskRouter.queryInView(viewId, '[data-rating="' + i + '"]');
+                    if (item) item.classList.remove('selected');
+                }
+
+                // Set selected
+                selectedRating = rating;
+                document.getElementById('feedback-rating-' + rating).src = iconPaths[rating].selected;
+                const selectedItem = KioskRouter.queryInView(viewId, '[data-rating="' + rating + '"]');
+                if (selectedItem) selectedItem.classList.add('selected');
+
+                // Enable submit button
+                const submitBtn = KioskRouter.queryInView(viewId, '.submit-button');
+                if (submitBtn) submitBtn.classList.remove('disabled');
+            }
+
+            function handleSubmit() {
+                if (selectedRating === null) return;
+                console.log('Feedback submitted:', selectedRating);
+                localStorage.setItem('feedbackRating', selectedRating);
+                KioskRouter.navigate('enjoy');
+            }
+
+            function init() {
+                console.log('[FeedbackView] init');
+                setCurrentPage('feedback');
+                currentLang = getCurrentLanguage();
+                applyLanguage(currentLang);
+                selectedRating = null;
+
+                // Reset UI
+                for (let i = 1; i <= 4; i++) {
+                    document.getElementById('feedback-rating-' + i).src = iconPaths[i].normal;
+                    const item = KioskRouter.queryInView(viewId, '[data-rating="' + i + '"]');
+                    if (item) item.classList.remove('selected');
+                }
+                const submitBtn = KioskRouter.queryInView(viewId, '.submit-button');
+                if (submitBtn) submitBtn.classList.add('disabled');
+            }
+
+            function destroy() {
+                selectedRating = null;
+            }
+
+            return { init, destroy, selectRating, handleSubmit };
+        })();
+        KioskRouter.registerView('feedback', FeedbackView);
+    </script>
+
+</body>
+
+</html>

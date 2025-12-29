@@ -1,0 +1,4 @@
+pywebview
+keyboard
+pywin32
+Pillow

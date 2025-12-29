@@ -1,0 +1,3173 @@
+<!DOCTYPE html>
+<html lang="en" style="visibility: hidden; opacity: 0" class="page-ready">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timezone - Scratchcard Summary</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    @font-face {
+      font-family: "Nulshock Heavy";
+      src: url("../nulshock/nulshock-heavy.otf");
+    }
+
+    /* Fixed for 1080x1920 resolution - NO SCROLLING */
+    html,
+    body {
+      overflow: hidden;
+    }
+
+    .container {
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+    }
+
+    .content {
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100%;
+      width: 100%;
+    }
+
+    /* Main Bonus Container */
+    .bonus-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding-top: 190px;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Header Section */
+    .header-section {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .header-subtitle {
+      font-family: "Nulshock", sans-serif;
+      font-size: 36px;
+      color: #ffffff;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      margin-top: 20px;
+      margin-bottom: 5px;
+    }
+
+    .header-title {
+      font-family: "Nulshock", sans-serif;
+      font-size: 70px;
+      color: #ffffff;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.5), 0 0 40px rgba(255, 255, 255, 0.3), 0 4px 8px rgba(0, 0, 0, 0.5);
+      letter-spacing: 5px;
+    }
+
+    .header-title .highlight {
+      background: linear-gradient(180deg, #ffffff 0%, #dddddd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: none;
+      filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.5)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+    }
+
+    /* Payment Details Box */
+    .payment-box {
+      position: relative;
+      width: 650px;
+      min-height: 580px;
+      margin: 40px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 80px 5px 80px;
+    }
+
+    .payment-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: fill;
+      border-radius: 20px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .payment-content {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    /* Section Title */
+    .section-title {
+      font-family: "Nulshock", sans-serif;
+      font-size: 28px;
+      color: #ffffff;
+      letter-spacing: 2px;
+      text-align: center;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Checkbox Row */
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .checkbox-wrapper {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      flex-shrink: 0;
+      cursor: pointer;
+      z-index: 100;
+    }
+
+    .checkbox-bg {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    .checkbox-tick {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      opacity: 1;
+      pointer-events: none;
+    }
+
+    .topup-section .checkbox-wrapper,
+    .scratch-section .checkbox-wrapper {
+      cursor: pointer;
+      position: relative;
+      z-index: 10;
+    }
+
+    .scratch-section .checkbox-tick.hidden {
+      display: none;
+    }
+
+    .value-group {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+      flex: 1;
+    }
+
+    .to-left {
+      position: absolute;
+      left: 60px;
+    }
+
+    .to-right {
+      position: absolute;
+      right: 20px;
+    }
+
+    .value-item {
+      display: flex;
+      flex-direction: row;
+      align-items: baseline;
+      gap: 5px;
+    }
+
+    .value-amount {
+      font-family: "Nulshock", sans-serif;
+      font-size: 35px;
+      line-height: 1.2;
+    }
+
+    .value-amount.pink {
+      background: linear-gradient(180deg, #ff66cc 0%, #ff00aa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .value-currency {
+      font-family: "Nulshock", sans-serif;
+      font-size: 18px;
+      background: linear-gradient(180deg, #ff66cc 0%, #ff00aa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 1px;
+    }
+
+    .value-tizo {
+      font-family: "Nulshock", sans-serif;
+      font-size: 33px;
+      background: linear-gradient(180deg, #00ffff 0%, #00aaff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .value-tizo-label {
+      font-family: "Nulshock", sans-serif;
+      font-size: 16px;
+      background: linear-gradient(180deg, #00ffff 0%, #00aaff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 1px;
+    }
+
+    /* Section Divider */
+    .section-divider {
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      margin: 10px 0;
+    }
+
+    /* Total Section */
+    .total-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .total-label {
+      font-family: "Nulshock", sans-serif;
+      font-size: 36px;
+      color: #ffffff;
+      margin-bottom: 5px;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+      letter-spacing: 2px;
+    }
+
+    .total-value-container {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .total-amount {
+      font-family: "Nulshock Heavy", sans-serif;
+      font-size: 130px;
+      background: linear-gradient(180deg, #ffff00 0%, #ffcc00 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.8));
+      line-height: 1;
+    }
+
+    .total-unit-inline {
+      font-family: "Nulshock Heavy", sans-serif;
+      font-size: 60px;
+      background: linear-gradient(180deg, #ffff00 0%, #ffcc00 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+    }
+
+    /* Next Button */
+    .next-button {
+      position: relative;
+      width: 70%;
+      height: 85px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.1s;
+      margin-top: 100px;
+    }
+
+    .next-button:hover {
+      transform: translateY(-4px);
+    }
+
+    .next-button:active {
+      transform: scale(0.95);
+    }
+
+    .next-button-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    .next-button-text {
+      position: relative;
+      z-index: 1;
+      color: white;
+      font-family: "Nulshock", sans-serif;
+      font-size: 30px;
+      letter-spacing: 3px;
+      text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Gift Row Styles */
+    .gift-row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+      margin-top: 15px;
+      justify-content: center;
+    }
+
+    .gift-label {
+      font-family: "Nulshock", sans-serif;
+      font-size: 22px;
+      background: linear-gradient(180deg, #ff66cc 0%, #ff00aa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .gift-value {
+      font-family: "Nulshock", sans-serif;
+      font-size: 22px;
+      background: linear-gradient(180deg, #00ffff 0%, #00aaff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .custom-topup-section {
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    .custom-value-group {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 30px;
+      margin-top: 15px;
+    }
+
+    .custom-value-group .value-item {
+      position: static;
+    }
+
+    .print-preview-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      z-index: 1200;
+    }
+
+    .print-preview-overlay.visible {
+      display: flex;
+    }
+
+    .preview-dialog {
+      width: min(720px, 95vw);
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      align-items: center;
+      overflow-y: auto;
+    }
+
+    .preview-close {
+      align-self: flex-end;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-size: 32px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+      transition: transform 0.2s ease;
+    }
+
+    .preview-close:hover {
+      transform: scale(1.1);
+    }
+
+    .preview-ticket {
+      width: 100%;
+      background: #fff;
+      border-radius: 28px;
+      padding: 32px 36px 40px;
+      box-shadow: 0 25px 45px rgba(0, 0, 0, 0.35);
+      font-family: "Poppins", "Segoe UI", sans-serif;
+      color: #1c1c1c;
+      flex-shrink: 0;
+    }
+
+    .preview-logo {
+      width: 380px;
+      margin: 0 auto 12px;
+      display: block;
+    }
+
+    .preview-location {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .preview-location-name {
+      font-size: 32px;
+      font-weight: 800;
+      color: #000;
+    }
+
+    .preview-location-date {
+      font-size: 18px;
+      color: #000;
+    }
+
+    .preview-divider {
+      width: 100%;
+      margin: 18px 0;
+      border: none;
+      border-top: 1.5px dashed #000;
+    }
+
+    .preview-website {
+      text-align: center;
+      font-size: 14px;
+      color: #000;
+      margin-top: -8px;
+      margin-bottom: 20px;
+    }
+
+    .preview-message {
+      text-align: center;
+      font-size: 17px;
+      color: #000;
+      font-weight: 600;
+      margin: 0 0 18px;
+    }
+
+    .preview-order-number {
+      text-align: center;
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #000;
+      margin: 10px 0;
+    }
+
+    .preview-section {
+      margin-bottom: 18px;
+    }
+
+    .preview-section-title {
+      font-size: 19px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .preview-row {
+      display: flex;
+      font-size: 18px;
+      margin: 5px 0;
+      line-height: 1.4;
+    }
+
+    .preview-row span:first-child {
+      width: 200px;
+      flex-shrink: 0;
+      color: #000;
+    }
+
+    .preview-row span:last-child {
+      flex-grow: 1;
+      text-align: right;
+      font-weight: 600;
+      color: #000;
+    }
+
+    .preview-total-section {
+      border-top: 2px solid #000;
+      padding-top: 12px;
+      margin-top: 8px;
+    }
+
+    .preview-total-section .preview-row {
+      font-weight: 700;
+      font-size: 19px;
+    }
+
+    .preview-total-highlight {
+      display: none;
+    }
+
+    .preview-footer {
+      display: block;
+      text-align: center;
+      font-size: 14px;
+      color: #000;
+      font-style: italic;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .preview-actions {
+      width: 100%;
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    .preview-actions button {
+      flex: 1;
+      padding: 14px 18px;
+      border-radius: 999px;
+      border: none;
+      font-size: 16px;
+      font-family: "Nulshock", sans-serif;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .preview-actions .preview-secondary {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+    }
+
+    .preview-actions .preview-primary {
+      background: linear-gradient(120deg, #ffcc00, #ff6a00);
+      color: #1c1c1c;
+      box-shadow: 0 8px 20px rgba(255, 137, 0, 0.35);
+    }
+
+    .preview-actions button:active {
+      transform: translateY(2px);
+    }
+
+    /* ========== PRINT RECEIPT STYLES FOR 80MM THERMAL PAPER ========== */
+    .print-receipt {
+      display: none;
+    }
+
+    @media print {
+      @page {
+        size: 80mm auto;
+        margin: 0;
+      }
+
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      body {
+        background: white !important;
+        overflow: visible !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 80mm !important;
+        font-family: "Courier New", monospace !important;
+      }
+
+      .container,
+      .back-button,
+      .language-selector,
+      .content,
+      .video-bg {
+        display: none !important;
+      }
+
+      .print-receipt {
+        display: block !important;
+        width: 72mm !important;
+        max-width: 72mm !important;
+        margin: 0 auto !important;
+        padding: 3mm 4mm !important;
+        font-family: "Courier New", monospace !important;
+        color: #000 !important;
+        background: white !important;
+        font-size: 10px !important;
+      }
+
+      .print-header {
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      .print-logo-text {
+        font-size: 28px;
+        font-weight: bold;
+        font-family: Arial, sans-serif;
+        letter-spacing: 4px;
+        color: #000;
+        margin-bottom: 5px;
+      }
+
+      .print-website {
+        font-size: 10px;
+        color: #000;
+        margin-top: 3px;
+      }
+
+      .print-location {
+        text-align: center;
+        margin: 15px 0;
+      }
+
+      .print-location-name {
+        font-weight: bold;
+        font-size: 18px;
+        color: #000;
+      }
+
+      .print-location-date {
+        font-size: 12px;
+        color: #000;
+        margin-top: 3px;
+        font-weight: bold;
+      }
+
+      .print-divider {
+        border: none;
+        border-top: 1px solid #ccc;
+        margin: 12px 0;
+      }
+
+      .print-message {
+        text-align: center;
+        font-size: 11px;
+        color: #000;
+        font-style: normal;
+        font-weight: bold;
+        margin: 12px 0;
+        line-height: 1.4;
+      }
+
+      .print-order-number {
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+        margin: 12px 0;
+        letter-spacing: 1px;
+      }
+
+      .print-section {
+        margin: 15px 0;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+      }
+
+      .print-section-title {
+        font-weight: bold;
+        font-size: 16px;
+        margin-bottom: 8px;
+        color: #000;
+      }
+
+      .print-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        margin: 4px 0;
+        padding-left: 10px;
+        font-weight: bold;
+        color: #000;
+      }
+
+      .print-row span:first-child {
+        color: #000;
+        font-weight: bold;
+      }
+
+      .print-row span:last-child {
+        color: #000;
+        font-weight: bold;
+      }
+
+      .print-total-section {
+        margin-top: 15px;
+        padding-top: 12px;
+        border-top: 1px solid #000;
+      }
+
+      .print-total-row {
+        font-weight: bold;
+      }
+
+      .print-footer {
+        text-align: center;
+        font-size: 10px;
+        color: #000;
+        margin-top: 20px;
+        font-style: normal;
+        font-weight: bold;
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+      }
+    }
+  </style>
+  <style id="page-loader-styles">
+    html {
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    html.page-ready {
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .page-loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      transition: opacity 0.3s ease-out;
+    }
+
+    .page-loading-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .page-loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(0, 255, 255, 0.2);
+      border-top-color: #00ffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  <style>
+    /* Printer Error Popup Styles */
+    .printer-error-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 99999;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+
+    .printer-error-content {
+      position: relative;
+      width: 600px;
+      max-width: 90%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .printer-error-bg {
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(0 0 30px rgba(255, 0, 0, 0.4));
+    }
+
+    .printer-error-text {
+      position: absolute;
+      top: 62%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      text-align: center;
+      color: white;
+      font-family: "Arial", sans-serif;
+      /* Using standard font for readability on error */
+    }
+
+    .error-title-small {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 5px;
+      letter-spacing: 1px;
+    }
+
+    .error-title-large {
+      font-size: 48px;
+      font-weight: 800;
+      margin-bottom: 20px;
+      letter-spacing: 2px;
+      line-height: 1.1;
+      text-transform: uppercase;
+    }
+
+    .error-subtitle {
+      font-size: 16px;
+      font-style: italic;
+      opacity: 0.9;
+      margin-top: 10px;
+    }
+
+    /* Animation for popup */
+    .scale-in {
+      animation: scaleIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes scaleIn {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Video Background -->
+    <video class="video-bg" autoplay="" loop="" muted="" playsinline="">
+      <source src="other-bg.mp4" type="video/mp4" />
+    </video>
+    <!-- Back Button -->
+    <img src="back-button.png" alt="Back" class="back-button" onclick="window.history.back()" />
+
+    <!-- Home Button -->
+    <img src="home.png" alt="Home" class="editable added-element" data-id="home-button" onclick="goHome()" style="
+          max-width: 200px;
+          height: auto;
+          position: absolute;
+          top: 31px;
+          right: 30px; /*transform: translate(calc(-50% + 412.67px), calc(-50% - 792px)) scale(0.9);*/
+          z-index: 50;
+          cursor: pointer;
+        " />
+
+    <div class="content">
+      <div class="bonus-container editable" data-id="bonus-container">
+        <!-- Header Section -->
+        <div class="header-section editable" data-id="header-section">
+          <p id="header-subtitle" class="header-subtitle">KAMU TELAH MEMILIH KEJUTAN</p>
+          <h1 class="header-title"><span class="highlight">BONUS</span> TIZO!</h1>
+        </div>
+
+        <!-- Payment Details Box -->
+        <div class="payment-box editable" data-id="payment-box" style="transform: translate(0, 100.333px) scale(1.4)">
+          <img src="Screen-7_box-summary.png" alt="Payment Background" class="payment-bg" />
+
+          <div class="payment-content">
+            <!-- Top-up Section -->
+            <div class="topup-section editable" data-id="topup-section"
+              style="transform: translate(0, 0) scale(1.2); margin-top: 20px">
+              <h3 id="topup-title" class="section-title">TOP-UP YANG DIPILIH:</h3>
+              <div class="checkbox-row">
+                <div class="checkbox-wrapper" onclick="toggleTopup()">
+                  <img src="checkbox-icon.png" alt="Checkbox" class="checkbox-bg" />
+                  <img id="topup-tick" src="tick-icon.png" alt="Tick" class="checkbox-tick" />
+                </div>
+                <div class="value-group">
+                  <div class="value-item to-left">
+                    <span id="topup-amount" class="value-amount pink">1790</span>
+                    <span class="value-currency" id="topup-rb-unit">Rb</span>
+                  </div>
+                  <div class="value-item to-right">
+                    <span id="topup-tizo" class="value-tizo">3460</span>
+                    <span class="value-tizo-label">TIZO</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Free Gifts Section (for new user blue card offer) -->
+            <div id="free-gifts-section" class="free-gifts-section editable" data-id="free-gifts-section"
+              style="display: none; margin-top: 15px; transform: translate(0px, -15.9999px) scale(1); align-items: center; gap: 20px; width: 100%; justify-content: center; pointer-events: none;">
+              <h3 id="free-gifts-title" class="section-title editable" data-id="free-gifts-title"
+                style="color: rgb(242, 202, 2); font-size: 22px; transform: translate(0, 0) scale(1.2); pointer-events: none;">
+                FREE GIFT
+                <span id="free-gifts-value" class="editable" data-id="free-gifts-value"
+                  style="color: rgb(172, 252, 255); font-size: 22px; font-weight: bold; transform: translate(0, 0) scale(1.2)">
+                  -
+                </span>
+              </h3>
+              <div class="gift-item"
+                style="display: flex; align-items: center; gap: 10px; margin-top: -5px; justify-content: center"></div>
+            </div>
+
+            <!-- <div class="section-divider"></div> -->
+
+            <!-- Scratch Card Section -->
+            <div class="scratch-section editable" data-id="scratch-section"
+              style="transform: translate(0, -72.0001px) scale(1.2); pointer-events: none;">
+              <h3 id="scratch-title" class="section-title" style="margin-top: 70px; pointer-events: none;">HADIAH
+                SCRATCH CARD:</h3>
+              <div class="checkbox-row" style="pointer-events: auto;">
+                <div class="checkbox-wrapper" onclick="toggleScratchCard()" style="pointer-events: auto;">
+                  <img src="checkbox-icon.png" alt="Checkbox" class="checkbox-bg" />
+                  <img id="scratch-tick" src="tick-icon.png" alt="Tick" class="checkbox-tick" />
+                </div>
+                <div class="value-group">
+                  <div class="value-item to-left">
+                    <span id="scratch-amount" class="value-amount pink">100</span>
+                    <span id="scratch-rb-unit" class="value-currency">Rb</span>
+                  </div>
+                  <div class="value-item to-right">
+                    <span id="scratch-tizo" class="value-tizo">400</span>
+                    <span id="scratch-tizo-label" class="value-tizo-label">TIZO</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Free Gift Row (dynamic, shown when gift exists) -->
+              <div id="gift-row" class="gift-row hidden"
+                style="display: none; opacity: 1; text-decoration: none; margin-top: 10px; pointer-events: auto;">
+                <span id="gift-label" class="gift-label editable" data-id="gift-label" data-free-gift-label="true"
+                  style="font-weight: bold">FREE GIFT</span>
+                <span id="gift-value" class="gift-value editable" data-id="gift-value"
+                  style="font-weight: bold; margin-left: 20px">-</span>
+              </div>
+            </div>
+
+            <!-- OOD Section -->
+            <div class="scratch-section editable" data-id="ood-section"
+              style="margin-top: 20px; transform: translate(0, -72.0001px) scale(1.2); pointer-events: none;">
+              <h3 id="ood-title" class="section-title"
+                style="font-size: 24px; margin-bottom: 15px; pointer-events: none;">OFFER OF THE DAY:
+              </h3>
+              <div class="checkbox-row" style="pointer-events: auto;">
+                <div class="checkbox-wrapper" onclick="toggleOOD()" style="pointer-events: auto;">
+                  <img src="checkbox-icon.png" alt="Checkbox" class="checkbox-bg" />
+                  <img id="ood-tick" src="tick-icon.png" alt="Tick" class="checkbox-tick hidden" />
+                </div>
+                <div class="value-group">
+                  <div class="value-item to-left">
+                    <span id="ood-amount" class="value-amount pink">50</span>
+                    <span id="ood-rb-unit" class="value-currency">Rb</span>
+                  </div>
+                  <div class="value-item to-right">
+                    <span id="ood-tizo" class="value-tizo">100</span>
+                    <span id="odd-tizo-label" class="value-tizo-label">TIZO</span>
+                  </div>
+                </div>
+              </div>
+              <!-- OOD Gift Row (dynamic, shown when gift exists) -->
+              <div id="ood-gift-row" class="gift-row hidden"
+                style="display: none; opacity: 1; text-decoration: none; margin-top: 10px; pointer-events: auto;">
+                <span class="gift-label" data-free-gift-label="true" style="font-weight: bold">FREE GIFT</span>
+                <span id="ood-gift-value" class="gift-value" style="font-weight: bold; margin-left: 20px">-</span>
+              </div>
+            </div>
+
+            <!-- OOH Section -->
+            <div class="scratch-section editable" data-id="ooh-section"
+              style="margin-top: 20px; transform: translate(0, -72.0001px) scale(1.2); pointer-events: none;">
+              <h3 id="ooh-title" class="section-title"
+                style="font-size: 24px; margin-bottom: 15px; pointer-events: none;">OFFER OF THE HOUR:
+              </h3>
+              <div class="checkbox-row" style="pointer-events: auto;">
+                <div class="checkbox-wrapper" onclick="toggleOOH()" style="pointer-events: auto;">
+                  <img src="checkbox-icon.png" alt="Checkbox" class="checkbox-bg" />
+                  <img id="ooh-tick" src="tick-icon.png" alt="Tick" class="checkbox-tick hidden" />
+                </div>
+                <div class="value-group">
+                  <div class="value-item to-left">
+                    <span id="ooh-amount" class="value-amount pink">50</span>
+                    <span id="ooh-rb-unit" class="value-currency">Rb</span>
+                  </div>
+                  <div class="value-item to-right">
+                    <span id="ooh-tizo" class="value-tizo">100</span>
+                    <span id="ooh-tizo-label" class="value-tizo-label">TIZO</span>
+                  </div>
+                </div>
+              </div>
+              <!-- OOH Gift Row (dynamic, shown when gift exists) -->
+              <div id="ooh-gift-row" class="gift-row hidden"
+                style="display: none; opacity: 1; text-decoration: none; margin-top: 10px; pointer-events: auto;">
+                <span class="gift-label" data-free-gift-label="true" style="font-weight: bold">FREE GIFT</span>
+                <span id="ooh-gift-value" class="gift-value" style="font-weight: bold; margin-left: 20px">-</span>
+              </div>
+            </div>
+
+            <!-- Snacks Section -->
+            <div class="scratch-section editable" data-id="snacks-section"
+              style="margin-top: 20px; display: none; transform: translate(0, -72.0001px) scale(1.2); pointer-events: none;">
+              <h3 id="snacks-title" class="section-title"
+                style="/* font-size: 24px; */ margin-bottom: 15px; pointer-events: none;">FREE
+                SNACKS:</h3>
+              <div class="checkbox-row" style="pointer-events: auto;">
+                <div class="checkbox-wrapper" onclick="toggleSnacks()" style="pointer-events: auto;">
+                  <img src="checkbox-icon.png" alt="Checkbox" class="checkbox-bg" />
+                  <img id="snacks-tick" src="tick-icon.png" alt="Tick" class="checkbox-tick hidden" />
+                </div>
+                <div class="value-group">
+                  <div class="value-item to-left">
+                    <span id="snacks-amount" class="value-amount pink">50</span>
+                    <span id="snacks-rb-unit" class="value-currency">Rb</span>
+                  </div>
+                  <div class="value-item to-right">
+                    <span id="snacks-tizo" class="value-tizo" style="margin-left: -20px">100</span>
+                    <span id="snacks-tizo-label" class="value-tizo-label">TIZO</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Snacks Gift Row (dynamic, shown when gift exists) -->
+              <div id="snacks-gift-row" class="gift-row hidden"
+                style="display: none; opacity: 1; text-decoration: none; margin-top: 10px; pointer-events: auto;">
+                <span class="gift-label" data-free-gift-label="true" style="font-weight: bold">FREE GIFT</span>
+                <span id="snacks-gift-value" class="gift-value" style="font-weight: bold; margin-left: 20px">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="custom-topup-display" class="scratch-section custom-topup-section editable"
+          data-id="custom-topup-section" style="display: none; transform: translate(0, 0) scale(1.2)">
+          <h3 class="section-title">CUSTOM TOP-UP:</h3>
+          <div class="custom-value-group">
+            <div class="value-item">
+              <span id="custom-topup-amount" class="value-amount pink">0</span>
+              <span class="value-currency" id="custom-topup-rb-unit">Rb</span>
+            </div>
+            <div class="value-item">
+              <span id="custom-topup-tizo" class="value-tizo">0</span>
+              <span class="value-tizo-label">TIZO</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Section -->
+        <div class="total-section editable" data-id="total-section"
+          style="transform: translate(0, 240px) scale(1.2); display: none">
+          <p id="total-label" class="total-label">TOTAL TIZO:</p>
+          <div class="total-value-container">
+            <div id="total-amount" class="total-amount">3860</div>
+            <span class="total-unit-inline">TIZO</span>
+          </div>
+        </div>
+
+        <!-- Calculation Display - Hidden by default, only shown for existing users with custom top-up -->
+        <div id="calculation-section" class="editable" data-id="calculation-section"
+          style="display: none; text-align: center; margin-top: 10px; color: #fff; font-family: 'Nulshock', sans-serif; transform: translate(5.33337px, 240px) scale(1.2)">
+          <p id="calculation-text" style="font-size: 20px; color: #aaa">Calculation: 1790 x 1.93 = 3460 + 400 (Bonus)
+          </p>
+        </div>
+
+        <!-- Next Button -->
+        <div class="next-button editable" data-id="next-button" onclick="handleNext()"
+          style="transform: translate(-13.3333px, 205.333px) scale(1.3)">
+          <img src="button.png" alt="Button" class="next-button-bg" />
+          <span id="next-text" class="next-button-text">CETAK</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="printPreview" class="print-preview-overlay">
+    <div class="preview-dialog">
+      <button class="preview-close" aria-label="Close preview" onclick="closePrintPreview()">×</button>
+      <div class="preview-ticket">
+        <img src="timezone-branding.png" alt="Timezone" class="preview-logo" />
+        <div class="preview-website">www.timezonegames.com</div>
+        <div class="preview-location">
+          <div class="preview-location-name" id="preview-location-name">Lippo Mall Puri</div>
+          <div class="preview-location-date" id="preview-date">Kamis 21/12/25 16:33 PM</div>
+        </div>
+        <hr class="preview-divider" />
+        <p class="preview-message" id="preview-message">*** MOHON UNTUK MENYERAHKAN STRUK INI<br />KE KASIR UNTUK
+          MENYELESAIKAN PEMBAYARAN ***</p>
+        <div class="preview-order-number" id="preview-order-number">RSC000000000</div>
+        <hr class="preview-divider" />
+        <div class="preview-section" id="preview-topup-section">
+          <div class="preview-section-title">Paket Top-up</div>
+          <div class="preview-row">
+            <span>Transaction Amount :</span>
+            <span id="preview-topup-nominal">Rp0</span>
+          </div>
+          <div class="preview-row">
+            <span>Total Tizo :</span>
+            <span id="preview-topup-tizo">0 Tizo</span>
+          </div>
+          <div class="preview-row" id="preview-free-gifts-row" style="display: none">
+            <span>Bonus :</span>
+            <span id="preview-free-gifts-value">-</span>
+          </div>
+        </div>
+        <div class="preview-section" id="preview-custom-topup-section" style="display: none">
+          <div class="preview-section-title">Custom Top-up</div>
+          <div class="preview-row">
+            <span>Transaction Amount :</span>
+            <span id="preview-custom-topup-nominal">Rp0</span>
+          </div>
+          <div class="preview-row">
+            <span>Total Tizo :</span>
+            <span id="preview-custom-topup-tizo">0 Tizo</span>
+          </div>
+        </div>
+        <div class="preview-section" id="preview-scratch-section">
+          <div class="preview-section-title">Bonus Scratchcard</div>
+          <div class="preview-row">
+            <span>Transaction Amount :</span>
+            <span id="preview-scratch-nominal">Rp0</span>
+          </div>
+          <div class="preview-row">
+            <span>Total Tizo :</span>
+            <span id="preview-scratch-tizo">0 Tizo</span>
+          </div>
+          <div class="preview-row" id="preview-bonus-row" style="display: none">
+            <span>Bonus :</span>
+            <span id="preview-bonus-value">-</span>
+          </div>
+        </div>
+        <div class="preview-section" id="preview-ood-section" style="display: none">
+          <div class="preview-section-title">OOD (Offer Of The Day)</div>
+          <div class="preview-row">
+            <span>Transaction Amount :</span>
+            <span id="preview-ood-nominal">Rp0</span>
+          </div>
+          <div class="preview-row">
+            <span>Total Tizo :</span>
+            <span id="preview-ood-tizo">0 Tizo</span>
+          </div>
+          <div class="preview-row" id="preview-ood-bonus-row" style="display: none">
+            <span>Bonus :</span>
+            <span id="preview-ood-bonus-value">-</span>
+          </div>
+        </div>
+        <div class="preview-section" id="preview-ooh-section" style="display: none">
+          <div class="preview-section-title">OOH (Offer Of The Hour)</div>
+          <div class="preview-row">
+            <span>Transaction Amount :</span>
+            <span id="preview-ooh-nominal">Rp0</span>
+          </div>
+          <div class="preview-row">
+            <span>Total Tizo :</span>
+            <span id="preview-ooh-tizo">0 Tizo</span>
+          </div>
+          <div class="preview-row" id="preview-ooh-bonus-row" style="display: none">
+            <span>Bonus :</span>
+            <span id="preview-ooh-bonus-value">-</span>
+          </div>
+        </div>
+        <div class="preview-section" id="preview-snacks-section" style="display: none">
+          <div class="preview-section-title">Free Snacks</div>
+          <div class="preview-row">
+            <span>Transaction Amount :</span>
+            <span id="preview-snacks-nominal">Rp0</span>
+          </div>
+          <div class="preview-row">
+            <span>Total Tizo :</span>
+            <span id="preview-snacks-tizo">0 Tizo</span>
+          </div>
+        </div>
+        <div class="preview-total-section">
+          <div class="preview-row">
+            <span>Total Payment :</span>
+            <span id="preview-total-payment">Rp0</span>
+          </div>
+          <div class="preview-row">
+            <span>Total Tizos :</span>
+            <span id="preview-total-tizo">0 Tizo</span>
+          </div>
+          <div class="preview-row" id="preview-total-tickets-row" style="display: none">
+            <span>Bonus :</span>
+            <span id="preview-total-tickets">-</span>
+          </div>
+          <div class="preview-row" id="preview-total-bonus-row" style="display: none">
+            <span>Bonus :</span>
+            <span id="preview-total-bonus">-</span>
+          </div>
+          <div class="preview-row" id="preview-total-ood-bonus-row" style="display: none">
+            <span>Bonus OOD :</span>
+            <span id="preview-total-ood-bonus">-</span>
+          </div>
+          <div class="preview-row" id="preview-total-ooh-bonus-row" style="display: none">
+            <span>Bonus OOH :</span>
+            <span id="preview-total-ooh-bonus">-</span>
+          </div>
+        </div>
+        <div class="preview-total-highlight">
+          <span>Kamu menerima total:</span>
+          <strong id="preview-total-highlight-value">0 Tizo</strong>
+        </div>
+        <p class="preview-footer" id="preview-footer">Total amount is per card. You can use this offer on <span
+            id="preview-card-count">0</span>
+          cards</p>
+      </div>
+      <div class="preview-actions">
+        <button class="preview-secondary" onclick="closePrintPreview()">KEMBALI</button>
+        <button class="preview-primary" onclick="confirmPrint()">PRINT</button>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Print Receipt (hidden on screen, shown when printing) -->
+  <div class="print-receipt">
+    <div class="print-header print-receipt">
+      <img src="logo-black.png" alt="TIMEZONE" class="print-logo-img"
+        style="width: 200px; height: auto; display: block; margin: 0 auto;" />
+      <div class="print-website">www.timezonegames.com</div>
+    </div>
+
+    <div class="print-location">
+      <div class="print-location-name" id="print-location-name">Lippo Mall Puri</div>
+      <div class="print-location-date" id="print-date">Jumat, 12 Des 2025 13.18</div>
+    </div>
+
+    <hr class="print-divider" />
+
+    <p class="print-message" id="print-message">Dimohon untuk menyerahkan struk ini<br />Kepada kasir untuk
+      menyelesaikan pembayaran.</p>
+
+    <div class="print-order-number" id="print-order-number">RSC995GNZNOV</div>
+
+    <hr class="print-divider" />
+
+    <!-- Paket Top-up Section -->
+    <div class="print-section" id="print-topup-section">
+      <div class="print-section-title">Paket Top-up</div>
+      <div class="print-row">
+        <span>Nominal Transaksi</span>
+        <span id="print-topup-nominal">Rp1.790.000</span>
+      </div>
+      <div class="print-row">
+        <span>Total Tizo</span>
+        <span id="print-topup-tizo">3460 Tizo</span>
+      </div>
+      <div class="print-row" id="print-free-gifts-row" style="display: none">
+        <span>Bonus</span>
+        <span id="print-free-gifts-value">500 Tiket</span>
+      </div>
+    </div>
+
+    <!-- Bonus Scratchcard Section -->
+    <div class="print-section" id="print-scratch-section" style="display: block">
+      <div class="print-section-title">Bonus Scratchcard</div>
+      <div class="print-row">
+        <span>Nominal Transaksi</span>
+        <span id="print-scratch-nominal">Rp100.000</span>
+      </div>
+      <div class="print-row">
+        <span>Total Tizo</span>
+        <span id="print-scratch-tizo">400 Tizo</span>
+      </div>
+      <div class="print-row" id="print-bonus-row" style="display: none">
+        <span>Bonus</span>
+        <span id="print-bonus-value">Doritos</span>
+      </div>
+    </div>
+
+    <!-- Custom Top Up Section -->
+    <div class="print-section" id="print-custom-topup-section" style="display: none">
+      <div class="print-section-title">Custom Top-up</div>
+      <div class="print-row">
+        <span>Nominal Transaksi</span>
+        <span id="print-custom-topup-nominal">Rp0</span>
+      </div>
+      <div class="print-row">
+        <span>Total Tizo</span>
+        <span id="print-custom-topup-tizo">0 Tizo</span>
+      </div>
+    </div>
+
+    <!-- OOD Section (Print) -->
+    <div class="print-section" id="print-ood-section" style="display: none">
+      <div class="print-section-title">OOD (Offer Of The Day)</div>
+      <div class="print-row">
+        <span>Nominal Transaksi</span>
+        <span id="print-ood-nominal">Rp50.000</span>
+      </div>
+      <div class="print-row">
+        <span>Total Tizo</span>
+        <span id="print-ood-tizo">100 Tizo</span>
+      </div>
+      <div class="print-row" id="print-ood-bonus-row" style="display: none">
+        <span>Bonus</span>
+        <span id="print-ood-bonus-value">-</span>
+      </div>
+    </div>
+
+    <!-- OOH Section (Print) -->
+    <div class="print-section" id="print-ooh-section" style="display: none">
+      <div class="print-section-title">OOH (Offer Of The Hour)</div>
+      <div class="print-row">
+        <span>Nominal Transaksi</span>
+        <span id="print-ooh-nominal">Rp50.000</span>
+      </div>
+      <div class="print-row">
+        <span>Total Tizo</span>
+        <span id="print-ooh-tizo">100 Tizo</span>
+      </div>
+      <div class="print-row" id="print-ooh-bonus-row" style="display: none">
+        <span>Bonus</span>
+        <span id="print-ooh-bonus-value">-</span>
+      </div>
+    </div>
+
+    <!-- Snacks Section (Print) -->
+    <div class="print-section" id="print-snacks-section" style="display: none">
+      <div class="print-section-title">Free Snacks</div>
+      <div class="print-row">
+        <span>Nominal Transaksi</span>
+        <span id="print-snacks-nominal">Rp50.000</span>
+      </div>
+      <div class="print-row">
+        <span>Total Tizo</span>
+        <span id="print-snacks-tizo">100 Tizo</span>
+      </div>
+    </div>
+
+    <!-- Calculation Logic (Print) - HIDDEN per user request -->
+    <div class="print-section" id="print-calculation-section" style="display: none; border-bottom: 1px dashed #ccc">
+      <div class="print-section-title">Calculation Logic</div>
+      <p id="print-calculation-text" style="font-size: 10px; margin: 0">1790 x 1.93 = 3460 + 400 (Bonus)</p>
+    </div>
+
+    <!-- Total Section -->
+    <div class="print-total-section">
+      <div class="print-row print-total-row">
+        <span>Total Bayar</span>
+        <span id="print-total-payment">Rp1.890.000</span>
+      </div>
+      <div class="print-row print-total-row">
+        <span>Total Tizo</span>
+        <span id="print-total-tizo">3860 Tizo</span>
+      </div>
+      <!-- Bonus order: 1. New user gift (tickets), 2. Scratchcard bonus, 3. OOD, 4. OOH -->
+      <div class="print-row print-total-row" id="print-total-tickets-row" style="display: none">
+        <span>Bonus</span>
+        <span id="print-total-tickets">500 Tiket</span>
+      </div>
+      <div class="print-row print-total-row" id="print-total-bonus-row" style="display: none">
+        <span>Bonus</span>
+        <span id="print-total-bonus">Doritos</span>
+      </div>
+      <div class="print-row print-total-row" id="print-total-ood-bonus-row" style="display: none">
+        <span>Bonus OOD</span>
+        <span id="print-total-ood-bonus">-</span>
+      </div>
+      <div class="print-row print-total-row" id="print-total-ooh-bonus-row" style="display: none">
+        <span>Bonus OOH</span>
+        <span id="print-total-ooh-bonus">-</span>
+      </div>
+    </div>
+
+    <p class="print-footer" id="print-footer">Total amount is per card. You can use this offer on <span
+        id="print-card-count">2</span> cards</p>
+  </div>
+
+  <!-- Printer Error Popup -->
+  <div id="printer-error-popup" class="printer-error-overlay" onclick="hidePrinterError()">
+    <div class="printer-error-content scale-in">
+      <img src="print-run-out.png" alt="Printer Error" class="printer-error-bg" />
+      <div class="printer-error-text">
+        <div id="error-text-1" class="error-title-small">GULUNGAN KERTAS</div>
+        <div id="error-text-main" class="error-title-large">HABIS!</div>
+        <div id="error-text-sub" class="error-subtitle">MOHON SEGERA HUBUNGI PETUGAS/STAF KAMI.</div>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="api-config.js"></script>
+  <script src="shell-connector.js"></script>
+  <script src="page-loader.js"></script>
+  <script src="session-manager.js"></script>
+  <script src="language.js"></script>
+  <script src="currency-formatter.js"></script>
+  <script>
+    // Set current page in session
+    setCurrentPage("scratchcard-summary");
+
+    // Detect mode from URL parameter (?accepted=true or ?accepted=false)
+    const urlParams = new URLSearchParams(window.location.search);
+    const isAcceptMode = urlParams.get("accepted") === "true";
+
+    const translations = {
+      en: {
+        headerSubtitle: "YOU HAVE SELECTED THE SURPRISE",
+        headerSubtitleUnchecked: "YOU JUST SKIPPED",
+        headerTitle: '<span class="highlight">BONUS</span> TIZO!',
+        headerTitleUnchecked: '<span class="highlight">THIS</span> BONUS!',
+        topupTitle: "OFFER CHOSEN:",
+        scratchTitle: "SCRATCH CARD WON:",
+        oodTitle: "OFFER OF THE DAY:",
+        oohTitle: "OFFER OF THE HOUR:",
+        snacksTitle: "FREE SNACKS:",
+        totalLabel: "TOTAL TIZO:",
+        nextText: "PRINT",
+        langLabel: "English",
+        errorSmall: "Add a new paper roll.",
+        errorMain: "Paper is finished.",
+        errorSub: "Please ask the cashier or staff for help.",
+        freeGift: "FREE GIFT",
+        freeSnacks: "FREE SNACKS",
+        // Print Preview translations
+        printTopupSection: "Top-up Package",
+        printScratchSection: "Bonus Scratchcard",
+        printCustomTopupSection: "Custom Top-up",
+        printOodSection: "OOD (Offer Of The Day)",
+        printOohSection: "OOH (Offer Of The Hour)",
+        printSnacksSection: "Free Snacks",
+        printTransactionAmount: "Transaction Amount :",
+        printTotalTizo: "Total Tizo :",
+        printBonus: "Bonus :",
+        printBonusOod: "Bonus OOD :",
+        printBonusOoh: "Bonus OOH :",
+        printTotalPayment: "Total Payment :",
+        printTotalTizos: "Total Tizos :",
+        printReceiveTotal: "You receive total:",
+        printFooter: "Total amount is per card. You can use this offer on",
+        printFooterCards: "cards",
+        printCancelBtn: "CANCEL",
+        printConfirmBtn: "CONFIRM & PRINT",
+        printMessage: "*** PLEASE HAND THIS RECEIPT<br/>TO THE CASHIER TO COMPLETE PAYMENT ***"
+      },
+      id: {
+        headerSubtitle: "KAMU TELAH MEMILIH KEJUTAN",
+        headerSubtitleUnchecked: "KAMU LEWATI",
+        headerTitle: '<span class="highlight">BONUS</span> TIZO!',
+        headerTitleUnchecked: '<span class="highlight">BONUS</span> INI!',
+        topupTitle: "TOP-UP YANG DIPILIH:",
+        scratchTitle: "HADIAH SCRATCH CARD:",
+        oodTitle: "PENAWARAN DI HARI INI:",
+        oohTitle: "PENAWARAN DI JAM INI:",
+        snacksTitle: "FREE SNACKS:",
+        totalLabel: "TOTAL TIZO:",
+        nextText: "CETAK",
+        langLabel: "Bahasa",
+        errorSmall: "GULUNGAN KERTAS",
+        errorMain: "HABIS!",
+        errorSub: "MOHON SEGERA HUBUNGI PETUGAS/STAF KAMI.",
+        freeGift: "GRATIS HADIAH",
+        freeSnacks: "SNACK GRATIS",
+        // Print Preview translations
+        printTopupSection: "Paket Top-up",
+        printScratchSection: "Bonus Scratchcard",
+        printCustomTopupSection: "Custom Top-up",
+        printOodSection: "OOD (Penawaran Hari Ini)",
+        printOohSection: "OOH (Penawaran Jam Ini)",
+        printSnacksSection: "Snack Gratis",
+        printTransactionAmount: "Nominal Transaksi :",
+        printTotalTizo: "Total Tizo :",
+        printBonus: "Bonus :",
+        printBonusOod: "Bonus OOD :",
+        printBonusOoh: "Bonus OOH :",
+        printTotalPayment: "Total Pembayaran :",
+        printTotalTizos: "Total Tizo :",
+        printReceiveTotal: "Kamu menerima total:",
+        printFooter: "Total pembayaran ini berlaku untuk satu kartu. Anda dapat menggunakan penawaran ini untuk",
+        printFooterCards: "kartu",
+        printCancelBtn: "BATAL",
+        printConfirmBtn: "KONFIRMASI & CETAK",
+        printMessage: "*** MOHON UNTUK MENYERAHKAN STRUK INI<br/>KE KASIR UNTUK MENYELESAIKAN PEMBAYARAN ***"
+      },
+    };
+
+    let currentLang = getCurrentLanguage();
+    // Set initial state based on URL parameter - accept mode = checked, reject mode = unchecked
+    let scratchCardSelected = isAcceptMode;
+    let topupSelected = true; // Top-up is selected by default
+
+    let oodSelected = false;
+    let oohSelected = false;
+    let snacksSelected = false;
+
+    // Default values for OOD/OOH/Snacks (can be updated from session or editable)
+    let oodCost = 50000;
+    let oodTizo = 100;
+    let oodGiftDetails = null;
+    let oohCost = 50000;
+    let oohTizo = 100;
+    let oohGiftDetails = null;
+    let snacksCost = 50000;
+    let snacksTizo = 100;
+    let snacksGiftDetails = null;
+
+    function getFreeGiftText(lang) {
+      const text = translations[lang]?.freeGift || translations.en.freeGift || "FREE GIFT";
+      return text.toUpperCase();
+    }
+
+    function updateFreeGiftLabels() {
+      const labelText = getFreeGiftText(currentLang);
+      document.querySelectorAll("[data-free-gift-label]").forEach((el) => {
+        el.textContent = labelText;
+      });
+    }
+
+    // Variables to hold current offer/bonus values for calculations
+    let offerCost = 0;
+    let offerTizo = 0;
+    let bonusCost = 0;
+    let bonusTizo = 0;
+    let giftDetails = null;
+    let showCalculation = false; // Only show for existing users with custom top-up
+
+    function toggleTopup() {
+      console.log('toggleTopup called! isEditModeActive:', window.isEditModeActive ? window.isEditModeActive() : 'not defined');
+      if (window.isEditModeActive && window.isEditModeActive()) return;
+      topupSelected = !topupSelected;
+      console.log('topupSelected is now:', topupSelected);
+      // If top-up is deselected and OOD is also not selected, deselect scratch card
+      // (Scratch card cannot be selected alone - needs either Topup or OOD)
+      if (!topupSelected && !oodSelected && scratchCardSelected) {
+        scratchCardSelected = false;
+      }
+      updateUI();
+    }
+
+    function toggleScratchCard() {
+      if (window.isEditModeActive && window.isEditModeActive()) {
+        return; // Don't toggle in edit mode
+      }
+      // Scratch card can only be selected if either Topup or OOD is selected
+      // (Scratch card cannot be selected alone)
+      if (!scratchCardSelected) {
+        // Trying to select scratch card
+        if (!topupSelected && !oodSelected) {
+          // Neither Topup nor OOD is selected, cannot select scratch card alone
+          console.log("Cannot select scratch card alone - need either Topup or OOD");
+          return;
+        }
+        scratchCardSelected = true;
+      } else {
+        // Deselecting scratch card - always allowed
+        scratchCardSelected = false;
+      }
+      updateUI();
+    }
+
+    function toggleOOD() {
+      if (window.isEditModeActive && window.isEditModeActive()) return;
+
+      oodSelected = !oodSelected;
+      // If OOD is deselected and Topup is also not selected, deselect scratch card
+      // (Scratch card cannot be selected alone - needs either Topup or OOD)
+      if (!oodSelected && !topupSelected && scratchCardSelected) {
+        scratchCardSelected = false;
+      }
+      updateUI();
+    }
+
+    function toggleOOH() {
+      if (window.isEditModeActive && window.isEditModeActive()) return;
+
+      oohSelected = !oohSelected;
+      updateUI();
+    }
+
+    function toggleSnacks() {
+      if (window.isEditModeActive && window.isEditModeActive()) return;
+
+      snacksSelected = !snacksSelected;
+      updateUI();
+    }
+
+    function updateUI() {
+      const tick = document.getElementById("scratch-tick");
+      const giftRow = document.getElementById("gift-row");
+
+      const oodTick = document.getElementById("ood-tick");
+      const oohTick = document.getElementById("ooh-tick");
+      const snacksTick = document.getElementById("snacks-tick");
+      const scratchAmount = document.getElementById("scratch-amount");
+      const scratchCurrency = document.getElementById("scratch-rb-unit");
+      const valueCurrency = document.getElementById("value-currency");
+      const strachTizoLabel = document.getElementById("scratch-tizo-label");
+      const scratchTizo = document.getElementById("scratch-tizo");
+
+      // Topup elements
+      const topupTick = document.getElementById("topup-tick");
+      const topupAmount = document.getElementById("topup-amount");
+      const topupTizo = document.getElementById("topup-tizo");
+      const topupCurrency = document.getElementById("topup-rb-unit");
+      const topupTizoLabel = document.querySelector(".topup-section .value-tizo-label");
+      const freeGiftsSection = document.getElementById("free-gifts-section");
+
+      // Use Number() to ensure numeric addition
+      // Only include topup if selected
+      let currentTotalTizo = topupSelected ? (Number(offerTizo) || 0) : 0;
+      let currentTotalPayment = topupSelected ? (Number(offerCost) || 0) : 0;
+
+      // Handle Topup Selection
+      if (topupSelected) {
+        if (topupTick) topupTick.classList.remove("hidden");
+        if (topupAmount) {
+          topupAmount.style.opacity = "1";
+          topupAmount.style.textDecoration = "none";
+        }
+        if (topupTizo) {
+          topupTizo.style.opacity = "1";
+          topupTizo.style.textDecoration = "none";
+        }
+        if (topupCurrency) {
+          topupCurrency.style.opacity = "1";
+          topupCurrency.style.textDecoration = "none";
+        }
+        if (topupTizoLabel) {
+          topupTizoLabel.style.opacity = "1";
+          topupTizoLabel.style.textDecoration = "none";
+        }
+        if (freeGiftsSection) {
+          freeGiftsSection.style.opacity = "1";
+          freeGiftsSection.style.textDecoration = "none";
+        }
+      } else {
+        if (topupTick) topupTick.classList.add("hidden");
+        if (topupAmount) {
+          topupAmount.style.opacity = "0.3";
+          topupAmount.style.textDecoration = "line-through";
+          topupAmount.style.textDecorationThickness = "5px";
+          topupAmount.style.textDecorationColor = "#262B6F";
+        }
+        if (topupTizo) {
+          topupTizo.style.opacity = "0.3";
+          topupTizo.style.textDecoration = "line-through";
+          topupTizo.style.textDecorationThickness = "5px";
+          topupTizo.style.textDecorationColor = "#262B6F";
+        }
+        if (topupCurrency) {
+          topupCurrency.style.opacity = "0.3";
+          topupCurrency.style.textDecoration = "line-through";
+          topupCurrency.style.textDecorationThickness = "5px";
+          topupCurrency.style.textDecorationColor = "#262B6F";
+        }
+        if (topupTizoLabel) {
+          topupTizoLabel.style.opacity = "0.3";
+          topupTizoLabel.style.textDecoration = "line-through";
+          topupTizoLabel.style.textDecorationThickness = "5px";
+          topupTizoLabel.style.textDecorationColor = "#262B6F";
+        }
+        if (freeGiftsSection) {
+          freeGiftsSection.style.opacity = "0.3";
+          freeGiftsSection.style.textDecoration = "line-through";
+        }
+      }
+
+      // Handle Scratch Card
+      if (scratchCardSelected) {
+        tick.classList.remove("hidden");
+        currentTotalTizo += Number(bonusTizo) || 0;
+        currentTotalPayment += Number(bonusCost) || 0;
+        if (giftRow) {
+          giftRow.style.opacity = "1";
+          giftRow.style.textDecoration = "none";
+        }
+
+        // Reset all scratch card element styles when selected
+        if (scratchAmount) {
+          scratchAmount.style.opacity = "1";
+          scratchAmount.style.textDecoration = "none";
+        }
+        if (scratchCurrency) {
+          scratchCurrency.style.opacity = "1";
+          scratchCurrency.style.textDecoration = "none";
+        }
+        if (scratchTizo) {
+          scratchTizo.style.opacity = "1";
+          scratchTizo.style.textDecoration = "none";
+        }
+        if (strachTizoLabel) {
+          strachTizoLabel.style.opacity = "1";
+          strachTizoLabel.style.textDecoration = "none";
+        }
+      } else {
+        tick.classList.add("hidden");
+        if (giftRow) {
+          giftRow.style.opacity = "0.3";
+          giftRow.style.textDecoration = "line-through";
+        }
+
+        // Added code
+        if (scratchAmount) {
+          scratchAmount.style.opacity = "0.3";
+          scratchAmount.style.textDecoration = "line-through";
+          scratchAmount.style.textDecorationThickness = "5px";
+          scratchAmount.style.textDecorationColor = "#262B6F";
+          scratchCurrency.style.opacity = "0.3";
+          scratchCurrency.style.textDecoration = "line-through";
+          scratchCurrency.style.textDecorationThickness = "5px";
+          scratchCurrency.style.textDecorationColor = "#262B6F";
+
+          scratchTizo.style.opacity = "0.3";
+          scratchTizo.style.textDecoration = "line-through";
+          scratchTizo.style.textDecorationThickness = "5px";
+          scratchTizo.style.textDecorationColor = "#262B6F";
+          strachTizoLabel.style.opacity = "0.3";
+          strachTizoLabel.style.textDecoration = "line-through";
+          strachTizoLabel.style.textDecorationThickness = "5px";
+          strachTizoLabel.style.textDecorationColor = "#262B6F";
+        }
+      }
+
+      // Handle OOD
+
+      // Added Code
+      const oodAmount = document.getElementById("ood-amount");
+      const oodCurrency = document.getElementById("ood-rb-unit");
+      const oodTizoEl = document.getElementById("ood-tizo");
+      const oddTizoLabel = document.getElementById("odd-tizo-label");
+      const oodGiftRow = document.getElementById("ood-gift-row");
+
+      if (oodSelected) {
+        oodTick.classList.remove("hidden");
+        currentTotalTizo += Number(oodTizo) || 0;
+        currentTotalPayment += Number(oodCost) || 0;
+
+        // Added Code
+        oodAmount.style.opacity = "1";
+        oodAmount.style.textDecoration = "none";
+        oodCurrency.style.opacity = "1";
+        oodCurrency.style.textDecoration = "none";
+
+        oodTizoEl.style.opacity = "1";
+        oodTizoEl.style.textDecoration = "none";
+        oddTizoLabel.style.opacity = "1";
+        oddTizoLabel.style.textDecoration = "none";
+        if (oodGiftRow) {
+          oodGiftRow.style.opacity = "1";
+          oodGiftRow.style.textDecoration = "none";
+        }
+      } else {
+        oodTick.classList.add("hidden");
+        // Added code
+        if (oodAmount) {
+          oodAmount.style.opacity = "0.3";
+          oodAmount.style.textDecoration = "line-through";
+          oodAmount.style.textDecorationThickness = "5px";
+          oodAmount.style.textDecorationColor = "#262B6F";
+          oodCurrency.style.opacity = "0.3";
+          oodCurrency.style.textDecoration = "line-through";
+          oodCurrency.style.textDecorationThickness = "5px";
+          oodCurrency.style.textDecorationColor = "#262B6F";
+
+          oodTizoEl.style.opacity = "0.3";
+          oodTizoEl.style.textDecoration = "line-through";
+          oodTizoEl.style.textDecorationThickness = "5px";
+          oodTizoEl.style.textDecorationColor = "#262B6F";
+          oddTizoLabel.style.opacity = "0.3";
+          oddTizoLabel.style.textDecoration = "line-through";
+          oddTizoLabel.style.textDecorationThickness = "5px";
+          oddTizoLabel.style.textDecorationColor = "#262B6F";
+          if (oodGiftRow) {
+            oodGiftRow.style.opacity = "0.3";
+            oodGiftRow.style.textDecoration = "line-through";
+          }
+        }
+      }
+
+      // Handle OOH
+
+      // Added Code
+      const oohAmount = document.getElementById("ooh-amount");
+      const oohCurrency = document.getElementById("ooh-rb-unit");
+      const oohTizoEl = document.getElementById("ooh-tizo");
+      const oohTizoLabel = document.getElementById("ooh-tizo-label");
+      const oohGiftRow = document.getElementById("ooh-gift-row");
+
+      if (oohSelected) {
+        oohTick.classList.remove("hidden");
+        currentTotalTizo += Number(oohTizo) || 0;
+        currentTotalPayment += Number(oohCost) || 0;
+
+        // Added Code
+        oohAmount.style.opacity = "1";
+        oohAmount.style.textDecoration = "none";
+        oohCurrency.style.opacity = "1";
+        oohCurrency.style.textDecoration = "none";
+
+        oohTizoEl.style.opacity = "1";
+        oohTizoEl.style.textDecoration = "none";
+        oohTizoLabel.style.opacity = "1";
+        oohTizoLabel.style.textDecoration = "none";
+        if (oohGiftRow) {
+          oohGiftRow.style.opacity = "1";
+          oohGiftRow.style.textDecoration = "none";
+        }
+      } else {
+        oohTick.classList.add("hidden");
+
+        // Added code
+        if (oohAmount) {
+          oohAmount.style.opacity = "0.3";
+          oohAmount.style.textDecoration = "line-through";
+          oohAmount.style.textDecorationThickness = "5px";
+          oohAmount.style.textDecorationColor = "#262B6F";
+          oohCurrency.style.opacity = "0.3";
+          oohCurrency.style.textDecoration = "line-through";
+          oohCurrency.style.textDecorationThickness = "5px";
+          oohCurrency.style.textDecorationColor = "#262B6F";
+
+          oohTizoEl.style.opacity = "0.3";
+          oohTizoEl.style.textDecoration = "line-through";
+          oohTizoEl.style.textDecorationThickness = "5px";
+          oohTizoEl.style.textDecorationColor = "#262B6F";
+          oohTizoLabel.style.opacity = "0.3";
+          oohTizoLabel.style.textDecoration = "line-through";
+          oohTizoLabel.style.textDecorationThickness = "5px";
+          oohTizoLabel.style.textDecorationColor = "#262B6F";
+          if (oohGiftRow) {
+            oohGiftRow.style.opacity = "0.3";
+            oohGiftRow.style.textDecoration = "line-through";
+          }
+        }
+      }
+
+      // Handle Snacks
+      // Added Code
+      const snacksAmount = document.getElementById("snacks-amount");
+      const snacksCurrency = document.getElementById("snacks-rb-unit");
+      const snacksTizoEl = document.getElementById("snacks-tizo");
+      const snacksTizoLabel = document.getElementById("snacks-tizo-label");
+      const snacksGiftRow = document.getElementById("snacks-gift-row");
+
+      if (snacksSelected) {
+        snacksTick.classList.remove("hidden");
+        currentTotalTizo += Number(snacksTizo) || 0;
+        currentTotalPayment += Number(snacksCost) || 0;
+
+        // Added Code
+        snacksAmount.style.opacity = "1";
+        snacksAmount.style.textDecoration = "none";
+        snacksCurrency.style.opacity = "1";
+        snacksCurrency.style.textDecoration = "none";
+
+        snacksTizoEl.style.opacity = "1";
+        snacksTizoEl.style.textDecoration = "none";
+        snacksTizoLabel.style.opacity = "1";
+        snacksTizoLabel.style.textDecoration = "none";
+        if (snacksGiftRow) {
+          snacksGiftRow.style.opacity = "1";
+          snacksGiftRow.style.textDecoration = "none";
+        }
+      } else {
+        snacksTick.classList.add("hidden");
+
+        if (snacksAmount) {
+          snacksAmount.style.opacity = "0.3";
+          snacksAmount.style.textDecoration = "line-through";
+          snacksAmount.style.textDecorationThickness = "5px";
+          snacksAmount.style.textDecorationColor = "#262B6F";
+          snacksCurrency.style.opacity = "0.3";
+          snacksCurrency.style.textDecoration = "line-through";
+          snacksCurrency.style.textDecorationThickness = "5px";
+          snacksCurrency.style.textDecorationColor = "#262B6F";
+
+          snacksTizoEl.style.opacity = "0.3";
+          snacksTizoEl.style.textDecoration = "line-through";
+          snacksTizoEl.style.textDecorationThickness = "5px";
+          snacksTizoEl.style.textDecorationColor = "#262B6F";
+          snacksTizoLabel.style.opacity = "0.3";
+          snacksTizoLabel.style.textDecoration = "line-through";
+          snacksTizoLabel.style.textDecorationThickness = "5px";
+          snacksTizoLabel.style.textDecorationColor = "#262B6F";
+          if (snacksGiftRow) {
+            snacksGiftRow.style.opacity = "0.3";
+            snacksGiftRow.style.textDecoration = "line-through";
+          }
+        }
+      }
+
+      // Update Total
+      document.getElementById("total-amount").textContent = currentTotalTizo;
+
+      // Update Header (logic depends on scratch card mainly, but could affect if others selected?)
+      // Keeping original header logic tied to scratch card for now as requested
+      let headerSubtitle = document.getElementById("header-subtitle");
+      let headerTitle = document.querySelector(".header-title");
+      const data = translations[currentLang] || translations["en"];
+
+      if (scratchCardSelected) {
+        if (headerSubtitle) headerSubtitle.textContent = data.headerSubtitle;
+        if (headerTitle) headerTitle.innerHTML = data.headerTitle;
+      } else {
+        if (headerSubtitle) headerSubtitle.textContent = data.headerSubtitleUnchecked;
+        if (headerTitle) headerTitle.innerHTML = data.headerTitleUnchecked;
+      }
+
+      // Update Calculation Display - Only show for existing users with custom top-up
+      const calcSection = document.getElementById("calculation-section");
+      const calcText = document.getElementById("calculation-text");
+
+      // Calculation logic hidden as per user request
+      if (false) {
+        if (calcSection) calcSection.style.display = "block";
+
+        let calculationString = `${Math.round(offerCost / 1000)} x ${(offerTizo / (offerCost / 1000)).toFixed(2).replace(/\.00$/, "")} = ${offerTizo}`;
+
+        if (globalUpsellTiers.length > 0) {
+          try {
+            const breakdown = calculateTieredBreakdown(Math.round(offerCost / 1000));
+            calculationString = breakdown.breakdownString;
+          } catch (e) {
+            console.error("Error calculating breakdown", e);
+          }
+        }
+
+        if (bonusTizo > 0 && scratchCardSelected) {
+          calculationString += ` + ${bonusTizo} (Bonus)`;
+        }
+        /*
+            if (oodTizo > 0 && oodSelected) {
+                calculationString += ` + ${oodTizo} (OOD)`;
+            }
+            if (oohTizo > 0 && oohSelected) {
+                calculationString += ` + ${oohTizo} (OOH)`;
+            }
+            if (snacksTizo > 0 && snacksSelected) {
+                calculationString += ` + ${snacksTizo} (Snacks)`;
+            }
+            */
+        if (calcText) calcText.textContent = `Calculation: ${calculationString}`;
+      } else {
+        // Hide calculation for new users or non-custom top-up
+        if (calcSection) calcSection.style.display = "none";
+      }
+
+      // Update Print Receipt
+      updatePrintReceipt();
+    }
+
+    function toggleLanguage() {
+      const dropdown = document.getElementById("lang-dropdown");
+      dropdown.classList.toggle("hidden");
+    }
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      // Fallback to 'en' if translation not found
+      const data = translations[lang] || translations["en"];
+
+      if (data.headerSubtitle) {
+        document.getElementById("header-subtitle").textContent = data.headerSubtitle;
+      }
+      if (data.topupTitle) {
+        document.getElementById("topup-title").textContent = data.topupTitle;
+      }
+      if (data.scratchTitle) {
+        document.getElementById("scratch-title").textContent = data.scratchTitle;
+      }
+      if (data.oodTitle) {
+        document.getElementById("ood-title").textContent = data.oodTitle;
+      }
+      if (data.oohTitle) {
+        document.getElementById("ooh-title").textContent = data.oohTitle;
+      }
+      if (data.snacksTitle) {
+        const snacksTitle = document.getElementById("snacks-title");
+        if (snacksTitle) snacksTitle.textContent = data.snacksTitle;
+      }
+      if (data.totalLabel) {
+        document.getElementById("total-label").textContent = data.totalLabel;
+      }
+      if (data.nextText) {
+        document.getElementById("next-text").textContent = data.nextText;
+      }
+
+      const langEl = document.getElementById("current-lang");
+      if (langEl && data.langLabel) langEl.textContent = data.langLabel;
+
+      // Update header title based on language
+      const headerTitle = document.querySelector(".header-title");
+      if (headerTitle) {
+        // Both languages use "BONUS TIZO!" for now per user request, with highlight class
+        headerTitle.innerHTML = '<span class="highlight">BONUS</span> TIZO!';
+      }
+
+      // Update printer error text
+      if (data.errorSmall) document.getElementById("error-text-1").textContent = data.errorSmall;
+      if (data.errorMain) document.getElementById("error-text-main").textContent = data.errorMain;
+      if (data.errorSub) document.getElementById("error-text-sub").textContent = data.errorSub;
+
+      updateFreeGiftLabels();
+      updatePrintPreviewLanguage(lang);
+    }
+
+    // Update print preview and print receipt labels based on language
+    function updatePrintPreviewLanguage(lang) {
+      const data = translations[lang] || translations["en"];
+
+      // Preview section titles
+      const previewTopupTitle = document.querySelector("#preview-topup-section .preview-section-title");
+      const previewScratchTitle = document.querySelector("#preview-scratch-section .preview-section-title");
+      const previewCustomTopupTitle = document.querySelector("#preview-custom-topup-section .preview-section-title");
+      const previewOodTitle = document.querySelector("#preview-ood-section .preview-section-title");
+      const previewOohTitle = document.querySelector("#preview-ooh-section .preview-section-title");
+      const previewSnacksTitle = document.querySelector("#preview-snacks-section .preview-section-title");
+
+      if (previewTopupTitle) previewTopupTitle.textContent = data.printTopupSection;
+      if (previewScratchTitle) previewScratchTitle.textContent = data.printScratchSection;
+      if (previewCustomTopupTitle) previewCustomTopupTitle.textContent = data.printCustomTopupSection;
+      if (previewOodTitle) previewOodTitle.textContent = data.printOodSection;
+      if (previewOohTitle) previewOohTitle.textContent = data.printOohSection;
+      if (previewSnacksTitle) previewSnacksTitle.textContent = data.printSnacksSection;
+
+      // Preview row labels - update first span of each row
+      document.querySelectorAll("#preview-topup-section .preview-row span:first-child").forEach((el, i) => {
+        if (i === 0) el.textContent = data.printTransactionAmount;
+        if (i === 1) el.textContent = data.printTotalTizo;
+      });
+      document.querySelectorAll("#preview-free-gifts-row span:first-child").forEach(el => el.textContent = data.printBonus);
+      document.querySelectorAll("#preview-scratch-section .preview-row:not(#preview-bonus-row) span:first-child").forEach((el, i) => {
+        if (i === 0) el.textContent = data.printTransactionAmount;
+        if (i === 1) el.textContent = data.printTotalTizo;
+      });
+      document.querySelectorAll("#preview-bonus-row span:first-child").forEach(el => el.textContent = data.printBonus);
+
+      // Preview total section
+      const previewTotalRows = document.querySelectorAll(".preview-total-section > .preview-row span:first-child");
+      if (previewTotalRows[0]) previewTotalRows[0].textContent = data.printTotalPayment;
+      if (previewTotalRows[1]) previewTotalRows[1].textContent = data.printTotalTizos;
+
+      // Preview receive total and footer
+      const previewReceiveLabel = document.querySelector(".preview-total-highlight span");
+      if (previewReceiveLabel) previewReceiveLabel.textContent = data.printReceiveTotal;
+
+      // Preview buttons
+      const previewCancelBtn = document.querySelector(".preview-secondary");
+      const previewConfirmBtn = document.querySelector(".preview-primary");
+      if (previewCancelBtn) previewCancelBtn.textContent = data.printCancelBtn;
+      if (previewConfirmBtn) previewConfirmBtn.textContent = data.printConfirmBtn;
+
+      // Preview message
+      const previewMsg = document.getElementById("preview-message");
+      if (previewMsg) previewMsg.innerHTML = data.printMessage;
+
+      // Print receipt section titles
+      const printTopupTitle = document.querySelector("#print-topup-section .print-section-title");
+      const printScratchTitle = document.querySelector("#print-scratch-section .print-section-title");
+      const printCustomTopupTitle = document.querySelector("#print-custom-topup-section .print-section-title");
+      const printOodTitle = document.querySelector("#print-ood-section .print-section-title");
+      const printOohTitle = document.querySelector("#print-ooh-section .print-section-title");
+      const printSnacksTitle = document.querySelector("#print-snacks-section .print-section-title");
+
+      if (printTopupTitle) printTopupTitle.textContent = data.printTopupSection;
+      if (printScratchTitle) printScratchTitle.textContent = data.printScratchSection;
+      if (printCustomTopupTitle) printCustomTopupTitle.textContent = data.printCustomTopupSection;
+      if (printOodTitle) printOodTitle.textContent = data.printOodSection;
+      if (printOohTitle) printOohTitle.textContent = data.printOohSection;
+      if (printSnacksTitle) printSnacksTitle.textContent = data.printSnacksSection;
+
+      // Print receipt row labels
+      document.querySelectorAll(".print-section .print-row span:first-child").forEach(el => {
+        const text = el.textContent.trim();
+        if (text.includes("Nominal") || text.includes("Transaction")) el.textContent = data.printTransactionAmount;
+        if (text === "Total Tizo :") el.textContent = data.printTotalTizo;
+        if (text === "Bonus :") el.textContent = data.printBonus;
+      });
+
+      // Print total section
+      const printTotalPayLabel = document.querySelector(".print-total-section .print-row:first-child span:first-child");
+      const printTotalTizoLabel = document.querySelector(".print-total-section .print-row:nth-child(2) span:first-child");
+      if (printTotalPayLabel) printTotalPayLabel.textContent = data.printTotalPayment;
+      if (printTotalTizoLabel) printTotalTizoLabel.textContent = data.printTotalTizos;
+
+      // Print message
+      const printMsg = document.getElementById("print-message");
+      if (printMsg) printMsg.innerHTML = data.printMessage;
+    }
+
+    function setLanguage(lang) {
+      saveLanguage(lang);
+      applyLanguage(lang);
+      document.getElementById("lang-dropdown").classList.add("hidden");
+    }
+
+    function handleNext() {
+      if (window.isEditModeActive && window.isEditModeActive()) {
+        return;
+      }
+      console.log("Next clicked, topup selected:", topupSelected, "scratch card selected:", scratchCardSelected, "OOD selected:", oodSelected, "OOH selected:", oohSelected);
+
+      // Calculate final total based on all selections - use Number() to ensure numeric addition
+      // Only include topup if selected
+      let finalPayment = topupSelected ? (Number(offerCost) || 0) : 0;
+      let finalTizo = topupSelected ? (Number(offerTizo) || 0) : 0;
+
+      if (scratchCardSelected) {
+        finalPayment += Number(bonusCost) || 0;
+        finalTizo += Number(bonusTizo) || 0;
+      }
+      if (oodSelected) {
+        finalPayment += Number(oodCost) || 0;
+        finalTizo += Number(oodTizo) || 0;
+      }
+      if (oohSelected) {
+        finalPayment += Number(oohCost) || 0;
+        finalTizo += Number(oohTizo) || 0;
+      }
+      if (snacksSelected) {
+        finalPayment += Number(snacksCost) || 0;
+        finalTizo += Number(snacksTizo) || 0;
+      }
+
+      // Update session based on selections
+      updateSession({
+        topupAccepted: topupSelected,
+        scratchCardAccepted: scratchCardSelected,
+        oodAccepted: oodSelected,
+        oohAccepted: oohSelected,
+        snacksAccepted: snacksSelected,
+        finalPayment: finalPayment,
+        finalTizo: finalTizo,
+      });
+
+      openPrintPreview();
+    }
+
+    function openPrintPreview() {
+      updatePrintReceipt();
+      const previewOverlay = document.getElementById("printPreview");
+      if (previewOverlay) {
+        previewOverlay.classList.add("visible");
+      }
+    }
+
+    function closePrintPreview() {
+      const previewOverlay = document.getElementById("printPreview");
+      if (previewOverlay) {
+        previewOverlay.classList.remove("visible");
+      }
+    }
+
+    function confirmPrint() {
+      closePrintPreview();
+
+      // CRITICAL FIX: Remove hidden elements from print-receipt before printing
+      // The thermal printer/kiosk app doesn't respect CSS display:none and extracts all text
+      // So we must physically remove hidden elements from the DOM before printing
+      const printReceipt = document.querySelector('.print-receipt');
+      if (printReceipt) {
+        // Find all elements with display:none and remove them from the DOM
+        const hiddenElements = printReceipt.querySelectorAll('[style*="display: none"], [style*="display:none"]');
+        hiddenElements.forEach(el => {
+          el.remove();
+        });
+
+        // Also remove any elements with empty/dash values that shouldn't print
+        const allBonusRows = printReceipt.querySelectorAll('.print-row');
+        allBonusRows.forEach(row => {
+          const valueSpan = row.querySelector('span:last-child');
+          if (valueSpan && (valueSpan.textContent.trim() === '-' || valueSpan.textContent.trim() === '')) {
+            row.remove();
+          }
+        });
+      }
+
+      // In kiosk mode (pywebview), the page runs inside an iframe
+      // Check both window.pywebview and parent.pywebview for kiosk detection
+      const isKioskMode = (window.pywebview && window.pywebview.api) ||
+        (window.parent && window.parent.pywebview && window.parent.pywebview.api) ||
+        (window.parent !== window); // Running in iframe = likely kiosk
+
+      if (isKioskMode) {
+        // In kiosk mode - use thermal printer API (no system dialog)
+        // Access API from parent frame if available
+        const api = (window.pywebview && window.pywebview.api) ||
+          (window.parent && window.parent.pywebview && window.parent.pywebview.api);
+
+        if (api) {
+          const printReceiptEl = document.querySelector('.print-receipt');
+          if (printReceiptEl) {
+            // Make visible temporarily to get HTML content
+            printReceiptEl.style.display = 'block';
+            const htmlContent = printReceiptEl.innerHTML;
+            printReceiptEl.style.display = 'none';
+
+            // Use print_receipt_html API (doesn't require html2canvas)
+            if (api.print_receipt_html) {
+              console.log('Using print_receipt_html API for thermal printing');
+              api.print_receipt_html(htmlContent);
+            } else if (api.print_receipt) {
+              // Fallback to text-based printing
+              console.log('Using print_receipt API (text mode)');
+              api.print_receipt(printReceiptEl.innerText);
+            } else {
+              console.error('No print API available');
+            }
+          }
+        } else {
+          console.log('Kiosk mode detected but no API available');
+        }
+      } else if (window.electronAPI) {
+        // Electron mode
+        window.electronAPI.print();
+      } else {
+        // Browser mode only - show system print dialog
+        window.print();
+      }
+
+      window.location.href = "feedback.html";
+    }
+
+    // Update print receipt based on current selection
+    function updatePrintReceipt() {
+      const session = getSession();
+      if (!session) return;
+
+      // Get data
+      // offerCost, offerTizo, bonusCost, bonusTizo are global now
+      // oodCost, oodTizo, oohCost, oohTizo are global now
+      // giftDetails is global now
+      const cardCount = session.selectedCardCount || localStorage.getItem("selectedCardCount") || "";
+      const splitTopup = session.splitTopup || null;
+      const hasSplitTopup = !!(splitTopup && splitTopup.customCost > 0);
+      const cardOfferCost = hasSplitTopup ? parseInt(splitTopup.cardOfferCost) || 0 : 0;
+      const cardOfferTizo = hasSplitTopup ? parseInt(splitTopup.cardOfferTizo) || 0 : 0;
+      const customSplitCost = hasSplitTopup ? parseInt(splitTopup.customCost) || 0 : 0;
+      const customSplitTizo = hasSplitTopup ? parseInt(splitTopup.customTizo) || 0 : 0;
+
+      // Calculate totals based on all selections - use Number() to ensure numeric addition
+      // Only include topup if selected
+      let totalPayment = topupSelected ? (Number(offerCost) || 0) : 0;
+      let totalTizo = topupSelected ? (Number(offerTizo) || 0) : 0;
+
+      if (scratchCardSelected) {
+        totalPayment += Number(bonusCost) || 0;
+        totalTizo += Number(bonusTizo) || 0;
+      }
+      if (oodSelected) {
+        totalPayment += Number(oodCost) || 0;
+        totalTizo += Number(oodTizo) || 0;
+      }
+      if (oohSelected) {
+        totalPayment += Number(oohCost) || 0;
+        totalTizo += Number(oohTizo) || 0;
+      }
+      if (snacksSelected) {
+        totalPayment += Number(snacksCost) || 0;
+        totalTizo += Number(snacksTizo) || 0;
+      }
+
+      // Show/hide topup section based on selection
+      const previewTopupSection = document.getElementById("preview-topup-section");
+      const printTopupSection = document.getElementById("print-topup-section");
+      if (previewTopupSection) previewTopupSection.style.display = topupSelected ? "block" : "none";
+      if (printTopupSection) printTopupSection.style.display = topupSelected ? "block" : "none";
+
+      // Show/hide custom topup section if applicable
+      const previewCustomTopupSection = document.getElementById("preview-custom-topup-section");
+      const printCustomTopupSection = document.getElementById("print-custom-topup-section");
+      if (!topupSelected) {
+        if (previewCustomTopupSection) previewCustomTopupSection.style.display = "none";
+        if (printCustomTopupSection) printCustomTopupSection.style.display = "none";
+      }
+
+      // Update date
+      const now = new Date();
+      const dateStr =
+        now.toLocaleDateString("id-ID", {
+          weekday: "long",
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        }) +
+        " " +
+        now.toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      const printDate = document.getElementById("print-date");
+      if (printDate) printDate.textContent = dateStr;
+
+      const previewDate = document.getElementById("preview-date");
+      if (previewDate) {
+        previewDate.textContent = now.toLocaleString("id-ID", {
+          weekday: "long",
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+
+      // Generate order number
+      const orderNumber = session?.orderNumber || generateOrderNumber();
+      const printOrderNumber = document.getElementById("print-order-number");
+      if (printOrderNumber) printOrderNumber.textContent = orderNumber;
+
+      const previewOrderNumber = document.getElementById("preview-order-number");
+      if (previewOrderNumber) previewOrderNumber.textContent = orderNumber;
+
+      const locationName = session.locationName || "Lippo Mall Puri";
+      const printLocationName = document.getElementById("print-location-name");
+      if (printLocationName) printLocationName.textContent = locationName;
+      const previewLocationName = document.getElementById("preview-location-name");
+      if (previewLocationName) previewLocationName.textContent = locationName;
+
+      const printMessageEl = document.getElementById("print-message");
+      const previewMessage = document.getElementById("preview-message");
+      if (previewMessage && printMessageEl) {
+        previewMessage.innerHTML = printMessageEl.innerHTML;
+      }
+
+      // Update Paket Top-up section
+      const printTopupNominal = document.getElementById("print-topup-nominal");
+      const printTopupTizo = document.getElementById("print-topup-tizo");
+      const topupDisplayCost = hasSplitTopup ? cardOfferCost : offerCost;
+      const topupDisplayTizo = hasSplitTopup ? cardOfferTizo : offerTizo;
+      if (printTopupNominal) printTopupNominal.textContent = "Rp" + parseInt(topupDisplayCost).toLocaleString("id-ID");
+      if (printTopupTizo) printTopupTizo.textContent = topupDisplayTizo + " Tizo";
+
+      const previewTopupNominal = document.getElementById("preview-topup-nominal");
+      const previewTopupTizo = document.getElementById("preview-topup-tizo");
+      if (previewTopupNominal) previewTopupNominal.textContent = "Rp" + parseInt(topupDisplayCost).toLocaleString("id-ID");
+      if (previewTopupTizo) previewTopupTizo.textContent = topupDisplayTizo + " Tizo";
+
+      // Update Free Gifts row for new users (blue, gold, platinum cards)
+      const printFreeGiftsRow = document.getElementById("print-free-gifts-row");
+      const printFreeGiftsValue = document.getElementById("print-free-gifts-value");
+      const newUserGiftDetails = session.newUserGiftDetails || null;
+      const isNewUserCard = ["blue", "gold", "platinum"].includes(session.selectedCard);
+
+      console.log("Print receipt debug - FULL SESSION:", JSON.stringify(session));
+      console.log("Print receipt debug - newUserGiftDetails:", newUserGiftDetails, "isNewPlayer:", session.isNewPlayer, "isNewUserCard:", isNewUserCard, "selectedCard:", session.selectedCard);
+
+      if (topupSelected && session.isNewPlayer && isNewUserCard && newUserGiftDetails) {
+        if (printFreeGiftsRow) printFreeGiftsRow.style.display = "flex";
+        if (printFreeGiftsValue) {
+          printFreeGiftsValue.textContent = newUserGiftDetails;
+        }
+        console.log("Showing free gifts row with:", newUserGiftDetails);
+      } else {
+        if (printFreeGiftsRow) printFreeGiftsRow.style.display = "none";
+        console.log("Hiding free gifts row");
+      }
+
+      const previewFreeGiftsRow = document.getElementById("preview-free-gifts-row");
+      const previewFreeGiftsValue = document.getElementById("preview-free-gifts-value");
+      if (topupSelected && session.isNewPlayer && isNewUserCard && newUserGiftDetails) {
+        if (previewFreeGiftsRow) previewFreeGiftsRow.style.display = "flex";
+        if (previewFreeGiftsValue) previewFreeGiftsValue.textContent = newUserGiftDetails;
+      } else {
+        if (previewFreeGiftsRow) previewFreeGiftsRow.style.display = "none";
+      }
+
+      // Update Bonus Scratchcard section
+      const printScratchSection = document.getElementById("print-scratch-section");
+      const printScratchNominal = document.getElementById("print-scratch-nominal");
+      const printScratchTizo = document.getElementById("print-scratch-tizo");
+      const printBonusRow = document.getElementById("print-bonus-row");
+      const printBonusValue = document.getElementById("print-bonus-value");
+
+      // Dynamic Title for Custom Top Up
+      if (printScratchSection) {
+        const scratchTitle = printScratchSection.querySelector(".print-section-title");
+        if (scratchTitle) {
+          // Check session source for custom top up OR split topup data
+          const hasSplitTopup = session.splitTopup && session.splitTopup.customCost > 0;
+          if (session.scratchCardSource === "custom-topup-upsell" || hasSplitTopup) {
+            scratchTitle.textContent = "Bonus Scratchcard";
+          } else {
+            scratchTitle.textContent = "Bonus Scratchcard";
+          }
+        }
+      }
+
+      // Get scratch card gift from session - check multiple possible keys
+      const scratchGift = session.scratchCardGift || session.bonusGiftDetails || session.giftDetails || giftDetails || null;
+      console.log("Print receipt debug - scratchGift:", scratchGift, "giftDetails global:", giftDetails, "scratchCardSelected:", scratchCardSelected);
+
+      if (scratchCardSelected) {
+        // Show scratch card section with values
+        if (printScratchSection) printScratchSection.style.display = "block";
+        if (printScratchNominal) printScratchNominal.textContent = "Rp" + parseInt(bonusCost).toLocaleString("id-ID");
+        if (printScratchTizo) printScratchTizo.textContent = bonusTizo + " Tizo";
+        if (scratchGift && scratchGift !== "-" && scratchGift.trim() !== "") {
+          if (printBonusRow) printBonusRow.style.display = "flex";
+          if (printBonusValue) printBonusValue.textContent = scratchGift;
+          console.log("Showing scratch bonus row with:", scratchGift);
+        } else {
+          if (printBonusRow) printBonusRow.style.display = "none";
+          console.log("Hiding scratch bonus row - no gift data");
+        }
+      } else {
+        // Hide scratch card section when not selected
+        if (printScratchSection) printScratchSection.style.display = "none";
+      }
+
+      // Update Custom Top Up section (printCustomTopupSection already declared above)
+      const printCustomTopupNominal = document.getElementById("print-custom-topup-nominal");
+      const printCustomTopupTizo = document.getElementById("print-custom-topup-tizo");
+      if (hasSplitTopup) {
+        if (printCustomTopupSection) printCustomTopupSection.style.display = "block";
+        if (printCustomTopupNominal) printCustomTopupNominal.textContent = "Rp" + customSplitCost.toLocaleString("id-ID");
+        if (printCustomTopupTizo) printCustomTopupTizo.textContent = customSplitTizo + " Tizo";
+      } else {
+        if (printCustomTopupSection) printCustomTopupSection.style.display = "none";
+      }
+
+      const previewScratchSection = document.getElementById("preview-scratch-section");
+      const previewScratchNominal = document.getElementById("preview-scratch-nominal");
+      const previewScratchTizo = document.getElementById("preview-scratch-tizo");
+      const previewBonusRow = document.getElementById("preview-bonus-row");
+      const previewBonusValue = document.getElementById("preview-bonus-value");
+      if (scratchCardSelected) {
+        if (previewScratchSection) previewScratchSection.style.display = "block";
+        if (previewScratchNominal) previewScratchNominal.textContent = "Rp" + parseInt(bonusCost).toLocaleString("id-ID");
+        if (previewScratchTizo) previewScratchTizo.textContent = bonusTizo + " Tizo";
+        if (scratchGift && scratchGift !== "-" && scratchGift.trim() !== "") {
+          if (previewBonusRow) previewBonusRow.style.display = "flex";
+          if (previewBonusValue) previewBonusValue.textContent = scratchGift;
+        } else {
+          if (previewBonusRow) previewBonusRow.style.display = "none";
+        }
+      } else {
+        if (previewScratchSection) previewScratchSection.style.display = "none";
+      }
+
+      // previewCustomTopupSection already declared above, just add new element refs
+      const previewCustomTopupNominal = document.getElementById("preview-custom-topup-nominal");
+      const previewCustomTopupTizo = document.getElementById("preview-custom-topup-tizo");
+      if (hasSplitTopup) {
+        if (previewCustomTopupSection) previewCustomTopupSection.style.display = "block";
+        if (previewCustomTopupNominal) previewCustomTopupNominal.textContent = "Rp" + customSplitCost.toLocaleString("id-ID");
+        if (previewCustomTopupTizo) previewCustomTopupTizo.textContent = customSplitTizo + " Tizo";
+      } else {
+        if (previewCustomTopupSection) previewCustomTopupSection.style.display = "none";
+      }
+
+      // Update OOD Section
+      const printOodSection = document.getElementById("print-ood-section");
+      const printOodNominal = document.getElementById("print-ood-nominal");
+      const printOodTizo = document.getElementById("print-ood-tizo");
+      const printOodBonusRow = document.getElementById("print-ood-bonus-row");
+      const printOodBonusValue = document.getElementById("print-ood-bonus-value");
+      if (oodSelected) {
+        if (printOodSection) printOodSection.style.display = "block";
+        if (printOodNominal) printOodNominal.textContent = "Rp" + parseInt(oodCost).toLocaleString("id-ID");
+        if (printOodTizo) printOodTizo.textContent = oodTizo + " Tizo";
+        // Show OOD gift if exists
+        if (oodGiftDetails && oodGiftDetails.trim() !== "" && oodGiftDetails !== "-") {
+          if (printOodBonusRow) printOodBonusRow.style.display = "flex";
+          if (printOodBonusValue) printOodBonusValue.textContent = oodGiftDetails;
+          console.log("Showing OOD bonus row with:", oodGiftDetails);
+        } else {
+          if (printOodBonusRow) printOodBonusRow.style.display = "none";
+        }
+      } else {
+        if (printOodSection) printOodSection.style.display = "none";
+      }
+
+      const previewOodSection = document.getElementById("preview-ood-section");
+      const previewOodNominal = document.getElementById("preview-ood-nominal");
+      const previewOodTizo = document.getElementById("preview-ood-tizo");
+      const previewOodBonusRow = document.getElementById("preview-ood-bonus-row");
+      const previewOodBonusValue = document.getElementById("preview-ood-bonus-value");
+      if (oodSelected) {
+        if (previewOodSection) previewOodSection.style.display = "block";
+        if (previewOodNominal) previewOodNominal.textContent = "Rp" + parseInt(oodCost).toLocaleString("id-ID");
+        if (previewOodTizo) previewOodTizo.textContent = oodTizo + " Tizo";
+        if (oodGiftDetails && oodGiftDetails.trim() !== "" && oodGiftDetails !== "-") {
+          if (previewOodBonusRow) previewOodBonusRow.style.display = "flex";
+          if (previewOodBonusValue) previewOodBonusValue.textContent = oodGiftDetails;
+        } else {
+          if (previewOodBonusRow) previewOodBonusRow.style.display = "none";
+        }
+      } else {
+        if (previewOodSection) previewOodSection.style.display = "none";
+      }
+
+      // Update OOH Section
+      const printOohSection = document.getElementById("print-ooh-section");
+      const printOohNominal = document.getElementById("print-ooh-nominal");
+      const printOohTizo = document.getElementById("print-ooh-tizo");
+      const printOohBonusRow = document.getElementById("print-ooh-bonus-row");
+      const printOohBonusValue = document.getElementById("print-ooh-bonus-value");
+      if (oohSelected) {
+        if (printOohSection) printOohSection.style.display = "block";
+        if (printOohNominal) printOohNominal.textContent = "Rp" + parseInt(oohCost).toLocaleString("id-ID");
+        if (printOohTizo) printOohTizo.textContent = oohTizo + " Tizo";
+        // Show OOH gift if exists
+        if (oohGiftDetails && oohGiftDetails.trim() !== "" && oohGiftDetails !== "-") {
+          if (printOohBonusRow) printOohBonusRow.style.display = "flex";
+          if (printOohBonusValue) printOohBonusValue.textContent = oohGiftDetails;
+          console.log("Showing OOH bonus row with:", oohGiftDetails);
+        } else {
+          if (printOohBonusRow) printOohBonusRow.style.display = "none";
+        }
+      } else {
+        if (printOohSection) printOohSection.style.display = "none";
+      }
+
+      const previewOohSection = document.getElementById("preview-ooh-section");
+      const previewOohNominal = document.getElementById("preview-ooh-nominal");
+      const previewOohTizo = document.getElementById("preview-ooh-tizo");
+      const previewOohBonusRow = document.getElementById("preview-ooh-bonus-row");
+      const previewOohBonusValue = document.getElementById("preview-ooh-bonus-value");
+      if (oohSelected) {
+        if (previewOohSection) previewOohSection.style.display = "block";
+        if (previewOohNominal) previewOohNominal.textContent = "Rp" + parseInt(oohCost).toLocaleString("id-ID");
+        if (previewOohTizo) previewOohTizo.textContent = oohTizo + " Tizo";
+        if (oohGiftDetails && oohGiftDetails.trim() !== "" && oohGiftDetails !== "-") {
+          if (previewOohBonusRow) previewOohBonusRow.style.display = "flex";
+          if (previewOohBonusValue) previewOohBonusValue.textContent = oohGiftDetails;
+        } else {
+          if (previewOohBonusRow) previewOohBonusRow.style.display = "none";
+        }
+      } else {
+        if (previewOohSection) previewOohSection.style.display = "none";
+      }
+
+      // Update Snacks Section
+      const printSnacksSection = document.getElementById("print-snacks-section");
+      const printSnacksNominal = document.getElementById("print-snacks-nominal");
+      const printSnacksTizo = document.getElementById("print-snacks-tizo");
+      if (snacksSelected) {
+        if (printSnacksSection) printSnacksSection.style.display = "block";
+        if (printSnacksNominal) printSnacksNominal.textContent = "Rp" + parseInt(snacksCost).toLocaleString("id-ID");
+        if (printSnacksTizo) printSnacksTizo.textContent = snacksTizo + " Tizo";
+      } else {
+        if (printSnacksSection) printSnacksSection.style.display = "none";
+      }
+
+      const previewSnacksSection = document.getElementById("preview-snacks-section");
+      const previewSnacksNominal = document.getElementById("preview-snacks-nominal");
+      const previewSnacksTizo = document.getElementById("preview-snacks-tizo");
+      if (snacksSelected) {
+        if (previewSnacksSection) previewSnacksSection.style.display = "block";
+        if (previewSnacksNominal) previewSnacksNominal.textContent = "Rp" + parseInt(snacksCost).toLocaleString("id-ID");
+        if (previewSnacksTizo) previewSnacksTizo.textContent = snacksTizo + " Tizo";
+      } else {
+        if (previewSnacksSection) previewSnacksSection.style.display = "none";
+      }
+
+      // Update Total section
+      const printTotalPayment = document.getElementById("print-total-payment");
+      const printTotalTizo = document.getElementById("print-total-tizo");
+      const printTotalBonusRow = document.getElementById("print-total-bonus-row");
+      const printTotalBonus = document.getElementById("print-total-bonus");
+
+      if (printTotalPayment) printTotalPayment.textContent = "Rp" + parseInt(totalPayment).toLocaleString("id-ID");
+      if (printTotalTizo) printTotalTizo.textContent = totalTizo + " Tizo";
+
+      const previewTotalPayment = document.getElementById("preview-total-payment");
+      const previewTotalTizo = document.getElementById("preview-total-tizo");
+      const previewTotalHighlightValue = document.getElementById("preview-total-highlight-value");
+      if (previewTotalPayment) previewTotalPayment.textContent = "Rp" + parseInt(totalPayment).toLocaleString("id-ID");
+      if (previewTotalTizo) previewTotalTizo.textContent = totalTizo + " Tizo";
+      if (previewTotalHighlightValue) previewTotalHighlightValue.textContent = totalTizo + " Tizo";
+
+      // Show scratch card bonus in total section (use scratchGift from above)
+      const totalScratchGift = session.scratchCardGift || session.bonusGiftDetails || session.giftDetails || giftDetails || null;
+      if (scratchCardSelected && totalScratchGift && totalScratchGift.trim() !== "" && totalScratchGift !== "-") {
+        if (printTotalBonusRow) printTotalBonusRow.style.display = "flex";
+        if (printTotalBonus) printTotalBonus.textContent = totalScratchGift;
+      } else {
+        if (printTotalBonusRow) printTotalBonusRow.style.display = "none";
+      }
+
+      const previewTotalBonusRow = document.getElementById("preview-total-bonus-row");
+      const previewTotalBonus = document.getElementById("preview-total-bonus");
+      if (scratchCardSelected && totalScratchGift && totalScratchGift.trim() !== "" && totalScratchGift !== "-") {
+        if (previewTotalBonusRow) previewTotalBonusRow.style.display = "flex";
+        if (previewTotalBonus) previewTotalBonus.textContent = totalScratchGift;
+      } else {
+        if (previewTotalBonusRow) previewTotalBonusRow.style.display = "none";
+      }
+
+      // Update bonus tickets row in Total section for new users (blue, gold, platinum cards)
+      const printTotalTicketsRow = document.getElementById("print-total-tickets-row");
+      const printTotalTickets = document.getElementById("print-total-tickets");
+
+      if (topupSelected && session.isNewPlayer && isNewUserCard && newUserGiftDetails) {
+        if (printTotalTicketsRow) printTotalTicketsRow.style.display = "flex";
+        if (printTotalTickets) {
+          printTotalTickets.textContent = newUserGiftDetails;
+        }
+      } else {
+        if (printTotalTicketsRow) printTotalTicketsRow.style.display = "none";
+      }
+
+      const previewTotalTicketsRow = document.getElementById("preview-total-tickets-row");
+      const previewTotalTickets = document.getElementById("preview-total-tickets");
+      if (topupSelected && session.isNewPlayer && isNewUserCard && newUserGiftDetails) {
+        if (previewTotalTicketsRow) previewTotalTicketsRow.style.display = "flex";
+        if (previewTotalTickets) previewTotalTickets.textContent = newUserGiftDetails;
+      } else {
+        if (previewTotalTicketsRow) previewTotalTicketsRow.style.display = "none";
+      }
+
+      // Update OOD bonus row in Total section
+      const printTotalOodBonusRow = document.getElementById("print-total-ood-bonus-row");
+      const printTotalOodBonus = document.getElementById("print-total-ood-bonus");
+      if (oodSelected && oodGiftDetails && oodGiftDetails.trim() !== "" && oodGiftDetails !== "-") {
+        if (printTotalOodBonusRow) printTotalOodBonusRow.style.display = "flex";
+        if (printTotalOodBonus) printTotalOodBonus.textContent = oodGiftDetails;
+      } else {
+        if (printTotalOodBonusRow) printTotalOodBonusRow.style.display = "none";
+      }
+
+      const previewTotalOodBonusRow = document.getElementById("preview-total-ood-bonus-row");
+      const previewTotalOodBonus = document.getElementById("preview-total-ood-bonus");
+      if (oodSelected && oodGiftDetails && oodGiftDetails.trim() !== "" && oodGiftDetails !== "-") {
+        if (previewTotalOodBonusRow) previewTotalOodBonusRow.style.display = "flex";
+        if (previewTotalOodBonus) previewTotalOodBonus.textContent = oodGiftDetails;
+      } else {
+        if (previewTotalOodBonusRow) previewTotalOodBonusRow.style.display = "none";
+      }
+
+      // Update OOH bonus row in Total section
+      const printTotalOohBonusRow = document.getElementById("print-total-ooh-bonus-row");
+      const printTotalOohBonus = document.getElementById("print-total-ooh-bonus");
+      if (oohSelected && oohGiftDetails && oohGiftDetails.trim() !== "" && oohGiftDetails !== "-") {
+        if (printTotalOohBonusRow) printTotalOohBonusRow.style.display = "flex";
+        if (printTotalOohBonus) printTotalOohBonus.textContent = oohGiftDetails;
+      } else {
+        if (printTotalOohBonusRow) printTotalOohBonusRow.style.display = "none";
+      }
+
+      const previewTotalOohBonusRow = document.getElementById("preview-total-ooh-bonus-row");
+      const previewTotalOohBonus = document.getElementById("preview-total-ooh-bonus");
+      if (oohSelected && oohGiftDetails && oohGiftDetails.trim() !== "" && oohGiftDetails !== "-") {
+        if (previewTotalOohBonusRow) previewTotalOohBonusRow.style.display = "flex";
+        if (previewTotalOohBonus) previewTotalOohBonus.textContent = oohGiftDetails;
+      } else {
+        if (previewTotalOohBonusRow) previewTotalOohBonusRow.style.display = "none";
+      }
+
+      // Update card count in footer and footer text based on language
+      const data = translations[currentLang] || translations["en"];
+      const printCardCount = document.getElementById("print-card-count");
+      const previewCardCount = document.getElementById("preview-card-count");
+      const printFooter = document.getElementById("print-footer");
+      const previewFooter = document.getElementById("preview-footer");
+
+      if (printCardCount) printCardCount.textContent = cardCount;
+      if (previewCardCount) previewCardCount.textContent = cardCount;
+
+      // Update footer text with language-specific format
+      if (printFooter) {
+        printFooter.innerHTML = `${data.printFooter} <span id="print-card-count">${cardCount}</span> ${data.printFooterCards}`;
+      }
+      if (previewFooter) {
+        previewFooter.innerHTML = `${data.printFooter} <span id="preview-card-count">${cardCount}</span> ${data.printFooterCards}`;
+      }
+    }
+
+    // Generate sequential order number (00001, 00002, etc.)
+    function generateOrderNumber() {
+      let counter = parseInt(localStorage.getItem('orderCounter') || '0');
+      counter++;
+      localStorage.setItem('orderCounter', counter.toString());
+      return counter.toString().padStart(5, '0');
+    }
+
+    // Printer Error Functions
+    function showPrinterError() {
+      document.getElementById("printer-error-popup").style.display = "flex";
+    }
+
+    function hidePrinterError() {
+      document.getElementById("printer-error-popup").style.display = "none";
+    }
+
+    // Printer Error Functions
+    function showPrinterError() {
+      document.getElementById("printer-error-popup").style.display = "flex";
+    }
+
+    function hidePrinterError() {
+      document.getElementById("printer-error-popup").style.display = "none";
+    }
+    function goBack() {
+      if (window.isEditModeActive && window.isEditModeActive()) return;
+      window.location.href = "prize-summary.html";
+    }
+
+    // Close dropdown
+    window.onclick = function (event) {
+      if (!event.target.matches("#lang-btn") && !event.target.closest("#lang-btn")) {
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        for (var i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (!openDropdown.classList.contains("hidden")) {
+            openDropdown.classList.add("hidden");
+          }
+        }
+      }
+    };
+
+    // Load values from session
+    function loadSessionData() {
+      const session = getSession();
+      if (!session) return;
+
+      // Get top-up data - ensure values are numbers to prevent string concatenation
+      offerCost = parseInt(session.offerCost) || 150000;
+      offerTizo = parseInt(session.offerTizo) || 180;
+      const offerCostInRb = Math.round(offerCost / 1000);
+
+      // Get scratch card source
+      const source = session.scratchCardSource || "";
+      let isCustomTopup = source === "custom-topup-upsell";
+      // Check both isNewPlayer and isNewUser since different pages may set either
+      const isNewUser = session.isNewPlayer === true || session.isNewUser === true;
+
+      // Show calculation ONLY for existing users with custom top-up
+      showCalculation = isCustomTopup && !isNewUser;
+
+      // Get scratch card data
+      // Check if we have split topup data - prioritize this check as it indicates a Custom Top Up with Upgrade
+      const split = session.splitTopup;
+      if (split && split.customCost > 0) {
+        // Force custom topup mode if split data exists
+        isCustomTopup = true;
+
+        // For split topup, the scratch section shows the card offer (original scratchcard)
+        bonusCost = parseInt(session.originalBonusCost) || 0;
+        bonusTizo = parseInt(session.originalBonusTizo) || 0;
+
+        // Show the custom topup section with the remaining amount
+        const customTopupDisplay = document.getElementById("custom-topup-display");
+        if (customTopupDisplay) {
+          customTopupDisplay.style.display = "none";
+        }
+
+        // Ensure globals are updated
+        updateSession({
+          bonusCost: bonusCost,
+          bonusTizo: bonusTizo,
+        });
+      } else if (isCustomTopup) {
+        // For custom topup without split data, use session values set by scratch-card.html
+        // Only fall back to defaults if session values are not available
+        bonusCost = parseInt(session.bonusCost) || 100000;
+        bonusTizo = parseInt(session.bonusTizo) || 100;
+
+        // Update session to ensure consistency
+        updateSession({
+          bonusCost: bonusCost,
+          bonusTizo: bonusTizo,
+        });
+      } else {
+        // Preset offers use data passed from scratch-card.html (from DB) - ensure numbers
+        bonusCost = parseInt(session.bonusCost) || 100000;
+        bonusTizo = parseInt(session.bonusTizo) || 400; // Default to 400 for standard
+      }
+
+      const bonusCostInRb = Math.round(bonusCost / 1000);
+
+      // Get gift data from session - check multiple possible keys
+      giftDetails = session.bonusGiftDetails || session.giftDetails || session.newUserGiftDetails || null;
+
+      // Also check for scratch card specific gift data
+      if (!giftDetails && session.scratchCardGift) {
+        giftDetails = session.scratchCardGift;
+      }
+
+      // Get OOD/OOH data from session or use defaults - ensure numbers
+      oodCost = parseInt(session.oodCost) || 50000;
+      oodTizo = parseInt(session.oodTizo) || 100;
+      oohCost = parseInt(session.oohCost) || 50000;
+      oohTizo = parseInt(session.oohTizo) || 100;
+
+      // URL parameter determines initial scratch card selection (not session)
+      // In reject mode (?accepted=false), checkbox starts unchecked but user can manually check it
+      // scratchCardSelected is already set from URL parameter at the top of the script
+      oodSelected = session.oodAccepted !== undefined ? session.oodAccepted : false;
+      oohSelected = session.oohAccepted !== undefined ? session.oohAccepted : false;
+
+      // Check for split topup (user came from custom topup with card upgrade)
+      // split variable already defined above
+
+      if (split?.hasCardUpgrade && split.customCost > 0) {
+        // Combine card offer + custom topup into a single display for the main top-up row
+        const cardLabels = { blue: "BLUE CARD OFFER", gold: "GOLD CARD OFFER", platinum: "PLATINUM CARD OFFER" };
+        const cardLabel = cardLabels[split.cardType] || "CARD OFFER";
+        const combinedCost = (split.cardOfferCost || 0) + (split.customCost || 0);
+        const combinedTizo = (split.cardOfferTizo || 0) + (split.customTizo || 0);
+
+        const topupAmountEl = document.getElementById("topup-amount");
+        const topupTizoEl = document.getElementById("topup-tizo");
+        const topupRbUnitEl = document.getElementById("topup-rb-unit");
+        const combinedCostRb = Math.round(combinedCost / 1000);
+
+        if (typeof formatAndUpdateRbDisplay === 'function') {
+          formatAndUpdateRbDisplay(topupAmountEl, topupRbUnitEl, combinedCostRb);
+        } else if (topupAmountEl) {
+          topupAmountEl.textContent = combinedCostRb;
+        }
+        if (topupTizoEl) {
+          topupTizoEl.textContent = combinedTizo;
+        }
+
+        // Update the title to reflect card offer
+        const topupTitle = document.getElementById("topup-title");
+        if (topupTitle) topupTitle.textContent = cardLabel + ":";
+
+        console.log("Split topup display:", {
+          cardLabel,
+          cardOffer: (split.cardOfferCost || 0) / 1000 + " Rb = " + split.cardOfferTizo + " Tizo",
+          customTopup: split.customCost / 1000 + " Rb = " + split.customTizo + " Tizo",
+          combined: Math.round(combinedCost / 1000) + " Rb = " + combinedTizo + " Tizo",
+        });
+
+        // IMPORTANT: Update global offerCost and offerTizo with combined values
+        // so total calculations include both card offer AND custom topup
+        offerCost = combinedCost;
+        offerTizo = combinedTizo;
+      } else {
+        // Normal display - just show the total offer
+        const topupAmountEl = document.getElementById("topup-amount");
+        const topupRbUnitEl = document.getElementById("topup-rb-unit");
+        if (typeof formatAndUpdateRbDisplay === "function") {
+          formatAndUpdateRbDisplay(topupAmountEl, topupRbUnitEl, offerCostInRb);
+        } else if (topupAmountEl) {
+          topupAmountEl.textContent = offerCostInRb;
+        }
+        document.getElementById("topup-tizo").textContent = offerTizo;
+      }
+
+      // Update scratch card section
+      const scratchAmountEl = document.getElementById("scratch-amount");
+      const scratchRbUnitEl = document.getElementById("scratch-rb-unit");
+      if (typeof formatAndUpdateRbDisplay === "function") {
+        formatAndUpdateRbDisplay(scratchAmountEl, scratchRbUnitEl, bonusCostInRb);
+      } else if (scratchAmountEl) {
+        scratchAmountEl.textContent = bonusCostInRb;
+      }
+      document.getElementById("scratch-tizo").textContent = bonusTizo;
+
+      // Update OOD section
+      const oodAmountEl = document.getElementById("ood-amount");
+      const oodRbUnitEl = document.getElementById("ood-rb-unit");
+      const oodCostRb = Math.round(oodCost / 1000);
+      if (typeof formatAndUpdateRbDisplay === "function") {
+        formatAndUpdateRbDisplay(oodAmountEl, oodRbUnitEl, oodCostRb);
+      } else if (oodAmountEl) {
+        oodAmountEl.textContent = oodCostRb;
+      }
+      document.getElementById("ood-tizo").textContent = oodTizo;
+
+      // Update OOH section
+      const oohAmountEl = document.getElementById("ooh-amount");
+      const oohRbUnitEl = document.getElementById("ooh-rb-unit");
+      const oohCostRb = Math.round(oohCost / 1000);
+      if (typeof formatAndUpdateRbDisplay === "function") {
+        formatAndUpdateRbDisplay(oohAmountEl, oohRbUnitEl, oohCostRb);
+      } else if (oohAmountEl) {
+        oohAmountEl.textContent = oohCostRb;
+      }
+      document.getElementById("ooh-tizo").textContent = oohTizo;
+
+      // Update gift row if gift exists
+      const giftRow = document.getElementById("gift-row");
+      const giftLabelEl = document.getElementById("gift-label");
+      const giftValueEl = document.getElementById("gift-value");
+      if (giftDetails && giftDetails.trim() !== "" && giftDetails !== "-") {
+        if (giftRow) {
+          giftRow.classList.remove("hidden");
+          giftRow.style.display = "flex";
+        }
+        if (giftLabelEl) giftLabelEl.textContent = getFreeGiftText(currentLang);
+        if (giftValueEl) giftValueEl.textContent = giftDetails.toUpperCase();
+      } else {
+        if (giftRow) giftRow.classList.add("hidden");
+      }
+
+      // Show FREE GIFTS section for new users with blue card offer
+      const freeGiftsSection = document.getElementById("free-gifts-section");
+      const freeGiftsValueEl = document.getElementById("free-gifts-value");
+      const printFreeGiftsRow = document.getElementById("print-free-gifts-row");
+      const printFreeGiftsValue = document.getElementById("print-free-gifts-value");
+
+      // Get new user gift data from session
+      const newUserGift = session.newUserGift || null;
+      const newUserGiftDetails = session.newUserGiftDetails || null;
+
+      // Check if this is a new user card (blue, gold, or platinum)
+      const isNewUserCardType = ["blue", "gold", "platinum"].includes(session.selectedCard);
+
+      if (session.isNewPlayer && isNewUserCardType && newUserGiftDetails) {
+        if (freeGiftsSection) freeGiftsSection.style.display = "block";
+        const freeGiftsLabelEl = document.getElementById("free-gifts-label-text");
+        if (freeGiftsLabelEl) freeGiftsLabelEl.textContent = getFreeGiftText(currentLang);
+        if (freeGiftsValueEl) freeGiftsValueEl.textContent = newUserGiftDetails;
+        if (printFreeGiftsRow) printFreeGiftsRow.style.display = "flex";
+        if (printFreeGiftsValue) printFreeGiftsValue.textContent = newUserGiftDetails;
+      } else if (session.isNewPlayer && isNewUserCardType) {
+        // Show with default value if no gift details but is new user card
+        if (freeGiftsSection) freeGiftsSection.style.display = "block";
+        const freeGiftsLabelEl = document.getElementById("free-gifts-label-text");
+        if (freeGiftsLabelEl) freeGiftsLabelEl.textContent = getFreeGiftText(currentLang);
+        if (printFreeGiftsRow) printFreeGiftsRow.style.display = "flex";
+      } else {
+        if (freeGiftsSection) freeGiftsSection.style.display = "none";
+        if (printFreeGiftsRow) printFreeGiftsRow.style.display = "none";
+      }
+
+      // Update total
+      // Call updateUI to handle all totals and print receipt updates based on current state
+      updateUI();
+
+      console.log("Accept scratchcard loaded:", { offerCost, offerTizo, bonusCost, bonusTizo });
+    }
+
+    // Global variable for tiers
+    let globalUpsellTiers = [];
+
+    // Fetch Upsell Offers from Server
+    async function fetchUpsellTiers() {
+      try {
+        const response = await fetch("/api/upsell-offers-all");
+        if (!response.ok) throw new Error("Network response was not ok");
+        const data = await response.json();
+        if (data.success && Array.isArray(data.offers)) {
+          // Sort by topup_rb descending for greedy approach
+          globalUpsellTiers = data.offers.sort((a, b) => b.topup_rb - a.topup_rb);
+          console.log("Loaded Upsell Tiers:", globalUpsellTiers);
+          // Update UI to reflect breakdown if needed
+          updateUI();
+        }
+      } catch (error) {
+        console.error("Failed to fetch upsell offers:", error);
+      }
+    }
+
+    // Calculate Tiered Breakdown (Replicating Server Logic)
+    // Dynamically determines min threshold from smallest offer in database
+    function calculateTieredBreakdown(amountRb, cardType = 'red') {
+      let remaining = amountRb;
+      let totalTizo = 0;
+      let breakdownParts = [];
+
+      // Normalize card type
+      const normalizedCardType = cardType.charAt(0).toUpperCase() + cardType.slice(1).toLowerCase();
+
+      // Filter offers for this card type and sort descending (largest first)
+      if (globalUpsellTiers.length > 0) {
+        const cardOffers = globalUpsellTiers
+          .filter(o => o.card_type === normalizedCardType)
+          .sort((a, b) => b.topup_rb - a.topup_rb);
+
+        // Dynamic minimum threshold = smallest offer for this card type
+        const minThreshold = cardOffers.length > 0
+          ? Math.min(...cardOffers.map(o => o.topup_rb))
+          : 0;
+
+        console.log(`[calculateTieredBreakdown] Card: ${normalizedCardType}, Amount: ${amountRb} RB, Dynamic min threshold: ${minThreshold} RB`);
+
+        // Greedy allocation - use largest offers first
+        for (const offer of cardOffers) {
+          const count = Math.floor(remaining / offer.topup_rb);
+          if (count > 0) {
+            const tizoForTier = count * offer.tizo_value;
+            totalTizo += tizoForTier;
+            remaining = remaining % offer.topup_rb;
+
+            const multiplier = (offer.tizo_value / offer.topup_rb).toFixed(2).replace(/\.00$/, "");
+            breakdownParts.push(`(${count} x ${offer.topup_rb}rb x ${multiplier})`);
+          }
+        }
+      }
+
+      // Remaining below smallest offer -> 1:1 Ratio
+      if (remaining > 0) {
+        totalTizo += remaining;
+        breakdownParts.push(`(${remaining}rb x 1.0)`);
+      }
+
+      return {
+        totalTizo: totalTizo,
+        breakdownString: breakdownParts.join(" + ") + ` = ${totalTizo}`,
+      };
+    }
+
+    // Fetch Active Offers to control visibility
+    async function fetchActiveOffers() {
+      try {
+        const response = await fetch(getApiUrl("/api/offers?excludeImages=true&screensaverOnly=true"));
+        const data = await response.json();
+
+        if (data.success && data.offers) {
+          console.log("[screensaver-offer] fetched offers:", data.offers);
+          // SHOW ONLY ONE OFFER TYPE - Priority: OOD > OOH > Snacks
+          // Check for both short names (OOD, OOH) and full names (OFFER OF THE DAY, etc.)
+          const oodOffer = data.offers.find((o) => o.category === "OOD" || o.category === "OFFER OF THE DAY");
+          const oohOffer = data.offers.find((o) => o.category === "OOH" || o.category === "OFFER OF THE HOUR");
+          const snacksOffer = data.offers.find((o) => o.category === "Snacks");
+          const scratchOffer = data.offers.find((o) => o.category === "Scratch Card");
+
+          const oodSection = document.querySelector('[data-id="ood-section"]');
+          const oohSection = document.querySelector('[data-id="ooh-section"]');
+          const snacksSection = document.querySelector('[data-id="snacks-section"]');
+
+          // Hide all by default
+          if (oodSection) oodSection.style.display = "none";
+          if (oohSection) oohSection.style.display = "none";
+          if (snacksSection) snacksSection.style.display = "none";
+          oodSelected = false;
+          oohSelected = false;
+          snacksSelected = false;
+
+          // Show only ONE offer based on priority
+          if (oodOffer) {
+            // OOD takes priority
+            oodCost = oodOffer.cost;
+            oodTizo = Math.round(oodOffer.tizo_credit);
+            oodGiftDetails = oodOffer.gift && oodOffer.gift !== "Nil" && oodOffer.gift_details ? oodOffer.gift_details : null;
+            const oodAmountEl = document.getElementById("ood-amount");
+            const oodRbUnitEl = document.getElementById("ood-rb-unit");
+            const oodCostRb = Math.round(oodCost / 1000);
+            if (typeof formatAndUpdateRbDisplay === "function") {
+              formatAndUpdateRbDisplay(oodAmountEl, oodRbUnitEl, oodCostRb);
+            } else if (oodAmountEl) {
+              oodAmountEl.textContent = oodCostRb;
+            }
+            if (document.getElementById("ood-tizo")) document.getElementById("ood-tizo").textContent = oodTizo;
+            if (oodSection) oodSection.style.display = "block";
+            // Show OOD gift if exists
+            const oodGiftRow = document.getElementById("ood-gift-row");
+            const oodGiftValue = document.getElementById("ood-gift-value");
+            if (oodGiftDetails) {
+              if (oodGiftRow) oodGiftRow.style.display = "flex";
+              if (oodGiftValue) oodGiftValue.textContent = oodGiftDetails;
+            }
+            console.log("[screensaver-offer] picked OOD offer", { gift: oodOffer.gift, gift_details: oodOffer.gift_details });
+          } else if (oohOffer) {
+            // OOH is second priority
+            oohCost = oohOffer.cost;
+            oohTizo = Math.round(oohOffer.tizo_credit);
+            oohGiftDetails = oohOffer.gift && oohOffer.gift !== "Nil" && oohOffer.gift_details ? oohOffer.gift_details : null;
+            const oohAmountEl = document.getElementById("ooh-amount");
+            const oohRbUnitEl = document.getElementById("ooh-rb-unit");
+            const oohCostRb = Math.round(oohCost / 1000);
+            if (typeof formatAndUpdateRbDisplay === "function") {
+              formatAndUpdateRbDisplay(oohAmountEl, oohRbUnitEl, oohCostRb);
+            } else if (oohAmountEl) {
+              oohAmountEl.textContent = oohCostRb;
+            }
+            if (document.getElementById("ooh-tizo")) document.getElementById("ooh-tizo").textContent = oohTizo;
+            if (oohSection) oohSection.style.display = "block";
+            // Show OOH gift if exists
+            const oohGiftRow = document.getElementById("ooh-gift-row");
+            const oohGiftValue = document.getElementById("ooh-gift-value");
+            if (oohGiftDetails) {
+              if (oohGiftRow) oohGiftRow.style.display = "flex";
+              if (oohGiftValue) oohGiftValue.textContent = oohGiftDetails;
+            }
+            console.log("[screensaver-offer] picked OOH offer", { gift: oohOffer.gift, gift_details: oohOffer.gift_details });
+          } else if (snacksOffer) {
+            // Snacks is third priority
+            snacksCost = snacksOffer.cost;
+            snacksTizo = Math.round(snacksOffer.tizo_credit);
+            snacksGiftDetails = snacksOffer.gift && snacksOffer.gift !== "Nil" && snacksOffer.gift_details ? snacksOffer.gift_details : null;
+            const snacksAmountEl = document.getElementById("snacks-amount");
+            const snacksRbUnitEl = document.getElementById("snacks-rb-unit");
+            const snacksCostRb = Math.round(snacksCost / 1000);
+            if (typeof formatAndUpdateRbDisplay === "function") {
+              formatAndUpdateRbDisplay(snacksAmountEl, snacksRbUnitEl, snacksCostRb);
+            } else if (snacksAmountEl) {
+              snacksAmountEl.textContent = snacksCostRb;
+            }
+            if (document.getElementById("snacks-tizo")) document.getElementById("snacks-tizo").textContent = snacksTizo;
+            if (snacksSection) snacksSection.style.display = "block";
+            // Show Snacks gift if exists
+            const snacksGiftRow = document.getElementById("snacks-gift-row");
+            const snacksGiftValue = document.getElementById("snacks-gift-value");
+            if (snacksGiftDetails) {
+              if (snacksGiftRow) snacksGiftRow.style.display = "flex";
+              if (snacksGiftValue) snacksGiftValue.textContent = snacksGiftDetails;
+            }
+            console.log("[screensaver-offer] picked Snacks offer", { gift: snacksOffer.gift, gift_details: snacksOffer.gift_details });
+          } else {
+            // Fallback: show default OOD section so one screensaver offer is always visible
+            if (oodSection) oodSection.style.display = "block";
+            const oodAmountEl = document.getElementById("ood-amount");
+            const oodRbUnitEl = document.getElementById("ood-rb-unit");
+            const oodCostRb = Math.round(oodCost / 1000);
+            if (typeof formatAndUpdateRbDisplay === "function") {
+              formatAndUpdateRbDisplay(oodAmountEl, oodRbUnitEl, oodCostRb);
+            } else if (oodAmountEl) {
+              oodAmountEl.textContent = oodCostRb;
+            }
+            if (document.getElementById("ood-tizo")) document.getElementById("ood-tizo").textContent = oodTizo;
+            oodSelected = true;
+            console.warn("[screensaver-offer] no offers returned, showing default OOD fallback");
+          }
+
+          // Handle Scratch Card Section Visibility
+          if (!scratchOffer) {
+            console.log("Warning: Scratch Card offer logic - active offer check failed/missing.");
+          }
+        }
+
+        // Update UI to reflect any auto-deselections
+        updateUI();
+      } catch (error) {
+        console.error("[screensaver-offer] Error fetching active offers:", error);
+      }
+    }
+
+    // Initialize page with loader
+    initPageWithLoader({
+      onDataLoad: async () => {
+        applyLanguage(currentLang);
+        loadSessionData();
+        await fetchActiveOffers(); // Fetch and filter offers
+        fetchUpsellTiers();
+      },
+      minLoadTime: 300,
+    }).then(() => {
+      // initEditMode removed - not available in this build
+
+      // DEBUG: Log all clicks to identify what element is receiving clicks
+      document.addEventListener('click', function (e) {
+        console.log('CLICK DEBUG - Target:', e.target);
+        console.log('CLICK DEBUG - Target class:', e.target.className);
+        console.log('CLICK DEBUG - Target id:', e.target.id);
+        console.log('CLICK DEBUG - Parent:', e.target.parentElement);
+        console.log('CLICK DEBUG - Closest checkbox-wrapper:', e.target.closest('.checkbox-wrapper'));
+      }, true);
+    });
+  </script>
+</body>
+
+</html>

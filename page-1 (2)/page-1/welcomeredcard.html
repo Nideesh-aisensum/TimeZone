@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timezone - Welcome Card</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    .page-title {
+      color: white;
+      font-size: clamp(1.8rem, 5vw, 5rem);
+      text-align: center;
+      margin-top: clamp(60px, 8vh, 120px);
+      margin-bottom: clamp(20px, 4vh, 60px);
+      text-shadow: 0 0 clamp(15px, 3vw, 40px) rgba(255, 255, 255, 0.4);
+      line-height: 1.1;
+    }
+
+    .card-selection-area {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 clamp(15px, 4vw, 50px);
+      margin-top: 125px;
+    }
+
+    .featured-card-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: clamp(20px, 4vh, 50px);
+      perspective: 1500px;
+      min-height: clamp(200px, 35vh, 500px);
+    }
+
+    .featured-card {
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      width: 500px;
+      max-width: 90%;
+      --base-transform: none;
+      transform: var(--base-transform);
+    }
+
+    .featured-card.flipped {
+      transform: var(--base-transform) rotateY(180deg);
+    }
+
+    .card-front,
+    .card-back {
+      width: 100%;
+      backface-visibility: hidden;
+      border-radius: clamp(12px, 2.5vw, 30px);
+      position: relative;
+    }
+
+    .card-front img,
+    .card-back img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 15px;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      transform: translateZ(0);
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+
+    .card-back {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform: rotateY(180deg);
+      cursor: pointer;
+    }
+
+    .card-text-overlay {
+      position: absolute;
+      top: 135px;
+      left: 35px;
+      right: 35px;
+      bottom: 135px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: clamp(8px, 1.5vw, 20px);
+      text-align: center;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: clamp(10px, 2vw, 25px);
+    }
+
+    .card-text-title {
+      color: white;
+      font-size: clamp(0.9rem, 2.2vw, 1.8rem);
+      font-weight: bold;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+      margin-bottom: clamp(6px, 1.2vh, 15px);
+    }
+
+    .card-text-desc {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: clamp(0.45rem, 1.1vw, 1rem);
+      line-height: 1.4;
+      text-shadow: 0 1px 5px rgba(0, 0, 0, 0.8);
+    }
+
+    .tap-hint {
+      position: absolute;
+      bottom: clamp(10px, 2vh, 25px);
+      color: rgba(255, 255, 255, 0.5);
+      font-size: clamp(0.5rem, 1vw, 0.9rem);
+    }
+
+    .info-icon {
+      position: absolute;
+      top: clamp(5px, 1vh, 15px);
+      right: clamp(-15px, -5vw, -30px);
+      width: clamp(50px, 5vw, 50px);
+      height: clamp(50px, 5vw, 50px);
+      cursor: pointer;
+      z-index: 15;
+      transition: all 0.3s ease;
+      filter: drop-shadow(0 4px 15px rgba(0, 212, 255, 0.5));
+      transform: var(--icon-transform, translate(0, 0) scale(1));
+    }
+
+    .flip-toggle-icon {
+      height: clamp(60px, 5vw, 50px) !important;
+    }
+
+    .info-icon:hover {
+      transform: var(--icon-transform, translate(0, 0) scale(1)) scale(1.15);
+    }
+
+    /* Counter-rotate the icon when card is flipped so it doesn't appear inverted */
+    .featured-card.flipped .info-icon {
+      transform: var(--icon-transform, translate(0, 0) scale(1)) rotateY(180deg);
+    }
+
+    .info-icon.flipped-icon {
+      transform: var(--icon-transform, translate(0, 0) scale(1)) rotateY(180deg) scale(1.2);
+    }
+
+    .cards-row {
+      display: flex;
+      justify-content: center;
+      gap: clamp(8px, 2vw, 25px);
+      margin-bottom: clamp(20px, 4vh, 60px);
+      padding: clamp(10px, 2vh, 30px) 0;
+      flex-wrap: wrap;
+      display: none;
+    }
+
+    .card-thumb {
+      width: clamp(60px, 15vw, 160px);
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      border-radius: clamp(6px, 1.5vw, 15px);
+      position: relative;
+    }
+
+    .card-thumb img {
+      width: 100%;
+      height: auto;
+      border-radius: clamp(6px, 1.5vw, 15px);
+      border: clamp(2px, 0.4vw, 4px) solid transparent;
+      transition: all 0.4s ease;
+    }
+
+    .card-thumb:hover {
+      transform: translateY(-10px) scale(1.08);
+    }
+
+    .card-thumb.active {
+      transform: translateY(-15px) scale(1.1);
+    }
+
+    .card-thumb.active img {
+      border-color: #00ff88;
+      box-shadow: 0 10px 30px rgba(0, 255, 136, 0.5);
+    }
+
+    /* Disabled cards - dark overlay */
+    .card-thumb:not(.active)::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: clamp(6px, 1.5vw, 15px);
+      pointer-events: none;
+    }
+
+    /* Disabled cards - can't click */
+    .card-thumb.disabled {
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .quantity-section {
+      background: linear-gradient(135deg, rgba(0, 20, 80, 0.7), rgba(0, 10, 50, 0.8));
+      border: 1px solid rgba(100, 140, 255, 0.4);
+      border-radius: clamp(20px, 4vw, 40px);
+      padding: clamp(12px, 2vh, 25px) clamp(20px, 4vw, 50px);
+      margin: 0 auto clamp(20px, 4vh, 50px);
+      width: 85%;
+      max-width: 650px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: clamp(10px, 2vh, 20px);
+    }
+
+    .quantity-label {
+      color: white;
+      font-size: clamp(0.6rem, 1.5vw, 1.3rem);
+      line-height: 1.5;
+    }
+
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: clamp(10px, 2vw, 25px);
+      background: rgba(0, 30, 80, 0.6);
+      padding: clamp(8px, 1.5vh, 15px) clamp(15px, 3vw, 30px);
+      border-radius: clamp(18px, 3.5vw, 35px);
+    }
+
+    .qty-btn {
+      width: clamp(30px, 5vw, 55px);
+      height: clamp(30px, 5vw, 55px);
+      border: none;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4a5fd9, #2a3a8f);
+      color: white;
+      font-size: clamp(1.2rem, 2vw, 2rem);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .qty-btn:hover {
+      transform: scale(1.15);
+    }
+
+    .qty-value {
+      color: white;
+      font-size: clamp(1.2rem, 2.5vw, 2.5rem);
+      min-width: 40px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .continue-button {
+      position: relative;
+      width: 75%;
+      max-width: 500px;
+      height: clamp(50px, 8vh, 130px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto clamp(30px, 5vh, 80px);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .continue-button:hover {
+      transform: translateY(-5px) scale(1.02);
+    }
+
+    .continue-button img {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .continue-button span {
+      position: relative;
+      z-index: 1;
+      color: white;
+      font-family: "Nulshock", sans-serif;
+      font-size: 36px;
+      letter-spacing: 2px;
+      text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    .content {
+      padding-top: 0;
+      overflow-y: auto;
+    }
+
+    @keyframes cardEnter {
+      0% {
+        transform: scale(0.9);
+        opacity: 0.5;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .featured-card.animate {
+      animation: cardEnter 0.3s ease-out;
+    }
+  </style>
+  <style>
+    .card-info-hint {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, calc(-50% + 520px)) scale(0.85);
+      z-index: 50;
+      font-family: "Nulshock", sans-serif;
+      font-size: 1.1rem;
+      color: #ffffff;
+      text-align: center;
+      width: 600px;
+      line-height: 1.5;
+      letter-spacing: 0.5px;
+      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .card-info-hint.visible {
+      opacity: 1 !important;
+    }
+  </style>
+</head>
+
+<body class="">
+  <div class="container">
+    <!-- Video Background -->
+    <video class="video-bg" autoplay loop muted playsinline>
+      <source src="other-bg.mp4" type="video/mp4" />
+    </video>
+    <img src="back-button.png" alt="Back" class="back-button" onclick="goBack()" style="top: 50px">
+
+    <!-- Home Button -->
+    <img src="home.png" alt="Home" class="editable added-element" data-id="home-button" onclick="goHome()"
+      style="max-width: 200px; height: auto; position: absolute; top: 31px; right: 30px; z-index: 50; cursor: pointer" />
+
+    <div class="content">
+      <h1 id="page-title" class="page-title editable" data-id="title" style="transform: translate(0px, 120px) scale(1)">
+        HALO PEMAIN BARU!<br />KARTUMU SAAT INI<br />WELCOME CARD</h1>
+
+      <!-- Card Selection Area (showing red card directly) -->
+      <div class="card-selection-area editable" data-id="cards" id="card-selection-area"
+        style="transform: translate(0px, 185px) scale(1)">
+        <div class="featured-card-container">
+          <div class="featured-card editable" id="featured-card" data-id="featured-card"
+            style="--base-transform: translate(-10.6666px, -24.0001px) scale(2.1)">
+            <div class="card-front">
+              <img id="featured-img" src="red-card.png" alt="Welcome Card" />
+            </div>
+            <div class="card-back" onclick="toggleCardFlip(event)">
+              <img id="back-img" src="red-card.png" alt="Card Back" />
+              <div class="card-text-overlay">
+                <div class="card-text-title" id="back-title">WELCOME CARD</div>
+                <div class="card-text-desc" id="back-desc">Kartu awal untuk memulai perjalanan Timezone Anda dengan
+                  keuntungan menarik</div>
+                <div id="tap-hint" class="tap-hint">Tap to flip back</div>
+              </div>
+            </div>
+            <img id="flip-toggle-icon" src="i-icon.png" alt="Info" class="info-icon editable" data-id="info-icon"
+              onclick="flipIconAndCard(event)"
+              style="--icon-transform: translate(-53.3335px, 101.333px) scale(1); height: clamp(50px, 5vw, 50px) !important;" />
+          </div>
+        </div>
+
+        <!-- Card thumbnails - only red is active, others disabled -->
+        <div class="cards-row" style="margin-top: -50px; transform: scale(1.2)">
+          <div class="card-thumb active" data-card="red"><img src="red-card.png" alt="Red Card" /></div>
+          <div class="card-thumb disabled" data-card="blue"><img src="blue-elite-dark.png" alt="Blue Card" /></div>
+          <div class="card-thumb disabled" data-card="gold"><img src="gold-dark.png" alt="Gold Card" /></div>
+          <div class="card-thumb disabled" data-card="silver"><img src="silver-dark.png" alt="Silver Card" /></div>
+        </div>
+      </div>
+
+      <!-- Quantity Section with blue banner elements - same as card-selection -->
+      <img src="blue-banner.png" alt="Added Image" class="editable added-element" data-id="added-1-1765247779590"
+        style="max-width: 200px; height: auto; position: absolute; top: 970px; left: 550px; transform: translate(calc(-50% - 5.33331px), calc(-50% + 432px)) scale(3.4); z-index: 50" />
+      <img src="plus-minus-bg.png" alt="Added Image" class="editable added-element" data-id="added-2-1765247860342"
+        style="max-width: 200px; height: auto; position: absolute; top: 976px; left: 538px; transform: translate(calc(-50% + 189.333px), calc(-50% + 424px)) scale(1.2); z-index: 50" />
+      <img src="plus-button.png" alt="Plus" class="editable added-element" data-id="added-3-1765247923856"
+        onclick="changeCardQuantity(1)"
+        style="max-width: 200px; height: auto; position: absolute; top: 976px; left: 542px; transform: translate(calc(-50% + 248px), calc(-50% + 424px)) scale(0.4); z-index: 50; cursor: pointer" />
+      <img src="minus-button.png" alt="Minus" class="editable added-element" data-id="added-4-1765247950642"
+        onclick="changeCardQuantity(-1)" style="
+            max-width: 200px;
+            height: auto;
+            position: absolute;
+            top: 976px;
+            left: 539px;
+            transform: translate(calc(-50% + 125.333px), calc(-50% + 424px)) scale(0.4);
+            z-index: 50;
+            cursor: pointer;
+          " />
+      <p id="card-quantity" class="editable added-element added-text" data-id="text-5-1765247979831" style="
+            position: absolute;
+            top: 976px;
+            left: 540px;
+            transform: translate(calc(-50% + 186.667px), calc(-50% + 424px)) scale(1.1);
+            z-index: 50;
+            font-family: Nulshock, sans-serif;
+            font-size: 1.5rem;
+            color: rgb(255, 255, 255);
+            text-align: center;
+            margin: 0px;
+            max-width: 80%;
+            font-weight: bold;
+          ">1</p>
+      <p class="editable added-element added-text" data-id="text-6-1765248045227" id="qty-label" style="
+            position: absolute;
+            top: 51%;
+            left: 50%;
+            transform: translate(calc(-50% - 112px), calc(-50% + 426.667px)) scale(0.8);
+            z-index: 50;
+            font-family: Nulshock, sans-serif;
+            font-size: 1.4rem;
+            color: rgb(255, 255, 255);
+            text-align: center;
+            margin: 0px;
+            max-width: 80%;
+            font-weight: bold;
+          ">
+        Pilih jumlah kartu yang<br />ingin Anda Top-Up
+      </p>
+      <!-- Continue Button - same position as card-selection -->
+      <div class="continue-button editable" data-id="continue-btn" onclick="handleContinue()"
+        style="transform: translate(10.6668px, 480px) scale(1)">
+        <img src="button.png" alt="Continue Button" />
+        <span id="continue-text">LANJUT</span>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="shell-connector.js"></script>
+  <script src="session-manager.js"></script>
+  <script src="background-music.js"></script>
+  <script src="language.js"></script>
+
+  <script>
+    const translations = {
+      en: {
+        title: "HELLO NEW PLAYER!<br>YOUR CURRENT CARD<br>WELCOME CARD",
+        qtyLabel: "Choose the number of cards<br>you want to Top-Up",
+        continueBtn: "NEXT",
+        langLabel: "English",
+        cardTitle: "WELCOME CARD",
+        cardDesc: "Welcome to Timezone, your fun starts now.",
+        tapHint: "Tap to flip back",
+      },
+      id: {
+        title: "HALO PEMAIN BARU!<br>KARTUMU SAAT INI<br>WELCOME CARD",
+        qtyLabel: "Pilih jumlah kartu yang<br>ingin Anda Top-Up",
+        continueBtn: "LANJUT",
+        langLabel: "Bahasa",
+        cardTitle: "WELCOME CARD",
+        cardDesc: "Selamat datang di Timezone. Saatnya Bersenang-senang!",
+        tapHint: "Ketuk untuk membalikkan kartu",
+      },
+    };
+
+    let currentLang = getCurrentLanguage();
+    let quantity = 1;
+    let isFlipped = false; // Start showing plain card front
+
+    function toggleLanguage() {
+      document.getElementById("lang-dropdown").classList.toggle("hidden");
+    }
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      const data = translations[lang];
+
+      document.getElementById("page-title").innerHTML = data.title;
+      document.getElementById("continue-text").textContent = data.continueBtn;
+      const langEl = document.getElementById("current-lang");
+      if (langEl) langEl.textContent = data.langLabel;
+      document.getElementById("back-title").textContent = data.cardTitle;
+      document.getElementById("back-desc").textContent = data.cardDesc;
+      document.getElementById("qty-label").innerHTML = data.qtyLabel;
+      document.getElementById("tap-hint").textContent = data.tapHint;
+    }
+
+    function setLanguage(lang) {
+      saveLanguage(lang);
+      applyLanguage(lang);
+      document.getElementById("lang-dropdown").classList.add("hidden");
+    }
+
+    function toggleCardFlip(event) {
+      event.stopPropagation();
+      isFlipped = !isFlipped;
+      document.getElementById("featured-card").classList.toggle("flipped", isFlipped);
+      const icon = document.getElementById("flip-toggle-icon");
+      if (icon) {
+        if (isFlipped) {
+          icon.src = "back-button.png";
+          icon.alt = "Back";
+        } else {
+          icon.src = "i-icon.png";
+          icon.alt = "Info";
+        }
+      }
+    }
+
+    function flipIconAndCard(event) {
+      event.stopPropagation();
+      toggleCardFlip(event);
+    }
+
+    function changeCardQuantity(delta) {
+      if (window.isEditModeActive && window.isEditModeActive()) return;
+      quantity = Math.max(1, Math.min(10, quantity + delta));
+      document.getElementById("card-quantity").textContent = quantity;
+    }
+
+    function handleContinue() {
+      if (window.isEditModeActive && window.isEditModeActive()) return;
+
+      // Set in both localStorage and session for consistency
+      localStorage.setItem("selectedCard", "red");
+      localStorage.setItem("cardQuantity", quantity);
+      localStorage.setItem("selectedCardCount", quantity);
+      localStorage.setItem("isNewPlayer", "true");
+
+      // Also set in session-manager for pages that use it
+      updateSession({
+        isNewPlayer: true,
+        selectedCard: "red",
+        cardQuantity: quantity,
+        selectedCardCount: quantity,
+      });
+
+      window.location.href = "offers-selection.html";
+    }
+
+    function goBack() {
+      if (window.isEditModeActive && window.isEditModeActive()) return;
+      window.location.href = "welcome.html";
+    }
+
+    window.onclick = function (event) {
+      if (!event.target.matches("#lang-btn") && !event.target.closest("#lang-btn")) {
+        document.querySelectorAll(".dropdown-content").forEach((d) => d.classList.add("hidden"));
+      }
+    };
+
+    // Apply language first to ensure UI is correct
+    applyLanguage(currentLang);
+
+    // Initialize edit mode (wrapped in try-catch to prevent breaking language)
+    try {
+
+    } catch (e) {
+      console.log('Edit mode not available:', e);
+    }
+  </script>
+</body>
+
+</html>

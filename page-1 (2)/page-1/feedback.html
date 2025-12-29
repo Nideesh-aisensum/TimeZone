@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, initial-scale=1.0">
+<title>Timezone - Feedback</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+    @font-face {
+        font-family: 'Nulshock';
+        src: url('nulshock/Nulshock-Bd.otf') format('opentype');
+        font-weight: bold;
+        font-style: normal;
+        font-display: swap;
+    }
+
+
+    /* Fixed for 1080x1920 resolution - NO SCROLLING */
+    html,
+    body {
+        overflow: hidden;
+        background: transparent;
+    }
+
+    .container {
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: transparent;
+    }
+
+    .content {
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        overflow: hidden;
+        height: 100%;
+        width: 100%;
+        padding-top: 60px;
+        background: transparent !important;
+    }
+
+    /* Branding Logo */
+    .branding-section {
+        margin-bottom: 40px;
+    }
+
+    .branding-logo {
+        width: 300px;
+        height: auto;
+        object-fit: contain;
+        margin-top: 120px;
+    }
+
+    /* Popup Container */
+    .popup-container {
+        position: relative;
+        width: 900px;
+        height: 750px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 40px;
+    }
+
+    .popup-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        z-index: 1;
+    }
+
+    .popup-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        padding: 60px 50px 40px;
+    }
+
+    /* Header Section */
+    .header-section {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .header-title {
+        font-family: 'Nulshock', sans-serif;
+        font-size: 65px;
+        background: linear-gradient(180deg, #ffff00 0%, #ffaa00 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: none;
+        filter: drop-shadow(0 0 20px rgba(255, 255, 0, 0.5)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+        letter-spacing: 3px;
+        line-height: 1.2;
+    }
+
+    .header-subtitle {
+        font-family: 'Nulshock', sans-serif;
+        font-size: 22px;
+        color: #b8f5ff;
+        letter-spacing: 2px;
+        margin-top: 35px;
+    }
+
+    /* Emoji Rating Section */
+    .rating-section {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-top: 40px;
+    }
+
+    .rating-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+
+    .rating-item:hover {
+        transform: scale(1.1);
+    }
+
+    .rating-item.selected {
+        transform: scale(1.15);
+    }
+
+    .rating-icon {
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
+        transition: all 0.2s ease;
+    }
+
+    .rating-label {
+        font-family: 'Nulshock', sans-serif;
+        font-size: 18px;
+        font-weight: bold;
+        color: #ffffff;
+        margin-top: 10px;
+        text-align: center;
+        max-width: 100px;
+    }
+
+    .rating-item.selected .rating-label {
+        color: #ffffff;
+    }
+
+    /* Submit Button */
+    .submit-button {
+        position: relative;
+        width: 500px;
+        height: 120px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: transform 0.1s;
+        margin-top: 80px;
+    }
+
+    .submit-button:hover {
+        transform: translateY(-4px);
+    }
+
+    .submit-button:active {
+        transform: scale(0.95);
+    }
+
+    .submit-button-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        pointer-events: none;
+    }
+
+    .submit-button-text {
+        position: relative;
+        z-index: 1;
+        color: white;
+        font-family: 'Nulshock', sans-serif;
+        font-size: 28px;
+        letter-spacing: 2px;
+        text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    .submit-button.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .submit-button.disabled:hover {
+        transform: none;
+    }
+
+    /* Powered by AISENSUM */
+    .powered-by {
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        z-index: 10;
+    }
+
+    .powered-text {
+        font-family: 'Nulshock', sans-serif;
+        font-size: 24px;
+        color: rgba(255, 255, 255, 0.6);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+    }
+
+    .aisensum-logo {
+        width: 350px;
+        height: auto;
+        opacity: 0.9;
+    }
+</style>
+
+
+</head>
+
+<body class="" __processed_3e7892a4-808f-4c4f-8ea7-0dd0c9b04ddb__="true"
+    bis_register="W3sibWFzdGVyIjp0cnVlLCJleHRlbnNpb25JZCI6ImVwcGlvY2VtaG1ubGJoanBsY2drb2ZjaWllZ29tY29uIiwiYWRibG9ja2VyU3RhdHVzIjp7IkRJU1BMQVkiOiJkaXNhYmxlZCIsIkZBQ0VCT09LIjoiZGlzYWJsZWQiLCJUV0lUVEVSIjoiZGlzYWJsZWQiLCJSRURESVQiOiJkaXNhYmxlZCIsIlBJTlRFUkVTVCI6ImRpc2FibGVkIiwiSU5TVEFHUkFNIjoiZGlzYWJsZWQiLCJUSUtUT0siOiJkaXNhYmxlZCIsIkxJTktFRElOIjoiZGlzYWJsZWQiLCJDT05GSUciOiJkaXNhYmxlZCJ9LCJ2ZXJzaW9uIjoiMi4wLjM1Iiwic2NvcmUiOjIwMDM1fV0="
+    __processed_e4a8e295-edb4-4b26-b748-d3e22bdf5ae5__="true" __processed_b46d3f21-cc14-4135-83e1-d920e9a260b3__="true">
+    <div class="container" bis_skin_checked="1">
+        <!-- Video Background -->
+        <video class="video-bg" autoplay="" loop="" muted="" playsinline="">
+            <source src="other-bg.mp4" type="video/mp4">
+        </video>
+        <!-- Home Button -->
+        <img src="home.png" alt="Home" class="editable added-element" data-id="home-button" onclick="goHome()"
+            style="max-width: 200px; height: auto; position: absolute; top: 31px; right: 30px; /*transform: translate(calc(-50% + 412.67px), calc(-50% - 792px)) scale(0.9);*/ z-index: 50; cursor: pointer;">
+
+        <div class="content" bis_skin_checked="1">
+            <!-- Timezone Branding -->
+            <div class="branding-section editable" data-id="branding-section"
+                style="transform: translate(0px, 70px) scale(1);" bis_skin_checked="1">
+                <img src="timezone-branding.png" alt="Timezone" class="branding-logo timezone-branding">
+            </div>
+
+            <!-- Popup Container -->
+            <div class="popup-container editable" data-id="popup-container"
+                style="transform: translate(0, 140.333px) scale(1.4);" bis_skin_checked="1">
+                <img src="pop-up-summary.png" alt="Popup Background" class="popup-bg" data-no-text-edit="true">
+
+                <div class="popup-content" bis_skin_checked="1">
+                    <!-- Header Section -->
+                    <div class="header-section editable" data-id="header-section"
+                        style="transform: translate(-8.00006px, 5.33337px) scale(0.6);" bis_skin_checked="1">
+                        <h1 id="header-title" class="header-title">NILAI<br>PENGALAMANMU</h1>
+                        <p id="header-subtitle" class="header-subtitle">TEKAN IKON UNTUK PILIH</p>
+                    </div>
+
+                    <!-- Emoji Rating Section -->
+                    <div class="rating-section editable" data-id="rating-section"
+                        style="transform: translate(0px, 0px) scale(0.8);" bis_skin_checked="1">
+                        <div class="rating-item" data-rating="1" onclick="selectRating(1)" bis_skin_checked="1">
+                            <img id="rating-1" src="feedback-icons/angry.png" alt="Angry" class="rating-icon">
+                            <span id="label-1" class="rating-label">Buruk</span>
+                        </div>
+                        <div class="rating-item" data-rating="2" onclick="selectRating(2)" bis_skin_checked="1">
+                            <img id="rating-2" src="feedback-icons/sad.png" alt="Sad" class="rating-icon">
+                            <span id="label-2" class="rating-label">Kurang</span>
+                        </div>
+                        <div class="rating-item" data-rating="3" onclick="selectRating(3)" bis_skin_checked="1">
+                            <img id="rating-3" src="feedback-icons/ok.png" alt="OK" class="rating-icon">
+                            <span id="label-3" class="rating-label">Baik</span>
+                        </div>
+                        <div class="rating-item" data-rating="4" onclick="selectRating(4)" bis_skin_checked="1">
+                            <img id="rating-4" src="feedback-icons/happy.png" alt="Happy" class="rating-icon">
+                            <span id="label-4" class="rating-label">Puas</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="submit-button editable disabled" data-id="submit-button" onclick="handleSubmit()"
+                style="transform: translate(-5.33331px, 245.333px) scale(1.2);" bis_skin_checked="1">
+                <img src="button.png" alt="Button" class="submit-button-bg">
+                <span id="submit-text" class="submit-button-text">KIRIM PENILAIAN</span>
+            </div>
+        </div>
+
+        <!-- Powered by Section -->
+        <div class="powered-by">
+            <span class="powered-text">POWERED BY</span>
+            <img src="aisensum-logo.png" alt="AISENSUM" class="aisensum-logo">
+        </div>
+    </div>
+
+
+    <script src="shell-connector.js"></script>
+    <script src="session-manager.js"></script>
+    <script src="language.js"></script>
+
+    <script>
+        // Set current page in session
+        setCurrentPage('feedback');
+
+        const translations = {
+            en: {
+                headerTitle: "RATE YOUR<br>EXPERIENCE",
+                headerSubtitle: "TAP A SMILEY TO VOTE",
+                label1: "Poor",
+                label2: "Bad",
+                label3: "Good",
+                label4: "Great",
+                submitText: "SUBMIT RATING",
+                langLabel: "English"
+            },
+            id: {
+                headerTitle: "NILAI<br>PENGALAMANMU",
+                headerSubtitle: "TEKAN IKON UNTUK PILIH",
+                label1: "Buruk",
+                label2: "Kurang",
+                label3: "Baik",
+                label4: "Puas",
+                submitText: "KIRIM PENILAIAN",
+                langLabel: "Bahasa"
+            }
+        };
+
+        let currentLang = getCurrentLanguage();
+        let selectedRating = null;
+
+        const iconPaths = {
+            1: { normal: 'feedback-icons/angry.png', selected: 'feedback-icons/angry_selected.png' },
+            2: { normal: 'feedback-icons/sad.png', selected: 'feedback-icons/sad_selected.png' },
+            3: { normal: 'feedback-icons/ok.png', selected: 'feedback-icons/ok_selected.png' },
+            4: { normal: 'feedback-icons/happy.png', selected: 'feedback-icons/happy_selected.png' }
+        };
+
+        function selectRating(rating) {
+            if (window.isEditModeActive && window.isEditModeActive()) {
+                return;
+            }
+
+            // Reset all icons to normal state
+            for (let i = 1; i <= 4; i++) {
+                document.getElementById(`rating-${i}`).src = iconPaths[i].normal;
+                document.querySelector(`[data-rating="${i}"]`).classList.remove('selected');
+            }
+
+            // Set selected icon
+            selectedRating = rating;
+            document.getElementById(`rating-${rating}`).src = iconPaths[rating].selected;
+            document.querySelector(`[data-rating="${rating}"]`).classList.add('selected');
+
+            // Enable submit button
+            document.querySelector('.submit-button').classList.remove('disabled');
+        }
+
+        function toggleLanguage() {
+            const dropdown = document.getElementById('lang-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function applyLanguage(lang) {
+            currentLang = lang;
+            const data = translations[lang];
+
+            document.getElementById('header-title').innerHTML = data.headerTitle;
+            document.getElementById('header-subtitle').textContent = data.headerSubtitle;
+            document.getElementById('label-1').textContent = data.label1;
+            document.getElementById('label-2').textContent = data.label2;
+            document.getElementById('label-3').textContent = data.label3;
+            document.getElementById('label-4').textContent = data.label4;
+            document.getElementById('submit-text').textContent = data.submitText;
+            const langEl = document.getElementById('current-lang');
+            if (langEl) langEl.textContent = data.langLabel;
+        }
+
+        function setLanguage(lang) {
+            saveLanguage(lang);
+            applyLanguage(lang);
+            document.getElementById('lang-dropdown').classList.add('hidden');
+        }
+
+        function handleSubmit() {
+            if (window.isEditModeActive && window.isEditModeActive()) {
+                return;
+            }
+
+            if (selectedRating === null) {
+                return; // No rating selected
+            }
+
+            console.log('Feedback submitted:', selectedRating);
+            // Store feedback
+            localStorage.setItem('feedbackRating', selectedRating);
+
+            // Navigate to enjoy page
+            window.location.href = 'enjoy.html';
+        }
+
+        // Close dropdown
+        window.onclick = function (event) {
+            if (!event.target.matches('#lang-btn') && !event.target.closest('#lang-btn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (!openDropdown.classList.contains('hidden')) {
+                        openDropdown.classList.add('hidden');
+                    }
+                }
+            }
+        }
+
+        // Initialize - Apply language immediately to prevent flash
+        // (Script loads after DOM elements, so they're already available)
+        applyLanguage(currentLang);
+
+        // ===== IDLE TIMEOUT: Go to screensaver after 20 seconds of inactivity =====
+        const IDLE_TIMEOUT_MS = 20 * 1000; // 20 seconds
+        let idleTimer = null;
+
+        function resetIdleTimer() {
+            if (idleTimer) {
+                clearTimeout(idleTimer);
+            }
+            idleTimer = setTimeout(() => {
+                console.log('[Feedback] Idle timeout - going to screensaver');
+                window.location.href = 'screensaver.html';
+            }, IDLE_TIMEOUT_MS);
+        }
+
+        // Reset timer on any user interaction
+        ['click', 'touchstart', 'mousemove', 'keydown'].forEach(event => {
+            document.addEventListener(event, resetIdleTimer, { passive: true });
+        });
+
+        // Start the idle timer
+        resetIdleTimer();
+    </script>
+
+
+    <span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span><span id="PING_IFRAME_FORM_DETECTION"
+        style="display: none;"></span><span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
+</body>
+
+</html>

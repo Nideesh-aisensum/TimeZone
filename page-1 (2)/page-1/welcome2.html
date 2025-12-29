@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timezone - Welcome</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Fixed for 1080x1920 resolution - NO SCROLLING */
+        html,
+        body {
+            overflow: hidden;
+        }
+
+        .container {
+            width: 1080px;
+            height: 1920px;
+            overflow: hidden;
+        }
+
+        .content {
+            padding-top: 80px;
+            padding-bottom: 0;
+        }
+
+
+        .logo {
+            width: 550px;
+            height: auto;
+            margin-bottom: 30px;
+        }
+
+        .welcome-text {
+            color: #f5d742;
+            font-family: 'Nulshock', sans-serif;
+            font-size: 46px;
+            text-align: center;
+            margin-bottom: 50px;
+            letter-spacing: 4px;
+        }
+
+        .brand-title {
+            color: white;
+            font-size: 72px;
+            text-align: center;
+            margin-bottom: 60px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .buttons-container {
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+            width: 600px;
+            margin-bottom: 50px;
+            align-items: center;
+            position: relative;
+            z-index: 20;
+        }
+
+        .menu-button-wrapper {
+            position: relative;
+            width: 100%;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .menu-button-wrapper:hover {
+            transform: translateY(-4px);
+        }
+
+        .menu-button-wrapper:active {
+            transform: scale(0.95);
+        }
+
+        .menu-button-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        .menu-button-text {
+            position: relative;
+            z-index: 1;
+            color: white;
+            font-family: 'Nulshock', sans-serif;
+            font-size: 36px;
+            letter-spacing: 2px;
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        .static-cat {
+            width: 750px;
+            height: auto;
+            object-fit: contain;
+            margin-top: auto;
+        }
+    </style>
+    <style type="text/css" id="mytempCss">
+        ._8mqQwQ {
+            display: none;
+        }
+
+        ._1TWLMK.icF5zO {
+            opacity: 0.01;
+        }
+    </style>
+    <script src="page-transition.js"></script>
+</head>
+
+<body>
+    <div class="container" bis_skin_checked="1">
+        <!-- Video Background -->
+        <video class="video-bg" autoplay="" loop="" muted="" playsinline="">
+            <source src="other-bg.mp4" type="video/mp4">
+        </video>
+        <!-- Back Button -->
+        <img src="back-button.png" alt="Back" class="back-button" onclick="goBack()">
+
+        <!-- Home Button -->
+        <img src="home.png" alt="Home" class="editable added-element" data-id="home-button" onclick="goHome()"
+            style="max-width: 200px; height: auto; position: absolute; top: 31px; right: 30px; /*transform: translate(calc(-50% + 412.67px), calc(-50% - 792px)) scale(0.9);*/ z-index: 50; cursor: pointer;">
+
+        <div class="content" bis_skin_checked="1">
+            <img src="timezone-branding.png" alt="Timezone Logo" class="logo timezone-branding editable" data-id="logo"
+                style="transform: translate(0, 243.333px) scale(1.5); z-index: 0; position: relative;">
+            <p id="welcome-text" class="welcome-text editable" data-id="welcome-text"
+                style="transform: translate(0px, -95.667px) scale(1); font-weight: normal; color: rgb(255, 255, 255); text-align: left;">
+                HALO! SELAMAT DATANG DI</p>
+
+            <div class="buttons-container editable" data-id="buttons"
+                style="transform: translate(0, 60px) scale(1) !important;" bis_skin_checked="1">
+                <div class="menu-button-wrapper" onclick="handleNewPlayer()" bis_skin_checked="1">
+                    <img src="button.png" alt="Button" class="menu-button-bg">
+                    <span id="btn-new" class="menu-button-text">PEMAIN BARU</span>
+                </div>
+                <div class="menu-button-wrapper" onclick="handleExistingPlayer()" bis_skin_checked="1">
+                    <img src="button.png" alt="Button" class="menu-button-bg">
+                    <span id="btn-existing" class="menu-button-text">PEMAIN LAMA</span>
+                </div>
+            </div>
+
+            <img src="cat-character.gif" alt="Cat Character" class="static-cat editable" data-id="cat"
+                style="transform: translate(16px, -200.666px) scale(1.2);">
+        </div>
+    </div>
+
+    <script src="shell-connector.js"></script>
+    <script src="session-manager.js"></script>
+    <script src="background-music.js"></script>
+    <script src="language.js"></script>
+    <script>
+        // Set current page in session
+        setCurrentPage('welcome2');
+
+        const translations = {
+            en: {
+                welcome: "HELLO! WELCOME TO",
+                btnNew: "NEW PLAYER",
+                btnExisting: "EXISTING PLAYER",
+                langLabel: "English"
+            },
+            id: {
+                welcome: "HALO! SELAMAT DATANG DI",
+                btnNew: "PEMAIN BARU",
+                btnExisting: "PEMAIN LAMA",
+                langLabel: "Bahasa"
+            }
+        };
+
+        let currentLang = getCurrentLanguage();
+
+        function toggleLanguage() {
+            const dropdown = document.getElementById('lang-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function applyLanguage(lang) {
+            currentLang = lang;
+            const data = translations[lang];
+
+            document.getElementById('welcome-text').textContent = data.welcome;
+            document.getElementById('btn-new').textContent = data.btnNew;
+            document.getElementById('btn-existing').textContent = data.btnExisting;
+            const langEl = document.getElementById('current-lang');
+            if (langEl) langEl.textContent = data.langLabel;
+        }
+
+        function setLanguage(lang) {
+            saveLanguage(lang);
+            applyLanguage(lang);
+            document.getElementById('lang-dropdown').classList.add('hidden');
+        }
+
+        function handleNewPlayer() {
+            if (window.isEditModeActive && window.isEditModeActive()) return;
+            console.log('New Player clicked');
+            updateSession({ isNewPlayer: true });
+            // Go to welcome-newplayer.html splash first, then it will redirect to welcome-newuser.html
+            window.location.href = 'welcome-newplayer.html';
+        }
+
+        function handleExistingPlayer() {
+            if (window.isEditModeActive && window.isEditModeActive()) return;
+            updateSession({ isNewPlayer: false });
+            window.location.href = 'card-selection.html';
+        }
+
+        // Close dropdown when clicking outside
+        window.onclick = function (event) {
+            if (!event.target.matches('#lang-btn') && !event.target.closest('#lang-btn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (!openDropdown.classList.contains('hidden')) {
+                        openDropdown.classList.add('hidden');
+                    }
+                }
+            }
+        }
+
+        function goBack() {
+            if (window.isEditModeActive && window.isEditModeActive()) return;
+            window.location.href = 'welcome.html';
+        }
+
+        function goHome() {
+            if (window.isEditModeActive && window.isEditModeActive()) return;
+            window.location.href = 'welcome.html';
+        }
+
+        // Apply saved language preference FIRST (before edit mode which may fail)
+        console.log('Current language from localStorage:', currentLang);
+        applyLanguage(currentLang);
+
+    </script>
+
+
+</body>
+
+</html>

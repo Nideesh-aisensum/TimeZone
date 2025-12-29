@@ -1,0 +1,1429 @@
+<!DOCTYPE html>
+<html lang="en" style="visibility: hidden; opacity: 0" class="page-ready">
+
+<head>
+  <style id="page-loader-styles">
+    html {
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    html.page-ready {
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .page-loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      transition: opacity 0.3s ease-out;
+    }
+
+    .page-loading-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .page-loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(0, 255, 255, 0.2);
+      border-top-color: #00ffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  <style id="page-loader-styles">
+    html {
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    html.page-ready {
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .page-loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      transition: opacity 0.3s ease-out;
+    }
+
+    .page-loading-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .page-loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(0, 255, 255, 0.2);
+      border-top-color: #00ffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  <style id="page-loader-styles">
+    html {
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    html.page-ready {
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .page-loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      transition: opacity 0.3s ease-out;
+    }
+
+    .page-loading-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .page-loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(0, 255, 255, 0.2);
+      border-top-color: #00ffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  <style id="page-loader-styles">
+    html {
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    html.page-ready {
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .page-loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      transition: opacity 0.3s ease-out;
+    }
+
+    .page-loading-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .page-loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(0, 255, 255, 0.2);
+      border-top-color: #00ffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  <style id="page-loader-styles">
+    html {
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    html.page-ready {
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .page-loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      transition: opacity 0.3s ease-out;
+    }
+
+    .page-loading-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .page-loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(0, 255, 255, 0.2);
+      border-top-color: #00ffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  <style id="page-loader-styles">
+    html {
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    html.page-ready {
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .page-loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      transition: opacity 0.3s ease-out;
+    }
+
+    .page-loading-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .page-loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(0, 255, 255, 0.2);
+      border-top-color: #00ffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  <style id="page-loader-styles">
+    html {
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    html.page-ready {
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .page-loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      transition: opacity 0.3s ease-out;
+    }
+
+    .page-loading-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .page-loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(0, 255, 255, 0.2);
+      border-top-color: #00ffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+
+  <style id="page-loader-styles">
+    html {
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    html.page-ready {
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .page-loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      transition: opacity 0.3s ease-out;
+    }
+
+    .page-loading-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .page-loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(0, 255, 255, 0.2);
+      border-top-color: #00ffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  <style id="page-loader-styles">
+    html {
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    html.page-ready {
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .page-loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      transition: opacity 0.3s ease-out;
+    }
+
+    .page-loading-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .page-loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(0, 255, 255, 0.2);
+      border-top-color: #00ffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  <style id="page-loader-styles">
+    html {
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    html.page-ready {
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .page-loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      transition: opacity 0.3s ease-out;
+    }
+
+    .page-loading-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .page-loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(0, 255, 255, 0.2);
+      border-top-color: #00ffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+
+  <script src="shell-connector.js"></script>
+  <script src="page-transition.js"></script>
+</head>
+
+<body class="">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timezone - Select Card</title>
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    .page-title {
+      color: white;
+      font-size: clamp(1.8rem, 5vw, 5rem);
+      text-align: center;
+      margin-top: clamp(60px, 8vh, 120px);
+      margin-left: -36px;
+      margin-bottom: clamp(20px, 4vh, 60px);
+      text-shadow: 0 0 clamp(15px, 3vw, 40px) rgba(255, 255, 255, 0.4);
+      line-height: 1.1;
+    }
+
+    .card-selection-area {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 clamp(15px, 4vw, 50px);
+      position: relative;
+    }
+
+    .featured-card-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1500px;
+      min-height: clamp(200px, 35vh, 500px);
+    }
+
+    .show-opcity-0 {
+      opacity: 0 !important;
+    }
+
+    .featured-card {
+      position: relative;
+      transform-style: preserve-3d;
+      width: 600px;
+      max-width: 90%;
+    }
+
+    /* Only apply transition when flipping (not during initial animation) */
+    .featured-card.can-flip {
+      transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .featured-card.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-front,
+    .card-back {
+      width: 100%;
+      backface-visibility: hidden;
+      border-radius: clamp(12px, 2.5vw, 30px);
+      position: relative;
+    }
+
+    .card-front img,
+    .card-back img {
+      width: 120%;
+      height: auto;
+      display: block;
+      margin-left: -56px;
+      border-radius: 15px;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      /* Use will-change instead of translateZ(0) to avoid texture blur */
+      will-change: transform;
+      /* Remove crisp-edges as it causes issues with photographic images */
+      image-rendering: auto;
+      image-rendering: -webkit-optimize-contrast;
+    }
+
+    .card-back {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform: rotateY(180deg);
+      cursor: pointer;
+    }
+
+    /* Text overlay on card back */
+    .card-text-overlay {
+      position: absolute;
+      top: 100px;
+      left: 0;
+      right: 0;
+      bottom: 100px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: clamp(15px, 3vw, 40px);
+      text-align: center;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: clamp(12px, 2.5vw, 30px);
+    }
+
+    .card-text-title {
+      color: white;
+      font-size: clamp(1.2rem, 3vw, 2.8rem);
+      font-weight: bold;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+      margin-bottom: clamp(10px, 2vh, 25px);
+    }
+
+    .card-text-desc {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: clamp(0.6rem, 1.5vw, 1.3rem);
+      line-height: 1.6;
+      text-shadow: 0 1px 5px rgba(0, 0, 0, 0.8);
+    }
+
+    .tap-hint {
+      position: absolute;
+      bottom: clamp(10px, 2vh, 25px);
+      color: rgba(255, 255, 255, 0.5);
+      font-size: clamp(0.5rem, 1vw, 0.9rem);
+    }
+
+    /* Removed glow effect */
+
+    .info-icon {
+      position: absolute;
+      /* top: clamp(5px, 1vh, 15px); */
+      /* right: clamp(-15px, -3vw, -30px); */
+      top: 115px;
+      right: 10px;
+      height: 70px;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.3s ease;
+      filter: drop-shadow(0 4px 15px rgba(0, 212, 255, 0.5));
+    }
+
+    .info-icon:hover {
+      transform: scale(1.15);
+    }
+
+    /* Counter-rotate the icon when card is flipped so it doesn't appear inverted */
+    .featured-card.flipped .info-icon {
+      transform: rotateY(180deg);
+    }
+
+    .featured-card.flipped .info-icon:hover {
+      transform: rotateY(180deg) scale(1.15);
+    }
+
+    .cards-row {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: -65px;
+      /* margin-bottom: clamp(20px, 4vh, 60px); */
+      padding: clamp(10px, 2vh, 30px) 0;
+      flex-wrap: nowrap;
+      width: 100%;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      transform: scale(1.25);
+    }
+
+    .card-thumb {
+      /* Much bigger size for better visibility */
+      flex: 0 0 auto;
+      width: 200px;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+      height: 180px;
+    }
+
+    .card-thumb img {
+      width: 100%;
+      height: auto;
+      border-radius: 12px;
+      border: none;
+      transition: all 0.4s ease;
+      margin-left: 4px;
+      margin-top: -5px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .card-thumb:hover {
+      transform: scale(1.1);
+    }
+
+    /* Hide the active/selected card from the row - it's shown above */
+    .card-thumb.active {
+      display: none;
+    }
+
+    /* Dark overlay for non-active cards - no border, just darkened */
+    .card-thumb:not(.active)::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 12px;
+      pointer-events: none;
+    }
+
+    /* Landscape orientation adjustments */
+    @media (orientation: landscape) {
+      .cards-row {
+        gap: 25px;
+      }
+
+      .card-thumb {
+        width: 180px;
+      }
+    }
+
+    .quantity-section {
+      background: linear-gradient(135deg, rgba(0, 20, 80, 0.7), rgba(0, 10, 50, 0.8));
+      border: 1px solid rgba(100, 140, 255, 0.4);
+      border-radius: clamp(20px, 4vw, 40px);
+      padding: clamp(12px, 2vh, 25px) clamp(20px, 4vw, 50px);
+      margin: 0 auto clamp(20px, 4vh, 50px);
+      width: 85%;
+      max-width: 650px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: clamp(10px, 2vh, 20px);
+    }
+
+    .quantity-label {
+      color: white;
+      font-size: clamp(0.6rem, 1.5vw, 1.3rem);
+      line-height: 1.5;
+    }
+
+    .quantity-controls {
+      display: flex;
+      align-items: center;
+      gap: clamp(10px, 2vw, 25px);
+      background: rgba(0, 30, 80, 0.6);
+      padding: clamp(8px, 1.5vh, 15px) clamp(15px, 3vw, 30px);
+      border-radius: clamp(18px, 3.5vw, 35px);
+    }
+
+    .qty-btn {
+      width: clamp(30px, 5vw, 55px);
+      height: clamp(30px, 5vw, 55px);
+      border: none;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #4a5fd9, #2a3a8f);
+      color: white;
+      font-size: clamp(1.2rem, 2vw, 2rem);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .qty-btn:hover {
+      transform: scale(1.15);
+    }
+
+    .qty-value {
+      color: white;
+      font-size: clamp(1.2rem, 2.5vw, 2.5rem);
+      min-width: 40px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .continue-button {
+      position: relative;
+      width: 500px;
+      height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto clamp(30px, 5vh, 80px);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 60px;
+    }
+
+    .continue-button:hover {
+      transform: translateY(-5px) scale(1.02);
+    }
+
+    .continue-button img {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .continue-button span {
+      position: relative;
+      z-index: 1;
+      color: white;
+      font-family: "Nulshock", sans-serif;
+      font-size: 36px;
+      letter-spacing: 2px;
+      text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+    }
+
+    .content {
+      padding-top: 0;
+      overflow-y: auto;
+    }
+
+    /* Animation for switching between thumbnails */
+    @keyframes cardEnter {
+      0% {
+        transform: scale(0.9);
+        opacity: 0.5;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* Animation for first appearance from grid - smooth scale up */
+    @keyframes cardAppear {
+      0% {
+        transform: scale(0.7);
+        opacity: 0;
+      }
+
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .featured-card.animate {
+      animation: cardEnter 0.3s ease-out;
+    }
+
+    .featured-card.first-appear {
+      animation: cardAppear 0.4s ease-out;
+    }
+
+    .initial-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 40px;
+      width: 100%;
+      max-width: 840px;
+      margin: 0 auto;
+      padding: 20px;
+      position: absolute;
+      top: 400px;
+      z-index: 1000;
+      /* transform: translateX(-50%); */
+    }
+
+    .initial-grid .grid-card {
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border-radius: 15px;
+      overflow: hidden;
+      height: 300px;
+      position: relative;
+    }
+
+    .initial-grid .grid-card:hover {
+      transform: scale(1.05);
+    }
+
+    .initial-grid .grid-card img {
+      width: 140%;
+      height: auto;
+      display: block;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 100, 255, 0.4);
+      position: absolute;
+      top: -150px;
+      left: -80px;
+    }
+
+    /* Hide selected view initially with smooth transition */
+    .card-selection-area {
+      opacity: 1;
+      transition: opacity 0.3s ease-out;
+    }
+
+    .card-selection-area.hidden {
+      display: none;
+      opacity: 0;
+    }
+
+    .initial-grid {
+      opacity: 1;
+      transition: opacity 0.25s ease-out;
+    }
+
+    .initial-grid.hidden {
+      display: none;
+      opacity: 0;
+    }
+
+    .initial-grid.fade-out {
+      opacity: 0;
+    }
+
+    .card-info-hint {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, calc(-50% + 385px)) scale(0.85);
+      z-index: 50;
+      font-family: "Nulshock", sans-serif;
+      font-size: 1.1rem;
+      color: #ffffff;
+      text-align: center;
+      width: 600px;
+      line-height: 1.5;
+      letter-spacing: 0.5px;
+      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+
+    .card-info-hint.visible {
+      opacity: 1 !important;
+    }
+
+    .opacity-0 {
+      opacity: 0 !important;
+    }
+
+    .opacity-1 {
+      opacity: 1 !important;
+    }
+
+    /* Shake animation for grid when user tries to continue without selecting */
+    @keyframes shakeGrid {
+
+      0%,
+      100% {
+        transform: translate(6px, 164px) scale(1);
+      }
+
+      10%,
+      30%,
+      50%,
+      70%,
+      90% {
+        transform: translate(-4px, 164px) scale(1);
+      }
+
+      20%,
+      40%,
+      60%,
+      80% {
+        transform: translate(16px, 164px) scale(1);
+      }
+    }
+  </style>
+
+  <div class="container" bis_skin_checked="1">
+    <!-- Video Background -->
+    <video class="video-bg" autoplay="" loop="" muted="" playsinline="">
+      <source src="other-bg.mp4" type="video/mp4" />
+    </video>
+    <img src="back-button.png" alt="Back" class="back-button" onclick="window.history.back()" />
+
+    <!-- Home Button -->
+    <img src="home.png" alt="Home" class="editable added-element" data-id="home-button" onclick="goHome()"
+      style="max-width: 200px; height: auto; position: absolute; top: 31px; right: 30px; z-index: 50; cursor: pointer" />
+
+    <div class="content" bis_skin_checked="1">
+      <h1 id="page-title" class="page-title editable" data-id="title"
+        style="transform: translate(15.9999px, 100px) scale(1.7)">PILIH<br />KARTUMU</h1>
+
+      <!-- Initial 2x2 Grid (visible on first load) -->
+      <div class="initial-grid editable" data-id="initial-grid" id="initial-grid"
+        style="transform: translate(6px, 164px) scale(1)" bis_skin_checked="1">
+        <div class="grid-card" data-card="red" onclick="selectCardFromGrid(this)" bis_skin_checked="1">
+          <img src="red-card.png" alt="Red Card" />
+        </div>
+        <div class="grid-card" data-card="blue" onclick="selectCardFromGrid(this)" bis_skin_checked="1">
+          <img src="blue-card.png" alt="Blue Card" style="top: -140px" />
+        </div>
+        <div class="grid-card" data-card="gold" onclick="selectCardFromGrid(this)" bis_skin_checked="1">
+          <img src="gold-card.png" alt="Gold Card" />
+        </div>
+        <div class="grid-card" data-card="silver" onclick="selectCardFromGrid(this)" bis_skin_checked="1">
+          <img src="silver-card.png" alt="Silver Card" />
+        </div>
+      </div>
+
+      <!-- Selected Card View (hidden initially) -->
+      <div class="card-selection-area editable opacity-0" data-id="cards" id="card-selection-area"
+        style="transform: translate(-5.33331px, 109.333px) scale(1.1)" bis_skin_checked="1">
+        <div class="featured-card-container" bis_skin_checked="1">
+          <div class="featured-card first-appear can-flip" id="featured-card" bis_skin_checked="1">
+            <div class="card-front" bis_skin_checked="1">
+              <img id="featured-img" src="red-card.png" alt="Selected Card" />
+            </div>
+            <div class="card-back" onclick="toggleCardFlip(event)" bis_skin_checked="1">
+              <img id="back-img" src="red-card.png" alt="Card Back" />
+              <div class="card-text-overlay" bis_skin_checked="1">
+                <div class="card-text-title" id="back-title" bis_skin_checked="1">RED CARD</div>
+                <div class="card-text-desc" id="back-desc" bis_skin_checked="1">Please enter the card information here.
+                </div>
+                <div class="tap-hint" id="tap-hint-text" bis_skin_checked="1">Tap to flip back</div>
+              </div>
+            </div>
+            <img src="i-icon.png" alt="Info" class="info-icon" id="flip-toggle-icon" onclick="toggleCardFlip(event)" />
+          </div>
+        </div>
+
+        <div class="cards-row" bis_skin_checked="1">
+          <div class="card-thumb active" data-card="red" onclick="selectCard(this)" bis_skin_checked="1"><img
+              src="red-card.png" alt="Red Card" /></div>
+          <div class="card-thumb" data-card="blue" onclick="selectCard(this)" bis_skin_checked="1"><img
+              src="blue-elite-dark.png" alt="Blue Card" /></div>
+          <div class="card-thumb" data-card="gold" onclick="selectCard(this)" bis_skin_checked="1"><img
+              src="gold-dark.png" alt="Gold Card" /></div>
+          <div class="card-thumb" data-card="silver" onclick="selectCard(this)" bis_skin_checked="1">
+            <img src="silver-dark.png" alt="Silver Card" />
+          </div>
+        </div>
+      </div>
+
+      <div class="continue-button editable" data-id="continue-btn" onclick="handleContinue()"
+        style="transform: translate(2.66675px, 450.666px) scale(1)" bis_skin_checked="1">
+        <img src="button.png" alt="Continue Button" />
+        <span id="continue-text">LANJUT</span>
+      </div>
+      <img src="blue-banner.png" alt="Added Image" class="editable added-element" data-id="added-1-1765247779590"
+        style="max-width: 200px; height: auto; position: absolute; top: 50%; left: 50%; transform: translate(calc(-50% + 0px), calc(-50% + 498.702px)) scale(3.3); z-index: 50" />
+
+      <img src="plus-minus-bg.png" alt="Added Image" class="editable added-element" data-id="added-2-1765247860342"
+        style="max-width: 200px; height: auto; position: absolute; top: 50%; left: 50%; transform: translate(calc(-50% + 200px), calc(-50% + 496.623px)) scale(1); z-index: 50" />
+
+      <img src="plus-button.png" alt="Plus" class="editable added-element" data-id="added-3-1765247923856"
+        onclick="changeCardQuantity(1)"
+        style="max-width: 200px; height: auto; position: absolute; top: 50%; left: 50%; transform: translate(calc(-50% + 250px), calc(-50% + 494.545px)) scale(0.3); z-index: 50; cursor: pointer" />
+
+      <img src="minus-button.png" alt="Minus" class="editable added-element" data-id="added-4-1765247950642"
+        onclick="changeCardQuantity(-1)"
+        style="max-width: 200px; height: auto; position: absolute; top: 50%; left: 50%; transform: translate(calc(-50% + 150px), calc(-50% + 496.702px)) scale(0.3); z-index: 50; cursor: pointer" />
+      <p id="card-quantity" class="editable added-element added-text" data-id="text-5-1765247979831" style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(calc(-50% + 201px), calc(-50% + 494.546px)) scale(1);
+            z-index: 50;
+            font-family: Nulshock, sans-serif;
+            font-size: 1.5rem;
+            color: rgb(255, 255, 255);
+            text-align: center;
+            margin: 0px;
+            max-width: 80%;
+            font-weight: bold;
+          ">
+        1
+      </p>
+      <p id="qty-label" class="editable added-element added-text" data-id="text-6-1765248045227" style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(calc(-50% - 94px), calc(-50% + 496.624px)) scale(0.8);
+            z-index: 50;
+            font-family: Nulshock, sans-serif;
+            font-size: 1.5rem;
+            color: rgb(255, 255, 255);
+            text-align: center;
+            margin: 0px;
+            max-width: 80%;
+            font-weight: bold;
+          ">
+        BERAPA KARTU YANG<br />INGIN ANDA TOP-UP?
+      </p>
+      <p id="card-info-text" class="card-info-hint visible"
+        style="margin-top: 20px; transform: translate(-50%, calc(-50% + 620px)) scale(1); z-index: 51; font-weight: normal; font-size: 1.3rem">
+        UNTUK PENGISIAN BANYAK KARTU, PILIH SATU KARTU TERTINGGIMU
+      </p>
+    </div>
+  </div>
+
+  <script src="page-transition.js"></script>
+  <script src="page-loader.js"></script>
+  <script src="api-config.js"></script>
+  <script src="session-manager.js"></script>
+  <script src="language.js"></script>
+
+  <script>
+    // Set current page in session
+    setCurrentPage("card-selection");
+
+    const translations = {
+      en: {
+        title: "SELECT<br>YOUR CARD",
+        qtyLabel: "HOW MANY CARDS<br>DO YOU WANT TO TOP-UP?",
+        continueBtn: "NEXT",
+        langLabel: "English",
+        cardInfo: "FOR MULTIPLE CARD RECHARGE, SELECT ONLY YOUR HIGHEST CARD",
+        tapHint: "Tap to flip back",
+      },
+      id: {
+        title: "PILIH<br>KARTUMU",
+        qtyLabel: "BERAPA KARTU YANG<br>INGIN ANDA TOP-UP?",
+        continueBtn: "LANJUT",
+        langLabel: "Bahasa",
+        cardInfo: "UNTUK PENGISIAN BANYAK KARTU, PILIH SATU KARTU TERTINGGIMU",
+        tapHint: "Ketuk untuk membalikkan kartu",
+      },
+    };
+
+    const cardDescriptions = {
+      en: {
+        red: "Welcome to Timezone, your fun starts now.",
+        blue: "Top-up 500K IDR and get a one-time gift of 50 Tizo + 500 tickets. Only in the Fun App.",
+        gold: "Top-up 2M IDR total and get a one-time gift of 200 Tizo + 2,000 tickets. Only in the Fun App.",
+        silver: "Top-up 8M IDR total and get a one-time gift of 800 Tizo + 8,000 tickets. Only in the Fun App.",
+      },
+      id: {
+        red: "Selamat datang di Timezone. Saatnya Bersenang-senang!",
+        blue: "Isi ulang saldo Rp 500.000 dan dapatkan hadiah sekali pakai berupa 50 Tizo + 500 tiket. Hanya di Aplikasi Fun.",
+        gold: "Isi ulang saldo 2M IDR dan dapatkan hadiah sekali berupa 200 Tizo + 2.000 tiket — hanya di Fun App.",
+        silver: "Isi ulang saldo 8M IDR dan dapatkan hadiah sekali berupa 800 Tizo + 8.000 tiket. Hanya di Fun App.",
+      },
+    };
+
+    // Default card data (fallback if database not available)
+    const cardData = {
+      red: { light: "red-card.png", dark: "red-card.png", title: "WELCOME CARD", desc: cardDescriptions.en.red },
+      blue: { light: "blue-card.png", dark: "blue-card.png", title: "BLUE ELITE", desc: cardDescriptions.en.blue },
+      gold: { light: "gold-card.png", dark: "gold-card.png", title: "GOLD", desc: cardDescriptions.en.gold },
+      silver: { light: "silver-card.png", dark: "silver-card.png", title: "PLATINUM", desc: cardDescriptions.en.silver },
+    };
+
+    function setCardDescriptionsForLanguage(lang) {
+      const langSet = cardDescriptions[lang] || cardDescriptions.en;
+      Object.keys(langSet).forEach((key) => {
+        if (cardData[key]) {
+          cardData[key].desc = langSet[key];
+        }
+      });
+    }
+
+    function updateActiveCardDescription() {
+      const backDescEl = document.getElementById("back-desc");
+      if (!backDescEl) return;
+      const activeThumb = document.querySelector(".card-thumb.active");
+      const activeCard = selectedCard || (activeThumb ? activeThumb.dataset.card : null);
+      if (activeCard && cardData[activeCard]) {
+        backDescEl.textContent = cardData[activeCard].desc;
+      }
+    }
+
+    // Apply initial descriptions based on current language (before any card selection)
+    setCardDescriptionsForLanguage(getCurrentLanguage());
+
+    // Fetch card info from database and update cardData (only description)
+    async function fetchCardInfo() {
+      try {
+        const response = await fetch(getApiUrl("/api/card-info"));
+        const data = await response.json();
+
+        if (data.success && data.cards) {
+          data.cards.forEach((card) => {
+            const cardId = card.id.toLowerCase();
+            // Map database id to our cardData keys
+            let key = cardId;
+            if (cardId === "platinum") key = "silver"; // platinum maps to silver in UI
+
+            if (cardData[key]) {
+              // Descriptions are managed locally to keep copy consistent
+              console.log(`Fetched description for ${key}:`, card.description);
+            }
+          });
+          console.log("Card info fetched from database.");
+        }
+      } catch (error) {
+        console.error("Error fetching card info:", error);
+        // Keep using default cardData
+      }
+      // Re-apply local copy after fetch to ensure consistency
+      setCardDescriptionsForLanguage(currentLang);
+      updateActiveCardDescription();
+    }
+
+    let currentLang = getCurrentLanguage(),
+      selectedCard = null,
+      quantity = 1,
+      isFlipped = false,
+      hasSelectedFromGrid = false;
+
+    setCardDescriptionsForLanguage(currentLang);
+
+    function goBack() {
+      window.location.href = "welcome2.html";
+    }
+
+    function toggleCardFlip(event) {
+      event.stopPropagation();
+      isFlipped = !isFlipped;
+      document.getElementById("featured-card").classList.toggle("flipped", isFlipped);
+
+      // Addon Code
+      const cardBackWrapper = document.querySelector(".card-back");
+      cardBackWrapper.style.opacity = "1";
+
+      // Swap the icon between info and back
+      const icon = document.getElementById("flip-toggle-icon");
+      if (isFlipped) {
+        icon.src = "back-button.png";
+        icon.alt = "Back";
+      } else {
+        icon.src = "i-icon.png";
+        icon.alt = "Info";
+      }
+    }
+
+    // Called when user clicks a card from the initial 2x2 grid
+    function selectCardFromGrid(gridCardEl) {
+      if (window.isEditModeActive && window.isEditModeActive()) return;
+
+      const cardType = gridCardEl.dataset.card;
+      selectedCard = cardType;
+      hasSelectedFromGrid = true;
+
+      // Get elements
+      const initialGrid = document.getElementById("initial-grid");
+      const cardSelectionArea = document.getElementById("card-selection-area");
+      const featuredCard = document.getElementById("featured-card");
+      const data = cardData[cardType];
+
+      // Prepare the featured card before showing (while grid is fading)
+      document.getElementById("featured-img").src = data.light;
+      document.getElementById("back-img").src = data.light;
+      document.getElementById("back-title").textContent = cardData[cardType].title;
+      document.getElementById("back-desc").textContent = cardData[cardType].desc;
+
+      //  Addon Code
+      const cardBackWrapper = document.querySelector(".card-back");
+      cardBackWrapper.style.opacity = "0";
+
+      // Update thumbnails
+      document.querySelectorAll(".card-thumb").forEach((thumb) => {
+        const type = thumb.dataset.card;
+        const img = thumb.querySelector("img");
+        if (type === cardType) {
+          thumb.classList.add("active");
+          img.src = cardData[type].light;
+        } else {
+          thumb.classList.remove("active");
+          img.src = cardData[type].dark;
+        }
+      });
+
+      // Start fade-out animation on grid
+      initialGrid.classList.add("fade-out");
+
+      // After fade-out, switch views and animate card
+      setTimeout(() => {
+        // Hide grid, show selection area
+        initialGrid.classList.add("hidden");
+        cardSelectionArea.classList.remove("hidden");
+        cardSelectionArea.classList.remove("opacity-0");
+
+        // Remove can-flip during animation to prevent transition conflicts
+        featuredCard.classList.remove("animate", "first-appear", "can-flip");
+        void featuredCard.offsetWidth; // Force reflow
+        featuredCard.classList.add("first-appear");
+
+        // Add can-flip class after animation completes so info flip works
+        setTimeout(() => {
+          featuredCard.classList.add("can-flip");
+        }, 400); // Match the cardAppear animation duration
+      }, 250); // Match the fade-out transition duration
+    }
+
+    function selectCard(thumbEl) {
+      const cardType = thumbEl.dataset.card;
+      if (selectedCard === cardType) return;
+
+      //  Addon Code
+      const cardBackWrapper = document.querySelector(".card-back");
+      cardBackWrapper.style.opacity = "0";
+
+      if (isFlipped) {
+        const icon = document.getElementById("flip-toggle-icon");
+        icon.src = "i-icon.png";
+        icon.alt = "Info";
+
+        document.getElementById("featured-card").classList.remove("flipped");
+        isFlipped = false;
+      }
+
+      selectedCard = cardType;
+      hasSelectedFromGrid = true; // Allow navigation when card is selected from thumbnails
+      const data = cardData[cardType];
+      const featuredCard = document.getElementById("featured-card");
+
+      // Remove all animation classes and re-add only 'animate' for thumbnail switching
+      featuredCard.classList.remove("animate", "first-appear");
+      void featuredCard.offsetWidth;
+      featuredCard.classList.add("animate");
+
+      document.getElementById("featured-img").src = data.light;
+      document.getElementById("back-img").src = data.light;
+      // Use database values for title and description
+      document.getElementById("back-title").textContent = cardData[cardType].title;
+      document.getElementById("back-desc").textContent = cardData[cardType].desc;
+
+      document.querySelectorAll(".card-thumb").forEach((thumb) => {
+        const type = thumb.dataset.card;
+        const img = thumb.querySelector("img");
+        if (type === cardType) {
+          thumb.classList.add("active");
+          img.src = cardData[type].light;
+        } else {
+          thumb.classList.remove("active");
+          img.src = cardData[type].dark;
+        }
+      });
+    }
+
+    function changeCardQuantity(delta) {
+      // Don't change if in edit mode
+      if (window.isEditModeActive && window.isEditModeActive()) return;
+
+      quantity = Math.max(1, Math.min(10, quantity + delta));
+      document.getElementById("card-quantity").textContent = quantity;
+      localStorage.setItem("cardQuantity", quantity);
+      updateCardInfoMessage();
+    }
+
+    function changeQuantity(delta) {
+      changeCardQuantity(delta);
+    }
+
+    function handleContinue() {
+      // Don't navigate if in edit mode
+      if (window.isEditModeActive && window.isEditModeActive()) return;
+
+      // Check if user has selected a card from the grid
+      if (!hasSelectedFromGrid || !selectedCard) {
+        // Shake the grid to indicate user needs to select a card
+        const grid = document.getElementById("initial-grid");
+        if (grid && !grid.classList.contains("hidden")) {
+          grid.style.animation = "none";
+          grid.offsetHeight; // Force reflow
+          grid.style.animation = "shakeGrid 0.5s ease";
+        }
+        return;
+      }
+
+      // Save to session - mark as existing player (not new)
+      updateSession({
+        selectedCard: selectedCard,
+        cardQuantity: quantity,
+        selectedCardCount: quantity,
+        isNewPlayer: false,
+      });
+      // Also keep localStorage for backward compatibility
+      localStorage.setItem("selectedCard", selectedCard);
+      localStorage.setItem("cardQuantity", quantity);
+      localStorage.setItem("selectedCardCount", quantity);
+      localStorage.setItem("isNewPlayer", "false");
+      window.location.href = "offers-selection.html";
+    }
+
+    function toggleLanguage() {
+      document.getElementById("lang-dropdown").classList.toggle("hidden");
+    }
+    function applyLanguage(lang) {
+      currentLang = lang;
+      const data = translations[lang];
+      document.getElementById("page-title").innerHTML = data.title;
+      document.getElementById("qty-label").innerHTML = data.qtyLabel;
+      document.getElementById("continue-text").textContent = data.continueBtn;
+      const langEl = document.getElementById("current-lang");
+      if (langEl) langEl.textContent = data.langLabel;
+      const cardInfoEl = document.getElementById("card-info-text");
+      if (cardInfoEl) {
+        cardInfoEl.innerHTML = data.cardInfo;
+      }
+      const tapHintEl = document.getElementById("tap-hint-text");
+      if (tapHintEl) {
+        tapHintEl.innerHTML = data.tapHint;
+      }
+      setCardDescriptionsForLanguage(lang);
+      updateActiveCardDescription();
+      updateCardInfoMessage();
+    }
+    function setLanguage(lang) {
+      saveLanguage(lang);
+      applyLanguage(lang);
+      document.getElementById("lang-dropdown").classList.add("hidden");
+    }
+
+    window.onclick = function (event) {
+      if (!event.target.matches("#lang-btn") && !event.target.closest("#lang-btn")) {
+        document.querySelectorAll(".dropdown-content").forEach((d) => d.classList.add("hidden"));
+      }
+    };
+
+    function updateCardInfoMessage() {
+      const cardInfoEl = document.getElementById("card-info-text");
+      if (!cardInfoEl) return;
+
+      if (quantity > 1) {
+        cardInfoEl.classList.add("visible");
+        cardInfoEl.classList.remove("hidden");
+      } else {
+        cardInfoEl.classList.remove("visible");
+        cardInfoEl.classList.add("hidden");
+      }
+    }
+
+    // Initialize page with loader
+    initPageWithLoader({
+      onDataLoad: async () => {
+        await fetchCardInfo(); // Load card info from database first
+        applyLanguage(currentLang);
+        updateCardInfoMessage();
+
+        // Check if card selection area is already visible (initial grid hidden)
+        const initialGrid = document.getElementById("initial-grid");
+        const cardSelectionArea = document.getElementById("card-selection-area");
+
+        if (initialGrid && initialGrid.classList.contains("hidden") && cardSelectionArea && !cardSelectionArea.classList.contains("hidden")) {
+          // Find the active card in the thumbnail row
+          const activeThumb = document.querySelector(".card-thumb.active");
+          if (activeThumb) {
+            selectedCard = activeThumb.dataset.card;
+            hasSelectedFromGrid = true;
+            console.log("Ã¢Å“â€¦ Pre-selected card:", selectedCard);
+          }
+        }
+      },
+      minLoadTime: 300,
+    }).then(() => {
+
+    });
+  </script>
+
+  <span id="PING_IFRAME_FORM_DETECTION" style="display: none"></span>
+
+  <span id="PING_IFRAME_FORM_DETECTION" style="display: none"></span><span id="PING_IFRAME_FORM_DETECTION"
+    style="display: none"></span>
+</body>
+
+</html>

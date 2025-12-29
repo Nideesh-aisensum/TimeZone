@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Timezone Kiosk - Shell</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            /* Kiosk security: prevent zooming, text selection, and all touch gestures */
+            touch-action: none !important;
+            -ms-touch-action: none !important;
+            -webkit-touch-callout: none !important;
+            -webkit-user-select: none !important;
+            -moz-user-select: none !important;
+            -ms-user-select: none !important;
+            user-select: none !important;
+        }
+
+        html,
+        body {
+            width: 1080px;
+            height: 1920px;
+            overflow: hidden;
+            background: #000;
+        }
+
+        /* ===== PERSISTENT VIDEO BACKGROUNDS ===== */
+        .global-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 1080px;
+            height: 1920px;
+            object-fit: cover;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .global-video.active {
+            opacity: 1;
+        }
+
+        /* ===== IFRAME CONTAINER ===== */
+        #page-frame {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 1080px;
+            height: 1920px;
+            border: none;
+            z-index: 10;
+            background: transparent;
+        }
+
+        /* ===== LOADING OVERLAY ===== */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        #loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #loading-overlay img {
+            width: 300px;
+            margin-bottom: 40px;
+        }
+
+        #loading-text {
+            font-family: 'Nulshock', Arial, sans-serif;
+            color: #33fff9;
+            font-size: 24px;
+            letter-spacing: 3px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ===== PERSISTENT VIDEO BACKGROUNDS (Never Reload) ===== -->
+    <video id="bg-main" class="global-video active" autoplay loop muted playsinline>
+        <source src="other-bg.mp4" type="video/mp4">
+    </video>
+    <video id="bg-ood" class="global-video" autoplay loop muted playsinline>
+        <source src="OOD-BACKGROUND.mp4" type="video/mp4">
+    </video>
+    <video id="bg-ooh" class="global-video" autoplay loop muted playsinline>
+        <source src="OOH-BACKGROUND.mp4" type="video/mp4">
+    </video>
+    <video id="bg-snacks" class="global-video" autoplay loop muted playsinline>
+        <source src="free-snacks-bg.mp4" type="video/mp4">
+    </video>
+
+    <!-- ===== PAGE IFRAME ===== -->
+    <iframe id="page-frame" src="welcome.html"></iframe>
+
+    <!-- ===== LOADING OVERLAY ===== -->
+    <div id="loading-overlay">
+        <img src="timezone-branding.png" alt="Loading">
+        <div id="loading-text">LOADING...</div>
+    </div>
+
+    <!-- ===== KIOSK SECURITY: Block right-click, zoom, long-press ===== -->
+    <script>
+        (function () {
+            // Block right-click context menu
+            document.addEventListener('contextmenu', function (e) {
+                e.preventDefault();
+                return false;
+            }, true);
+
+            // Block long-press context menu on touch devices
+            let longPressTimer = null;
+            document.addEventListener('touchstart', function (e) {
+                longPressTimer = setTimeout(function () {
+                    e.preventDefault();
+                }, 500);
+            }, { passive: false });
+
+            document.addEventListener('touchend', function () {
+                if (longPressTimer) {
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                }
+            });
+
+            document.addEventListener('touchmove', function () {
+                if (longPressTimer) {
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                }
+            });
+
+            // Block keyboard shortcuts for zoom
+            document.addEventListener('keydown', function (e) {
+                // Block Ctrl+Plus, Ctrl+Minus, Ctrl+0 (zoom)
+                if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '-' || e.key === '=' || e.key === '0')) {
+                    e.preventDefault();
+                    return false;
+                }
+                // Block F3, F5, F12
+                if (e.key === 'F3' || e.key === 'F5' || e.key === 'F12') {
+                    e.preventDefault();
+                    return false;
+                }
+            }, true);
+
+            // Block wheel zoom (Ctrl+scroll)
+            document.addEventListener('wheel', function (e) {
+                if (e.ctrlKey) {
+                    e.preventDefault();
+                    return false;
+                }
+            }, { passive: false });
+
+            // Block pinch-to-zoom (gesturestart for Safari/iOS)
+            document.addEventListener('gesturestart', function (e) {
+                e.preventDefault();
+                return false;
+            }, { passive: false });
+
+            document.addEventListener('gesturechange', function (e) {
+                e.preventDefault();
+                return false;
+            }, { passive: false });
+
+            document.addEventListener('gestureend', function (e) {
+                e.preventDefault();
+                return false;
+            }, { passive: false });
+
+            // Block multi-touch zoom (2+ fingers)
+            document.addEventListener('touchstart', function (e) {
+                if (e.touches.length > 1) {
+                    e.preventDefault();
+                    return false;
+                }
+            }, { passive: false });
+
+            console.log('[KioskShell] Security: Right-click, zoom, and long-press blocked');
+        })();
+    </script>
+
+    <!-- ===== PERSISTENT BACKGROUND MUSIC (Never Reload) ===== -->
+    <script>
+        /**
+         * BACKGROUND MUSIC MANAGER (Shell-Level)
+         * 
+         * The music is managed here in the shell so it:
+         * 1. Never gets duplicated when pages change in the iframe
+         * 2. Continues playing seamlessly across page navigation
+         * 3. Properly ducks when other sounds play in the iframe
+         */
+        (function () {
+            const MUSIC_VOLUME = 0.3; // 30% volume
+            const DUCKED_VOLUME = 0.1; // 10% volume when other sounds play
+            const MUSIC_SRC = 'bg-music.wav';
+            const FADE_DURATION = 150; // ms for volume fade transitions
+
+            let bgAudio = null;
+            const activeSounds = new Set();
+
+            // Smooth volume transition
+            function fadeVolume(audio, targetVolume, duration = FADE_DURATION) {
+                if (!audio) return;
+                const startVolume = audio.volume;
+                const volumeDiff = targetVolume - startVolume;
+                const startTime = performance.now();
+
+                function step(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const easeProgress = 1 - (1 - progress) * (1 - progress);
+                    let newVolume = startVolume + (volumeDiff * easeProgress);
+                    newVolume = Math.max(0, Math.min(1, newVolume));
+                    audio.volume = newVolume;
+
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    }
+                }
+
+                requestAnimationFrame(step);
+            }
+
+            // Initialize background music
+            function initBackgroundMusic() {
+                if (bgAudio) return; // Already initialized
+
+                bgAudio = document.createElement('audio');
+                bgAudio.id = 'shell-background-music';
+                bgAudio.loop = true;
+                bgAudio.preload = 'auto';
+                bgAudio.volume = 0;
+                bgAudio.src = MUSIC_SRC;
+                bgAudio.style.display = 'none';
+
+                bgAudio.addEventListener('canplaythrough', function onReady() {
+                    bgAudio.removeEventListener('canplaythrough', onReady);
+
+                    const playPromise = bgAudio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            fadeVolume(bgAudio, MUSIC_VOLUME, 200);
+                            console.log('[KioskShell] Background music started');
+                        }).catch(function (error) {
+                            console.log('[KioskShell] Autoplay prevented, waiting for interaction');
+
+                            function playOnInteraction() {
+                                bgAudio.play().then(function () {
+                                    fadeVolume(bgAudio, MUSIC_VOLUME, 200);
+                                    document.removeEventListener('click', playOnInteraction);
+                                    document.removeEventListener('touchstart', playOnInteraction);
+                                    console.log('[KioskShell] Background music started on interaction');
+                                }).catch(function (e) {
+                                    console.log('[KioskShell] Still cannot play music:', e);
+                                });
+                            }
+
+                            document.addEventListener('click', playOnInteraction);
+                            document.addEventListener('touchstart', playOnInteraction);
+                        });
+                    }
+                }, { once: true });
+
+                document.body.appendChild(bgAudio);
+            }
+
+            // Duck music when sounds play in iframe
+            function handleIframeSoundStart(element) {
+                if (activeSounds.size === 0 && bgAudio) {
+                    fadeVolume(bgAudio, DUCKED_VOLUME);
+                }
+                activeSounds.add(element);
+            }
+
+            function handleIframeSoundEnd(element) {
+                activeSounds.delete(element);
+                if (activeSounds.size === 0 && bgAudio) {
+                    fadeVolume(bgAudio, MUSIC_VOLUME);
+                }
+            }
+
+            // Try to start music (called on any user interaction)
+            let musicStarted = false;
+            function tryStartMusic() {
+                if (musicStarted || !bgAudio) return;
+
+                bgAudio.play().then(function () {
+                    fadeVolume(bgAudio, MUSIC_VOLUME, 200);
+                    musicStarted = true;
+                    console.log('[KioskShell] Background music started');
+                }).catch(function (e) {
+                    console.log('[KioskShell] Cannot play music:', e);
+                });
+            }
+
+            // Listen for messages from iframe (ducking AND user interaction)
+            window.addEventListener('message', function (event) {
+                const data = event.data;
+                if (!data || !data.type) return;
+
+                if (data.type === 'duckMusic') {
+                    if (data.action === 'start') {
+                        handleIframeSoundStart(data.soundId || 'unknown');
+                    } else if (data.action === 'end') {
+                        handleIframeSoundEnd(data.soundId || 'unknown');
+                    }
+                }
+
+                // User clicked/touched in iframe - try to start music
+                if (data.type === 'userInteraction') {
+                    tryStartMusic();
+                }
+            });
+
+            // Also listen for clicks on the shell itself (loading overlay, etc)
+            document.addEventListener('click', tryStartMusic);
+            document.addEventListener('touchstart', tryStartMusic);
+
+            // Initialize on ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initBackgroundMusic);
+            } else {
+                initBackgroundMusic();
+            }
+
+            // Expose for debugging
+            window.ShellMusic = {
+                getAudio: () => bgAudio,
+                fadeVolume: fadeVolume,
+                duck: () => fadeVolume(bgAudio, DUCKED_VOLUME),
+                unduck: () => fadeVolume(bgAudio, MUSIC_VOLUME),
+                tryStart: tryStartMusic
+            };
+        })();
+    </script>
+
+    <script>
+        /**
+         * KIOSK SHELL
+         * 
+         * This shell provides:
+         * 1. Persistent background videos (never reload)
+         * 2. Iframe for page content (isolated JS/CSS)
+         * 3. Message-based navigation
+         * 4. Background switching based on page
+         * 5. Persistent background music (never duplicates)
+         */
+
+        const KioskShell = {
+            currentBg: 'main',
+            frame: null,
+
+            // Background mapping for pages
+            PAGE_BACKGROUNDS: {
+                'screensaver.html': 'ood',
+                'screensaver-ood.html': 'ood',
+                'free-snacks.html': 'snacks'
+                // All other pages use 'main'
+            },
+
+            init: function () {
+                console.log('[KioskShell] Initializing...');
+                this.frame = document.getElementById('page-frame');
+
+                // Listen for messages from iframe
+                window.addEventListener('message', this.handleMessage.bind(this));
+
+                // Listen for iframe load
+                this.frame.addEventListener('load', () => {
+                    console.log('[KioskShell] Page loaded:', this.frame.contentWindow.location.href);
+                    this.hideLoading();
+
+                    // Switch background based on loaded page
+                    try {
+                        const loadedUrl = this.frame.contentWindow.location.href.split('/').pop();
+                        const bgType = this.PAGE_BACKGROUNDS[loadedUrl] || 'main';
+                        this.switchBackground(bgType);
+                        console.log('[KioskShell] Auto-switched background for:', loadedUrl, '->', bgType);
+                    } catch (e) {
+                        console.log('[KioskShell] Could not auto-switch background:', e.message);
+                    }
+
+                    // Inject shell connector into iframe
+                    this.injectConnector();
+                });
+
+                // Wait for main video to be ready
+                const mainVideo = document.getElementById('bg-main');
+                if (mainVideo.readyState >= 3) {
+                    this.hideLoading();
+                } else {
+                    mainVideo.addEventListener('canplay', () => this.hideLoading(), { once: true });
+                    setTimeout(() => this.hideLoading(), 2000);
+                }
+            },
+
+            handleMessage: function (event) {
+                const data = event.data;
+                if (!data || !data.type) return;
+
+                console.log('[KioskShell] Message received:', data);
+
+                switch (data.type) {
+                    case 'navigate':
+                        this.navigateTo(data.url);
+                        break;
+                    case 'switchBackground':
+                        this.switchBackground(data.background);
+                        break;
+                }
+            },
+
+            // Navigation lock to prevent rapid clicks causing race conditions
+            _isNavigating: false,
+
+            navigateTo: function (url) {
+                // Prevent rapid navigation
+                if (this._isNavigating) {
+                    console.log('[KioskShell] Navigation locked, ignoring:', url);
+                    return;
+                }
+                this._isNavigating = true;
+
+                // Clear lock after 2 seconds (safety fallback)
+                setTimeout(() => { this._isNavigating = false; }, 2000);
+
+                console.log('[KioskShell] Navigating to:', url);
+
+                // Switch background based on target page
+                const bgType = this.PAGE_BACKGROUNDS[url] || 'main';
+                this.switchBackground(bgType);
+
+                // Navigate iframe
+                this.frame.src = url;
+            },
+
+            switchBackground: function (bgType) {
+                if (bgType === this.currentBg) return;
+
+                console.log('[KioskShell] Switching background:', this.currentBg, '->', bgType);
+
+                // Hide all backgrounds
+                document.querySelectorAll('.global-video').forEach(v => {
+                    v.classList.remove('active');
+                });
+
+                // Show target background
+                const bgMap = {
+                    'main': 'bg-main',
+                    'ood': 'bg-ood',
+                    'ooh': 'bg-ooh',
+                    'snacks': 'bg-snacks'
+                };
+
+                const targetEl = document.getElementById(bgMap[bgType] || 'bg-main');
+                if (targetEl) {
+                    targetEl.classList.add('active');
+                }
+
+                this.currentBg = bgType;
+            },
+
+            hideLoading: function () {
+                document.getElementById('loading-overlay').classList.add('hidden');
+            },
+
+            injectConnector: function () {
+                try {
+                    const iframeWindow = this.frame.contentWindow;
+                    const iframeDoc = this.frame.contentDocument;
+
+                    // Only inject if we have access (same origin)
+                    if (!iframeDoc) return;
+
+                    // Override navigation functions in iframe
+                    iframeWindow.shellNavigate = (url) => {
+                        window.parent.postMessage({ type: 'navigate', url: url }, '*');
+                    };
+
+                    // Override window.location.href setter
+                    // This intercepts navigation and sends to shell instead
+                    const originalLocation = iframeWindow.location;
+
+                    // Intercept link clicks
+                    iframeDoc.addEventListener('click', (e) => {
+                        const link = e.target.closest('a');
+                        if (link && link.href && link.href.endsWith('.html')) {
+                            e.preventDefault();
+                            const url = link.href.split('/').pop();
+                            window.parent.postMessage({ type: 'navigate', url: url }, '*');
+                        }
+                    });
+
+                    // Make background transparent
+                    const container = iframeDoc.querySelector('.container');
+                    if (container) {
+                        container.style.background = 'transparent';
+                        container.style.backgroundColor = 'transparent';
+                    }
+
+                    // Remove video backgrounds from iframe (we have them in shell)
+                    const videos = iframeDoc.querySelectorAll('.video-bg, video.hero-background');
+                    videos.forEach(v => {
+                        v.style.opacity = '0';
+                        v.style.display = 'none';
+                    });
+
+                    console.log('[KioskShell] Connector injected successfully');
+
+                } catch (e) {
+                    console.log('[KioskShell] Cannot inject connector (cross-origin):', e.message);
+                }
+            }
+        };
+
+        // Initialize on DOM ready
+        document.addEventListener('DOMContentLoaded', () => {
+            KioskShell.init();
+        });
+
+        // Expose for debugging
+        window.KioskShell = KioskShell;
+    </script>
+</body>
+
+</html>

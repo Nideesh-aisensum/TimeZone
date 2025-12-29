@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <title>Timezone - Free Snacks Highlight</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        @font-face {
+            font-family: 'Nulshock';
+            src: url('nulshock/nulshock-heavy.otf') format('opentype');
+            font-display: swap;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: transparent;
+            font-family: 'Nulshock', sans-serif;
+        }
+
+        .free-snack-hero {
+            width: 1080px;
+            height: 1920px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .hero-background {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .hero-gradient {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 35%, rgba(87, 133, 255, 0.6), transparent 55%),
+                radial-gradient(circle at 50% 100%, rgba(255, 0, 153, 0.35), transparent 45%);
+            z-index: 2;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 3;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 120px;
+            color: #fff;
+            text-align: center;
+        }
+
+        .timezone-wordmark {
+            font-size: 42px;
+            letter-spacing: 12px;
+            margin-bottom: 40px;
+            color: #ffe16c;
+            text-shadow: 0 0 30px rgba(255, 241, 108, 0.6);
+        }
+
+        .free-gift-title {
+            font-size: 90px;
+            letter-spacing: 6px;
+            color: #ffffff;
+            text-shadow:
+                0 0 25px rgba(255, 255, 255, 0.7),
+                0 12px 40px rgba(0, 0, 0, 0.65);
+            margin-bottom: 65px;
+        }
+
+        .offer-stack {
+            position: relative;
+        }
+
+        .free-snack-icon {
+            position: absolute;
+            left: -130px;
+            top: -60px;
+            width: 150px;
+            height: auto;
+            z-index: 5;
+            transform: rotate(-6deg);
+            filter: drop-shadow(0 15px 35px rgba(0, 0, 0, 0.4));
+        }
+
+        .card-visual {
+            width: 720px;
+            height: auto;
+            filter: drop-shadow(0 20px 50px rgba(255, 100, 180, 0.5));
+        }
+
+        .card-copy {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding-top: 60px;
+            pointer-events: none;
+        }
+
+        .rb-row {
+            font-size: 90px;
+            color: #182c4f;
+            letter-spacing: 4px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            text-transform: uppercase;
+        }
+
+        .rb-unit {
+            font-size: 38px;
+            line-height: 1.3;
+            color: #182c4f;
+        }
+
+        .dapat-label {
+            margin-top: 10px;
+            font-size: 50px;
+            letter-spacing: 4px;
+            color: #33fff9;
+        }
+
+        .tizo-amount {
+            font-size: 90px;
+            color: #33fff9;
+            text-shadow:
+                0 0 30px rgba(51, 255, 249, 0.6),
+                0 12px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .tizo-unit {
+            font-size: 50px;
+            letter-spacing: 10px;
+            color: #33fff9;
+        }
+
+        .snack-footer {
+            margin-top: 15px;
+            font-size: 110px;
+            color: #33fff9;
+            letter-spacing: 8px;
+        }
+
+        .snack-footer span {
+            display: block;
+            font-size: 60px;
+            letter-spacing: 6px;
+        }
+
+        .tap-hint {
+            position: absolute;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 26px;
+            letter-spacing: 4px;
+            color: rgba(255, 255, 255, 0.7);
+            animation: pulse 2.4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.35;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body onclick="handleClick(event)" __processed_42fbca2d-a536-4d5f-86a9-8377c243c06c__="true"
+    bis_register="W3sibWFzdGVyIjp0cnVlLCJleHRlbnNpb25JZCI6ImVwcGlvY2VtaG1ubGJoanBsY2drb2ZjaWllZ29tY29uIiwiYWRibG9ja2VyU3RhdHVzIjp7IkRJU1BMQVkiOiJkaXNhYmxlZCIsIkZBQ0VCT09LIjoiZGlzYWJsZWQiLCJUV0lUVEVSIjoiZGlzYWJsZWQiLCJSRURESVQiOiJkaXNhYmxlZCIsIlBJTlRFUkVTVCI6ImRpc2FibGVkIiwiSU5TVEFHUkFNIjoiZGlzYWJsZWQiLCJUSUtUT0siOiJkaXNhYmxlZCIsIkxJTktFRElOIjoiZGlzYWJsZWQiLCJDT05GSUciOiJkaXNhYmxlZCJ9LCJ2ZXJzaW9uIjoiMi4wLjM1Iiwic2NvcmUiOjIwMDM1fV0="
+    class="">
+    <div class="free-snack-hero editable" data-id="free-snack-hero" bis_skin_checked="1">
+        <video class="hero-background" autoplay loop muted playsinline>
+            <source src="free-snacks-bg.mp4" type="video/mp4">
+        </video>
+        <div class="hero-gradient" bis_skin_checked="1"></div>
+
+        <div class="hero-content" bis_skin_checked="1">
+            <div class="timezone-wordmark editable" data-id="timezone-wordmark" bis_skin_checked="1">TIMEZONE</div>
+            <div class="free-gift-title editable" data-id="free-gift-title" bis_skin_checked="1">FREE GIFT!</div>
+
+            <div class="offer-stack" bis_skin_checked="1">
+                <img src="free-snack-icon.gif" alt="Free snack badge" class="free-snack-icon editable"
+                    data-id="free-snack-icon" style="transform: translate(672px, 53.3334px) scale(1.3);">
+                <img src="free-gift-offer.png" alt="Free snack card" class="card-visual editable" data-id="card-visual">
+
+                <div class="card-copy" bis_skin_checked="1">
+                    <div class="rb-row editable" data-id="rb-row" bis_skin_checked="1">
+                        <span>600</span>
+                        <span class="rb-unit">RB</span>
+                    </div>
+                    <div class="dapat-label editable" data-id="dapat-label" bis_skin_checked="1">DAPAT</div>
+                    <div class="tizo-amount editable" data-id="tizo-amount" bis_skin_checked="1">1080</div>
+                    <div class="tizo-unit editable" data-id="tizo-unit" bis_skin_checked="1">TIZO</div>
+                    <div class="snack-footer editable" data-id="snack-footer" bis_skin_checked="1">SNACK</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tap-hint editable" data-id="tap-hint" bis_skin_checked="1">TAP TO CONTINUE</div>
+    </div>
+
+
+    <script src="shell-connector.js"></script>
+    <script src="api-config.js"></script>
+    <script src="language.js"></script>
+    <script>
+        // Fetch Snacks offer data from database
+        async function fetchSnacksOffer() {
+            try {
+                console.log('Fetching Snacks offers...');
+                const response = await fetch(getApiUrl('/api/offers?category=Snacks'));
+                console.log('Response status:', response.status);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Snacks API response:', data);
+                    if (data.success && data.offers && data.offers.length > 0) {
+                        const offer = data.offers[0];
+                        const costInRb = Math.round(parseFloat(offer.cost) / 1000);
+                        const tizoCredit = Math.round(parseFloat(offer.tizo_credit));
+
+                        // Update text values - use class selectors
+                        const rbRowSpan = document.querySelector('.rb-row span');
+                        if (rbRowSpan) rbRowSpan.textContent = costInRb;
+
+                        const tizoAmountEl = document.querySelector('.tizo-amount');
+                        if (tizoAmountEl) tizoAmountEl.textContent = tizoCredit;
+
+                        // Use captured offer card image if available
+                        if (offer.offer_card_image && offer.offer_card_image.trim() !== '') {
+                            const cardEl = document.querySelector('.card-visual');
+                            if (cardEl) {
+                                cardEl.src = offer.offer_card_image;
+                                // Hide text overlay since image already has text
+                                const cardCopy = document.querySelector('.card-copy');
+                                if (cardCopy) cardCopy.style.display = 'none';
+                            }
+                        }
+
+                        console.log('Snacks offer loaded:', { rb: costInRb, tizo: tizoCredit, hasCardImage: !!(offer.offer_card_image) });
+                    } else {
+                        // No active Snacks offer, redirect to welcome
+                        console.log('No active Snacks offers found, redirecting to welcome');
+                        window.location.href = 'welcome.html';
+                    }
+                } else {
+                    console.log('Failed to fetch Snacks offer, status:', response.status);
+                }
+            } catch (error) {
+                console.error('Error fetching Snacks offer:', error);
+            }
+        }
+
+        function handleClick(event) {
+            if (window.isEditModeActive && window.isEditModeActive()) return;
+            window.location.href = 'welcome.html';
+        }
+
+
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            fetchSnacksOffer();
+        });
+    </script>
+
+</body>
+
+</html>

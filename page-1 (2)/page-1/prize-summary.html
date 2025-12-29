@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en" style="visibility: hidden; opacity: 0;" class="page-ready">
+
+
+<head>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <title>Timezone - Prize Summary</title>
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Font Face Declarations */
+        @font-face {
+            font-family: 'Nulshock';
+            src: url('nulshock/Nulshock-Bd.otf') format('opentype');
+            font-weight: bold;
+            font-style: normal;
+            font-display: swap;
+        }
+
+
+        /* Fixed for 1080x1920 resolution - NO SCROLLING */
+        html,
+        body {
+            overflow: hidden;
+            background: transparent;
+        }
+
+        .container {
+            width: 1080px;
+            height: 1920px;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        .content {
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+            padding-top: 80px;
+            background: transparent !important;
+        }
+
+        /* Back button - remove blue circle, show only the PNG */
+
+
+        /* Top info text - OUTSIDE the card, at the very top */
+        .top-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .top-label {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 24px;
+            color: #ffffff;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .top-value {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 28px;
+            color: #ffffff;
+            letter-spacing: 1px;
+        }
+
+        /* Popup Container - the card */
+        .popup-container {
+            position: relative;
+            width: 850px;
+            height: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+            margin-left: 25px;
+        }
+
+        /* Popup Background Image */
+        .popup-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            z-index: 1;
+        }
+
+        /* Content overlay on top of popup bg - INSIDE THE CARD */
+        .popup-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            padding: 80px 60px 40px;
+        }
+
+        /* Surprise Header - INSIDE CARD */
+        .surprise-header {
+            text-align: center;
+            margin-top: 85px;
+        }
+
+        .surprise-title {
+            font-family: 'Nulshock', 'Arial Black', sans-serif;
+            font-size: 80px;
+            color: #ff00ff;
+            text-shadow: 0 0 30px rgba(255, 0, 255, 0.7);
+            margin-bottom: 10px;
+        }
+
+        .surprise-subtitle {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 32px;
+            color: #ffffff;
+            letter-spacing: 3px;
+        }
+
+        /* Prize Display - INSIDE CARD */
+        .prize-display {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .prize-label {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 35px;
+            font-weight: bold;
+            color: #ffffff;
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+        }
+
+        .prize-amount {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 150px;
+            color: #acfcff;
+            font-weight: bold;
+            line-height: 1;
+            text-shadow: 0 0 30px rgba(172, 252, 255, 0.4);
+        }
+
+        .prize-unit {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 48px;
+            color: #acfcff;
+            letter-spacing: 8px;
+            margin-top: 0;
+        }
+
+        /* Plus symbol and Free Gift section - INSIDE CARD */
+        .prize-plus {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 60px;
+            color: #ff00ff;
+            text-shadow: 0 0 20px rgba(255, 0, 255, 0.7);
+            margin: 15px 0;
+        }
+
+        .free-gift-section {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .free-gift-section.hidden {
+            display: none;
+        }
+
+        .free-gift-label {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 28px;
+            color: #ffffff;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+
+        .free-gift-value {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 36px;
+            color: #33fff9;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(51, 255, 249, 0.6);
+            font-weight: bold;
+        }
+
+        /* ========== BELOW THE CARD ========== */
+
+        /* Summary Section - OUTSIDE/BELOW the card */
+        .summary-section {
+            text-align: center;
+            width: 100%;
+            max-width: 900px;
+            margin-bottom: 30px;
+        }
+
+        .summary-title {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 28px;
+            color: #ffffff;
+            letter-spacing: 2px;
+            margin-bottom: 25px;
+            line-height: 1.3;
+        }
+
+        .summary-table {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            padding: 0 40px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .summary-label {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 20px;
+            color: #ffffff;
+            letter-spacing: 1px;
+        }
+
+        .summary-value {
+            font-family: 'Nulshock', sans-serif;
+            font-size: 20px;
+            color: #ffffff;
+            letter-spacing: 1px;
+            text-align: right;
+        }
+
+        /* Buttons Section - OUTSIDE/BELOW the card */
+        .buttons-section {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-button {
+            position: relative;
+            width: 380px;
+            height: 110px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .action-button:hover {
+            transform: translateY(-4px);
+        }
+
+        .action-button:active {
+            transform: scale(0.95);
+        }
+
+        .action-button-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        .action-button-text {
+            position: relative;
+            z-index: 1;
+            color: white;
+            font-family: 'Nulshock', sans-serif;
+            font-size: 20px;
+            letter-spacing: 1px;
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Congrats Overlay */
+        .congrats-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 100;
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .congrats-overlay img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+    <style id="page-loader-styles">
+        html {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        html.page-ready {
+            visibility: visible !important;
+            opacity: 1 !important;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .page-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            transition: opacity 0.3s ease-out;
+        }
+
+        .page-loading-overlay.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .page-loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(0, 255, 255, 0.2);
+            border-top-color: #00ffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
+    <style id="page-loader-styles">
+        html {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        html.page-ready {
+            visibility: visible !important;
+            opacity: 1 !important;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .page-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            transition: opacity 0.3s ease-out;
+        }
+
+        .page-loading-overlay.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .page-loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(0, 255, 255, 0.2);
+            border-top-color: #00ffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    <style id="page-loader-styles">
+        html {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        html.page-ready {
+            visibility: visible !important;
+            opacity: 1 !important;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .page-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            transition: opacity 0.3s ease-out;
+        }
+
+        .page-loading-overlay.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .page-loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(0, 255, 255, 0.2);
+            border-top-color: #00ffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    <style id="page-loader-styles">
+        html {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        html.page-ready {
+            visibility: visible !important;
+            opacity: 1 !important;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .page-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            transition: opacity 0.3s ease-out;
+        }
+
+        .page-loading-overlay.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .page-loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(0, 255, 255, 0.2);
+            border-top-color: #00ffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    <style id="page-loader-styles">
+        html {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        html.page-ready {
+            visibility: visible !important;
+            opacity: 1 !important;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .page-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            transition: opacity 0.3s ease-out;
+        }
+
+        .page-loading-overlay.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .page-loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(0, 255, 255, 0.2);
+            border-top-color: #00ffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
+    <style id="page-loader-styles">
+        html {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        html.page-ready {
+            visibility: visible !important;
+            opacity: 1 !important;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .page-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            transition: opacity 0.3s ease-out;
+        }
+
+        .page-loading-overlay.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .page-loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(0, 255, 255, 0.2);
+            border-top-color: #00ffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
+    <style id="page-loader-styles">
+        html {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        html.page-ready {
+            visibility: visible !important;
+            opacity: 1 !important;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .page-loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            transition: opacity 0.3s ease-out;
+        }
+
+        .page-loading-overlay.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .page-loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(0, 255, 255, 0.2);
+            border-top-color: #00ffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+
+</head>
+
+<body class="" __processed_00038f81-6516-48f9-a4d6-c2fd85614b62__="true"
+    bis_register="W3sibWFzdGVyIjp0cnVlLCJleHRlbnNpb25JZCI6ImVwcGlvY2VtaG1ubGJoanBsY2drb2ZjaWllZ29tY29uIiwiYWRibG9ja2VyU3RhdHVzIjp7IkRJU1BMQVkiOiJkaXNhYmxlZCIsIkZBQ0VCT09LIjoiZGlzYWJsZWQiLCJUV0lUVEVSIjoiZGlzYWJsZWQiLCJSRURESVQiOiJkaXNhYmxlZCIsIlBJTlRFUkVTVCI6ImRpc2FibGVkIiwiSU5TVEFHUkFNIjoiZGlzYWJsZWQiLCJUSUtUT0siOiJkaXNhYmxlZCIsIkxJTktFRElOIjoiZGlzYWJsZWQiLCJDT05GSUciOiJkaXNhYmxlZCJ9LCJ2ZXJzaW9uIjoiMi4wLjM1Iiwic2NvcmUiOjIwMDM1fV0="
+    __processed_62b71047-b5f7-4597-8db7-9f8f04d264b9__="true" __processed_85e09e4a-e1a7-4e78-8d4e-23567cdc3849__="true"
+    __processed_63d3e2b9-69a7-476c-94a2-0ddeff0d58f0__="true" __processed_736ff819-d367-40dc-9922-43b5d16fb990__="true"
+    __processed_4f65dd26-21e6-49c2-bef5-6b56b07f3454__="true">
+    <div class="container" bis_skin_checked="1">
+        <!-- Video Background -->
+        <video class="video-bg" autoplay="" loop="" muted="" playsinline="">
+            <source src="other-bg.mp4" type="video/mp4">
+        </video>
+        <!-- Back Button -->
+        <img src="back-button.png" alt="Back" class="back-button" onclick="window.history.back()">
+
+        <!-- Home Button -->
+        <img src="home.png" alt="Home" class="editable added-element" data-id="home-button" onclick="goHome()"
+            style="max-width: 200px; height: auto; position: absolute; top: 31px; right: 30px; /*transform: translate(calc(-50% + 412.67px), calc(-50% - 792px)) scale(0.9);*/ z-index: 50; cursor: pointer;">
+
+        <div class="content" bis_skin_checked="1">
+
+
+            <!-- Popup Card Container - THE CARD -->
+            <div class="popup-container editable" data-id="popup-container"
+                style="transform: translate(-13.3333px, 256px) scale(1.2);" bis_skin_checked="1">
+                <!-- Popup Background -->
+                <img src="pop-up-summary.png" alt="Popup Background" class="popup-bg editable" data-id="popup-bg"
+                    data-no-text-edit="true">
+
+                <div class="popup-content" bis_skin_checked="1">
+                    <!-- Surprise Header - INSIDE CARD -->
+                    <div class="surprise-header editable" data-id="surprise-header" bis_skin_checked="1">
+                        <h1 id="surprise-title" class="surprise-title editable" data-id="surprise-title">KEJUTAN!</h1>
+                        <p id="surprise-subtitle" class="surprise-subtitle editable" data-id="surprise-subtitle">EXTRA
+                            TIZO UNTUKMU!</p>
+                    </div>
+
+                    <!-- Prize Display - INSIDE CARD -->
+                    <div class="prize-display editable" data-id="prize-display" bis_skin_checked="1">
+                        <p id="prize-label" class="prize-label editable" data-id="prize-label"
+                            style="transform: translate(0px, 40px) scale(1);">100 RB DAPAT</p>
+                        <div class="prize-amount editable" data-id="prize-amount"
+                            style="transform: translate(-2.6666px, 20px) scale(1);" bis_skin_checked="1">400</div>
+                        <div class="prize-unit editable" data-id="prize-unit" bis_skin_checked="1">TIZO</div>
+                    </div>
+
+                    <!-- Free Gift Section - INSIDE CARD (dynamic, shown when free gift exists) -->
+                    <div id="free-gift-section" class="free-gift-section editable" data-id="free-gift-section"
+                        bis_skin_checked="1">
+                        <div class="prize-plus editable" data-id="prize-plus" bis_skin_checked="1"
+                            style="transform: translate(-7.99997px, -32.0001px) scale(1);">+</div>
+                        <p id="free-gift-label" class="free-gift-label editable" data-id="free-gift-label"
+                            style="transform: translate(-2.66663px, -48.0001px) scale(1);">FREE GIFT</p>
+                        <p id="free-gift-value" class="free-gift-value editable" data-id="free-gift-value"
+                            style="transform: translate(0px, -40.0001px) scale(1);">COCA-COLA</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== BELOW THE CARD ========== -->
+
+            <!-- Summary Section - OUTSIDE the card (HIDDEN - kept for future use) -->
+            <div class="summary-section editable" data-id="summary-section"
+                style="transform: translate(5.33331px, 136px) scale(1); display: none !important;" bis_skin_checked="1">
+                <h2 id="summary-title" class="summary-title editable" data-id="summary-title"
+                    style="transform: translate(2.66675px, 10.6665px) scale(1);">TAMBAHKAN PENAWARAN<br>DAN DAPATKAN:
+                </h2>
+
+                <div class="summary-table" bis_skin_checked="1">
+                    <div class="summary-row editable" data-id="summary-row-1" bis_skin_checked="1">
+                        <span class="summary-label editable" data-id="label-total-tizo">TOTAL TIZO</span>
+                        <span class="summary-value editable" data-id="value-total-tizo" id="total-tizo">1750 TIZO (1350
+                            + 400)</span>
+                    </div>
+                    <div class="summary-row editable" data-id="summary-row-2" bis_skin_checked="1">
+                        <span class="summary-label editable" data-id="label-total-topup">TOTAL TOP-UP</span>
+                        <span class="summary-value editable" data-id="value-total-topup" id="total-topup">700 RIBU (600
+                            RIBU + 100 RIBU)</span>
+                    </div>
+                    <div class="summary-row editable" data-id="summary-row-3" bis_skin_checked="1">
+                        <span class="summary-label editable" data-id="label-extra-games">FREE GIFT</span>
+                        <span class="summary-value editable" data-id="value-extra-games"
+                            id="extra-games">Coca-Cola</span>
+                    </div>
+                    <div class="summary-row editable" data-id="summary-row-4"
+                        style="transform: translate(5.33344px, 8.00012px) scale(1);" bis_skin_checked="1">
+                        <span class="summary-label editable" data-id="label-bonus-prize"
+                            style="transform: translate(0px, 0.000244141px) scale(1);">HADIAH TAMBAHAN</span>
+                        <span class="summary-value editable" data-id="value-bonus-prize" id="bonus-prize">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons - OUTSIDE the card -->
+            <div class="buttons-section editable" data-id="buttons-section"
+                style="transform: translate(0, 337.333px) scale(1.3);" bis_skin_checked="1">
+                <div class="action-button editable" data-id="skip-button" onclick="handleSkip()"
+                    style="transform: translate(-6.66656px,  90.6667px) scale(1);" bis_skin_checked="1">
+                    <img src="button.png" alt="Button" class="action-button-bg editable" data-id="skip-btn-bg"
+                        data-no-text-edit="true">
+                    <span id="skip-text" class="action-button-text editable" data-id="skip-btn-text"
+                        style="transform: translate(0px, -3px) scale(1.4);">LEWATI SAJA</span>
+                </div>
+                <div class="action-button editable" data-id="accept-button" onclick="handleAccept()"
+                    style="transform: translate(5.33322px, 90.6667px) scale(1);" bis_skin_checked="1">
+                    <img src="button.png" alt="Button" class="action-button-bg editable" data-id="accept-btn-bg"
+                        data-no-text-edit="true">
+                    <span id="accept-text" class="action-button-text editable" data-id="accept-btn-text"
+                        style="transform: translate(0px, -3px) scale(1.4);">AMBIL BONUS INI</span>
+                </div>
+            </div>
+            <img src="gold-coin.png" alt="Added Image" class="editable added-element" data-id="added-2-1765387288264"
+                style="max-width: 200px; height: auto; position: absolute; top: 50%; left: 49%; transform: translate(calc(-50% + 381.333px), calc(-50% + 285.333px)) scale(1.4); z-index: 50;">
+
+            <!-- Congrats Overlay -->
+            <div class="congrats-overlay">
+                <img src="congrates.gif" alt="Congratulations">
+            </div>
+        </div>
+    </div>
+
+
+    <script src="shell-connector.js"></script>
+    <script src="page-loader.js"></script>
+    <script src="session-manager.js"></script>
+    <script src="language.js"></script>
+
+    <script>
+        // Set current page in session
+        setCurrentPage('prize-summary');
+
+        const translations = {
+            en: {
+                topLabel: "Top-Up Chosen:",
+                topValue: "150 RIBU GET 180 TIZO",
+                surpriseTitle: "SURPRISE!",
+                surpriseSubtitle: "EXTRA TIZO FOR YOU!",
+                prizeLabel: "200 RB GET",
+                summaryTitle: "ADD THIS OFFER<br>AND GET:",
+                totalTizo: "480 TIZO (180 + 300)",
+                totalTopup: "350 RIBU (150 RIBU + 200 RIBU)",
+                extraGames: "-",
+                bonusPrize: "-",
+                acceptText: "GRAB THIS BONUS",
+                skipText: "SKIP",
+                langLabel: "English",
+                freeGift: "FREE GIFT"
+            },
+            id: {
+                topLabel: "Top-Up Dipilih:",
+                topValue: "150 RIBU DAPAT 180 TIZO",
+                surpriseTitle: "KEJUTAN!",
+                surpriseSubtitle: "EXTRA TIZO UNTUKMU!",
+                prizeLabel: "200 RB DAPAT",
+                summaryTitle: "TAMBAHKAN PENAWARAN<br>DAN DAPATKAN:",
+                totalTizo: "480 TIZO (180 + 300)",
+                totalTopup: "350 RIBU (150 RIBU + 200 RIBU)",
+                extraGames: "-",
+                bonusPrize: "-",
+                acceptText: "AMBIL BONUS INI",
+                skipText: "LEWATI SAJA",
+                langLabel: "Bahasa",
+                freeGift: "GRATIS HADIAH"
+            }
+        };
+
+        let currentLang = getCurrentLanguage();
+
+        function toggleLanguage() {
+            const dropdown = document.getElementById('lang-dropdown');
+            dropdown.classList.toggle('hidden');
+        }
+
+        function applyLanguage(lang) {
+            currentLang = lang;
+            const data = translations[lang];
+
+            // Apply static translations (top-label removed from HTML)
+            document.getElementById('surprise-title').textContent = data.surpriseTitle;
+            document.getElementById('surprise-subtitle').textContent = data.surpriseSubtitle;
+            document.getElementById('summary-title').innerHTML = data.summaryTitle;
+            document.getElementById('accept-text').textContent = data.acceptText;
+            document.getElementById('skip-text').textContent = data.skipText;
+            const langEl = document.getElementById('current-lang');
+            if (langEl) langEl.textContent = data.langLabel;
+            const freeGiftLabelEl = document.getElementById('free-gift-label');
+            if (freeGiftLabelEl && data.freeGift) {
+                freeGiftLabelEl.textContent = data.freeGift;
+            }
+
+            // Reload dynamic data with new language
+            loadScratchCardData();
+        }
+
+        function setLanguage(lang) {
+            saveLanguage(lang);
+            applyLanguage(lang);
+            document.getElementById('lang-dropdown').classList.add('hidden');
+        }
+
+        function handleAccept() {
+            if (window.isEditModeActive && window.isEditModeActive()) {
+                return;
+            }
+            console.log('Accept bonus clicked');
+            // Get scratch card data from session (already saved by scratch-card.html)
+            const session = getSession();
+            const bonusCost = session?.bonusCost || 100000;
+            const bonusTizo = session?.bonusTizo || 200;
+
+            // Save bonus acceptance to session, then continue to summary
+            updateSession({
+                bonusAccepted: true,
+                bonusCost: bonusCost,
+                bonusTizo: bonusTizo
+            });
+            // Navigate with accepted flag
+            window.location.href = 'scratchcard-summary.html?accepted=true';
+        }
+
+        function handleSkip() {
+            if (window.isEditModeActive && window.isEditModeActive()) {
+                return;
+            }
+            console.log('Skip clicked');
+            // Save bonus rejection to session (keep original bonus values for display on page)
+            updateSession({
+                bonusAccepted: false
+            });
+            // Navigate with rejected flag
+            window.location.href = 'scratchcard-summary.html?accepted=false';
+        }
+
+        // Close dropdown
+        window.onclick = function (event) {
+            if (!event.target.matches('#lang-btn') && !event.target.closest('#lang-btn')) {
+                var dropdowns = document.getElementsByClassName("dropdown-content");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (!openDropdown.classList.contains('hidden')) {
+                        openDropdown.classList.add('hidden');
+                    }
+                }
+            }
+        }
+
+        function goBack() {
+            if (window.isEditModeActive && window.isEditModeActive()) return;
+            window.location.href = 'scratch-card.html';
+        }
+
+        // Load and display scratch card data from session
+        function loadScratchCardData() {
+            const session = getSession();
+            if (!session) return;
+
+            // Get scratch card prize data
+            const bonusCost = session.bonusCost || 100000;
+            const bonusTizo = session.bonusTizo || 200;
+            const bonusCostInRb = Math.round(bonusCost / 1000);
+
+            // Get top-up data
+            const offerCost = session.offerCost || 150000;
+            const offerTizo = session.offerTizo || 180;
+            const offerCostInRb = Math.round(offerCost / 1000);
+
+            // Get gift label and details from session
+            // gift = label (e.g., "FREE GAMES", "HADIAH TAMBAHAN")
+            // giftDetails = value (e.g., "5 Games", "1 Keychain")
+            const giftLabel = session.bonusGift;
+            const giftDetails = session.bonusGiftDetails;
+            const defaultFreeGiftText = (translations[currentLang]?.freeGift || translations.en.freeGift || "FREE GIFT").toUpperCase();
+
+            // Calculate totals
+            const totalCost = offerCost + bonusCost;
+            const totalTizo = offerTizo + bonusTizo;
+            const totalCostInRb = Math.round(totalCost / 1000);
+
+            // Update prize display (inside the card)
+            const prizeLabel = document.getElementById('prize-label');
+            if (prizeLabel) {
+                if (currentLang === 'id') {
+                    prizeLabel.textContent = `TAMBAH ${bonusCostInRb} RB DAPAT`;
+                } else {
+                    prizeLabel.textContent = `ADD ${bonusCostInRb} RB GET`;
+                }
+            }
+
+            const prizeAmount = document.querySelector('.prize-amount');
+            if (prizeAmount) {
+                prizeAmount.textContent = bonusTizo;
+            }
+
+            // Update free gift section inside the card (dynamic)
+            const freeGiftSection = document.getElementById('free-gift-section');
+            const freeGiftLabelEl = document.getElementById('free-gift-label');
+            const freeGiftValueEl = document.getElementById('free-gift-value');
+
+            if (giftLabel && giftLabel.trim() !== '' && giftDetails && giftDetails.trim() !== '' && giftDetails !== '-') {
+                // Show the free gift section
+                if (freeGiftSection) {
+                    freeGiftSection.classList.remove('hidden');
+                }
+                if (freeGiftLabelEl) {
+                    const normalizedLabel = giftLabel.trim().toUpperCase();
+                    freeGiftLabelEl.textContent = normalizedLabel === "FREE GIFT" ? defaultFreeGiftText : normalizedLabel;
+                }
+                if (freeGiftValueEl) {
+                    freeGiftValueEl.textContent = giftDetails.toUpperCase();
+                }
+            } else {
+                // Hide the free gift section if no gift
+                if (freeGiftSection) {
+                    freeGiftSection.classList.add('hidden');
+                }
+            }
+
+            // Update top info (top-up selected)
+            const topValue = document.getElementById('top-value');
+            if (topValue) {
+                const dapatText = currentLang === 'id' ? 'DAPAT' : 'GET';
+                topValue.textContent = `${offerCostInRb} RIBU ${dapatText} ${offerTizo} TIZO`;
+            }
+
+            // Update summary section
+            const totalTizoEl = document.getElementById('total-tizo');
+            if (totalTizoEl) {
+                totalTizoEl.textContent = `${totalTizo} TIZO (${offerTizo} + ${bonusTizo})`;
+            }
+
+            const totalTopupEl = document.getElementById('total-topup');
+            if (totalTopupEl) {
+                totalTopupEl.textContent = `${totalCostInRb} RIBU (${offerCostInRb} RIBU + ${bonusCostInRb} RIBU)`;
+            }
+
+            // Update gift row - label from 'gift' column, value from 'gift_details' column
+            // The label element shows what type of gift (e.g., "FREE GAMES", "HADIAH TAMBAHAN")
+            const giftLabelEl = document.querySelector('[data-id="label-extra-games"]');
+            const giftValueEl = document.getElementById('extra-games');
+
+            if (giftLabel && giftLabel.trim() !== '') {
+                // Show the gift label from database
+                if (giftLabelEl) {
+                    const normalizedLabel = giftLabel.trim().toUpperCase();
+                    giftLabelEl.textContent = normalizedLabel === "FREE GIFT" ? defaultFreeGiftText : normalizedLabel;
+                }
+                // Show the gift details on the right side
+                if (giftValueEl) {
+                    giftValueEl.textContent = giftDetails || '-';
+                }
+            } else {
+                // No gift - hide or show default
+                if (giftLabelEl) {
+                    giftLabelEl.textContent = 'EXTRA GAMES';
+                }
+                if (giftValueEl) {
+                    giftValueEl.textContent = '-';
+                }
+            }
+
+            // Hide HADIAH TAMBAHAN row if no separate gift (since gift is now dynamic)
+            const bonusPrizeEl = document.getElementById('bonus-prize');
+            if (bonusPrizeEl) {
+                bonusPrizeEl.textContent = '-';
+            }
+
+            console.log('Prize summary loaded:', {
+                bonusCost, bonusTizo, offerCost, offerTizo,
+                totalCost, totalTizo, giftLabel, giftDetails
+            });
+        }
+
+        // Initialize page with loader
+        initPageWithLoader({
+            onDataLoad: async () => {
+                // applyLanguage already calls loadScratchCardData
+                applyLanguage(currentLang);
+            },
+            minLoadTime: 300
+        }).then(() => {
+            // Only initialize edit mode if the script is loaded
+            if (typeof initEditMode === 'function') {
+
+            }
+
+            // Play jackpot winner sound
+            const jackpotAudio = new Audio('jackpot-winner.mp3');
+            jackpotAudio.volume = 0.7;
+            jackpotAudio.play().catch(e => console.log('Audio autoplay blocked:', e));
+        });
+    </script>
+
+
+    <span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span><span id="PING_IFRAME_FORM_DETECTION"
+        style="display: none;"></span><span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
+
+
+    <span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span><span id="PING_IFRAME_FORM_DETECTION"
+        style="display: none;"></span><span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
+</body>
+
+</html>

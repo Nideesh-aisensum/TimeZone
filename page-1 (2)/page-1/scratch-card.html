@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en" style="visibility: hidden; opacity: 0" class="page-ready">
+
+<head>
+  <style id="page-loader-styles">
+    html {
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    html.page-ready {
+      visibility: visible !important;
+      opacity: 1 !important;
+      transition: opacity 0.3s ease-in-out;
+    }
+
+    .page-loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      transition: opacity 0.3s ease-out;
+    }
+
+    .page-loading-overlay.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .page-loading-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(0, 255, 255, 0.2);
+      border-top-color: #00ffff;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <plasmo-csui></plasmo-csui>
+
+  <style type="text/css" id="mytempCss">
+    ._8mqQwQ {
+      display: none;
+    }
+
+    ._1TWLMK.icF5zO {
+      opacity: 0.01;
+    }
+  </style>
+
+  <plasmo-csui></plasmo-csui>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timezone - Scratch &amp; Win</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Fixed for 1080x1920 resolution - NO SCROLLING */
+    html,
+    body {
+      overflow: hidden;
+    }
+
+    .container {
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+    }
+
+    .content {
+      padding: 40px 50px 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+      height: 100%;
+      width: 100%;
+    }
+
+    /* Header Section */
+    .header-section {
+      text-align: center;
+      margin-bottom: 15px;
+      margin-top: 20px;
+    }
+
+    .scratch-title {
+      font-family: "Nulshock", sans-serif;
+      font-size: 70px;
+      color: #fff;
+      text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.3);
+      margin-bottom: 6px;
+      /*max-width: 600px;*/
+    }
+
+    .scratch-subtitle {
+      font-family: "Nulshock", sans-serif;
+      font-size: 36px;
+      color: #b8f5ff;
+      letter-spacing: 2px;
+    }
+
+    /* Scratch Card Container */
+    .scratch-card-container {
+      position: relative;
+      width: 900px;
+      height: 1200px;
+      margin: 0 auto;
+    }
+
+    /* The card PNG image */
+
+    /*
+    .card-image {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+*/
+
+
+    .card-image {
+      position: absolute;
+      top: -200px;
+      left: -50px;
+      width: 1000px;
+      height: 2000px;
+      object-fit: contain;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Canvas positioned exactly over the card's inner area */
+    /* The card has rounded corners so we clip to match */
+
+
+
+    /* Adjust these values to match EXACTLY the inner card area */
+    #revealCanvas {
+      position: absolute;
+      top: 360px;
+      left: 218px;
+      width: 490px;
+      height: 725px;
+      border-radius: 25px;
+      overflow: hidden;
+      cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="25" fill="%231a1a2e" stroke="%23000" stroke-width="2" opacity="0.8"/></svg>') 30 30,
+        crosshair;
+      z-index: 5;
+    }
+
+    /* Continue button */
+    .continue-section {
+      margin-top: auto;
+      padding-bottom: 40px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      pointer-events: none;
+      transform: translateY(50px);
+    }
+
+    .continue-section.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+      animation: slideUp 0.5s ease;
+    }
+
+    /* Card shake animation */
+    @keyframes cardShake {
+
+      0%,
+      100% {
+        transform: translate(4.15581px, 170px) scale(1.2) rotate(0deg);
+      }
+
+      10% {
+        transform: translate(4.15581px, 170px) scale(1.2) rotate(-2deg);
+      }
+
+      20% {
+        transform: translate(4.15581px, 170px) scale(1.2) rotate(2deg);
+      }
+
+      30% {
+        transform: translate(4.15581px, 170px) scale(1.2) rotate(-2deg);
+      }
+
+      40% {
+        transform: translate(4.15581px, 170px) scale(1.2) rotate(2deg);
+      }
+
+      50% {
+        transform: translate(4.15581px, 170px) scale(1.2) rotate(0deg);
+      }
+    }
+
+    @keyframes cardGlow {
+
+      0%,
+      100% {
+        filter: drop-shadow(0 0 10px rgba(0, 200, 255, 0.3));
+      }
+
+      50% {
+        filter: drop-shadow(0 0 30px rgba(0, 200, 255, 0.8));
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .scratch-card-container.revealed {
+      animation: cardShake 0.6s ease, cardGlow 1s ease-in-out infinite;
+    }
+
+    /* Scratching bounce effect - small jumps */
+    @keyframes scratchBounce {
+
+      0%,
+      100% {
+        /* transform: translate(-18.6667px, 333.334px) scale(0.7); */
+        transform: translate(4.15581px, 170px) scale(1.2);
+      }
+
+      50% {
+        transform: translate(4.15581px, 160px) scale(1.2);
+      }
+    }
+
+    .scratch-card-container.scratching {
+      animation: scratchBounce 0.15s ease-in-out infinite;
+    }
+
+    /* Scratch particles effect */
+    .scratch-particles {
+      position: absolute;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .scratch-particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: radial-gradient(circle, rgba(255, 215, 0, 0.9) 0%, rgba(255, 165, 0, 0.6) 50%, transparent 100%);
+      border-radius: 50%;
+      animation: particleFade 0.4s ease-out forwards;
+    }
+
+    @keyframes particleFade {
+      0% {
+        opacity: 1;
+        transform: scale(1) translate(0, 0);
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(0.3) translate(var(--tx, 10px), var(--ty, -10px));
+      }
+    }
+
+    /* Canvas glow when scratching - subtle effect, no yellow box */
+    #revealCanvas.scratching {
+      filter: brightness(1.05);
+    }
+
+    /* Hand Gesture Overlay */
+    .hand-gesture-overlay {
+      position: absolute;
+      top: 75%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 400px;
+      height: auto;
+      z-index: 15;
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.5s ease;
+      /* animation: scratchHint 4s ease-in-out infinite; */
+    }
+
+    @keyframes scratchHint {
+      0% {
+        transform: translate(-50%, -50%);
+      }
+
+      15% {
+        transform: translate(-30%, -20%);
+      }
+
+      30% {
+        transform: translate(-60%, 10%);
+      }
+
+      45% {
+        transform: translate(-25%, -10%);
+      }
+
+      60% {
+        transform: translate(-55%, 20%);
+      }
+
+      75% {
+        transform: translate(-35%, -5%);
+      }
+
+      100% {
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    .hand-gesture-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+      animation: none;
+    }
+
+    .continue-button {
+      position: relative;
+      width: 550px;
+      height: 110px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .continue-button:hover {
+      transform: translateY(-4px);
+    }
+
+    .continue-button:active {
+      transform: scale(0.95);
+    }
+
+    .continue-button-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    .continue-button-text {
+      position: relative;
+      z-index: 1;
+      color: white;
+      font-family: "Nulshock", sans-serif;
+      font-size: 22px;
+      letter-spacing: 2px;
+      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    }
+  </style>
+  <style type="text/css" id="mytempCss">
+    ._8mqQwQ {
+      display: none;
+    }
+
+    ._1TWLMK.icF5zO {
+      opacity: 0.01;
+    }
+  </style>
+
+  <div class="container" bis_skin_checked="1">
+    <!-- Video Background -->
+    <video class="video-bg" autoplay="" loop="" muted="" playsinline="">
+      <source src="other-bg.mp4" type="video/mp4" />
+    </video>
+    <!-- Back Button -->
+    <img src="back-button.png" alt="Back" class="back-button" onclick="window.history.back()" />
+
+    <!-- Home Button -->
+    <img src="home.png" alt="Home" class="editable added-element" data-id="home-button" onclick="goHome()" style="
+          max-width: 200px;
+          height: auto;
+          position: absolute;
+          top: 31px;
+          right: 30px; /* transform: translate(calc(-50% + 458.667px), calc(-50% - 792px)) scale(0.9); */
+          z-index: 50;
+          cursor: pointer;
+        " />
+
+    <div class="content" bis_skin_checked="1">
+      <!-- Header -->
+      <div class="header-section editable" data-id="header-section"
+        style="transform: translate(4.15581px, 270.325px) scale(1)" bis_skin_checked="1">
+        <h1 id="main-title" class="scratch-title editable" data-id="main-title"
+          style="transform: translate(-4.15585px, -2.07795px) scale(1)">GOSOK DAN DAPATKAN HADIAH!</h1>
+        <p id="main-subtitle" class="scratch-subtitle editable" data-id="main-subtitle"
+          style="transform: translate(-2.07794px, 4.15578px) scale(1)">BUKA MEGA TIZO MU!</p>
+      </div>
+
+      <!-- Scratch Card -->
+      <div class="scratch-card-container editable" data-id="scratch-card"
+        style="transform: translate(0, 170.667px) scale(1.2)" bis_skin_checked="1">
+        <!-- Card PNG image -->
+        <img id="card-image" src="card2.png" alt="Scratch Card" class="card-image" />
+
+        <!-- Canvas clipped to card's inner area -->
+        <canvas id="revealCanvas" width="670" height="780"></canvas>
+
+        <!-- Hand Gesture Overlay -->
+        <img id="handGesture" class="hand-gesture-overlay" src="hand-gesture.gif" alt="Scratch here" />
+      </div>
+
+      <!-- Continue Button -->
+      <div id="continueSection" class="continue-section editable" data-id="continue-section" bis_skin_checked="1">
+        <div class="continue-button" onclick="handleContinue()" bis_skin_checked="1">
+          <img src="button.png" alt="Button" class="continue-button-bg" />
+          <span id="continue-text" class="continue-button-text editable" data-id="continue-text">KLAIM HADIAH</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="shell-connector.js"></script>
+  <script src="api-config.js"></script>
+  <script src="page-loader.js"></script>
+  <script src="session-manager.js"></script>
+  <script src="language.js"></script>
+  <script>
+    // Set current page in session
+    setCurrentPage("scratch-card");
+
+    const translations = {
+      en: {
+        mainTitle: "SCRATCH & WIN!",
+        mainSubtitle: "UNLOCK YOUR SURPRISE TIZO DROP!",
+        continueText: "CLAIM REWARD",
+        langLabel: "English",
+        cardImage: "scratch_preview_english.gif",
+      },
+      id: {
+        mainTitle: "GOSOK DAN DAPATKAN HADIAH!",
+        mainSubtitle: "BUKA MEGA TIZO MU!",
+        continueText: "KLAIM HADIAH",
+        langLabel: "Bahasa",
+        cardImage: "scratch_preview_indo.gif",
+      },
+    };
+
+    let currentLang = getCurrentLanguage();
+    let canvas, ctx;
+    let maskCanvas, maskCtx;
+    let isDrawing = false;
+    let drawPercent = 0;
+    let hasRevealed = false;
+    let lastX, lastY;
+    let prizeImage;
+
+    // Scratch card prize data (will be loaded from database)
+    let scratchCardData = {
+      cost: 100000, // Default: 100 RIBU
+      tizo: 200, // Default: 200 TIZO
+      costInRb: 100, // Display value
+      isNewUser: false,
+    };
+
+    function toggleLanguage() {
+      const dropdown = document.getElementById("lang-dropdown");
+      dropdown.classList.toggle("hidden");
+    }
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      const data = translations[lang];
+
+      document.getElementById("main-title").textContent = data.mainTitle;
+      document.getElementById("main-subtitle").textContent = data.mainSubtitle;
+      document.getElementById("continue-text").textContent = data.continueText;
+      const langEl = document.getElementById("current-lang");
+      if (langEl) langEl.textContent = data.langLabel;
+      document.getElementById("card-image").src = data.cardImage;
+    }
+
+    function setLanguage(lang) {
+      saveLanguage(lang);
+      applyLanguage(lang);
+      document.getElementById("lang-dropdown").classList.add("hidden");
+    }
+
+    function createPrizeImage() {
+      // Create an offscreen canvas for the prize text
+      const prizeCanvas = document.createElement("canvas");
+      prizeCanvas.width = canvas.width;
+      prizeCanvas.height = canvas.height;
+      const prizeCtx = prizeCanvas.getContext("2d");
+
+      // Dark background matching the marker color
+      const gradient = prizeCtx.createLinearGradient(0, 0, 0, prizeCanvas.height);
+      gradient.addColorStop(0, "#0d1421");
+      gradient.addColorStop(0.5, "#1a2a3e");
+      gradient.addColorStop(1, "#0d1421");
+      prizeCtx.fillStyle = gradient;
+      prizeCtx.fillRect(0, 0, prizeCanvas.width, prizeCanvas.height);
+
+      // Add subtle sparkles
+      prizeCtx.fillStyle = "rgba(0, 200, 255, 0.15)";
+      for (let i = 0; i < 30; i++) {
+        prizeCtx.beginPath();
+        prizeCtx.arc(Math.random() * prizeCanvas.width, Math.random() * prizeCanvas.height, Math.random() * 4 + 1, 0, Math.PI * 2);
+        prizeCtx.fill();
+      }
+
+      // Draw cost text (e.g., "100 RIBU DAPAT") - using dynamic value
+      const dapatText = currentLang === "id" ? "DAPAT" : "GET";
+      prizeCtx.font = "bold 32px Nulshock, sans-serif";
+      prizeCtx.fillStyle = "#00ffff";
+      prizeCtx.textAlign = "center";
+      prizeCtx.textBaseline = "middle";
+      prizeCtx.fillText(`${scratchCardData.costInRb} RIBU ${dapatText}`, prizeCanvas.width / 2, prizeCanvas.height / 2 - 140);
+
+      // Draw TIZO amount - large prize amount with gradient (using dynamic value)
+      prizeCtx.font = "bold 200px Nulshock, sans-serif";
+      const textGradient = prizeCtx.createLinearGradient(0, prizeCanvas.height / 2 - 100, 0, prizeCanvas.height / 2 + 100);
+      textGradient.addColorStop(0, "#00ffff");
+      textGradient.addColorStop(0.5, "#00aaff");
+      textGradient.addColorStop(1, "#0066ff");
+      prizeCtx.fillStyle = textGradient;
+      prizeCtx.fillText(scratchCardData.tizo.toString(), prizeCanvas.width / 2, prizeCanvas.height / 2 - 20);
+
+      // Draw "TIZO" label
+      prizeCtx.font = "bold 56px Nulshock, sans-serif";
+      prizeCtx.fillStyle = "#00ffff";
+      prizeCtx.fillText("TIZO", prizeCanvas.width / 2, prizeCanvas.height / 2 + 100);
+
+      // Draw free gift section if available (+ symbol and gift details)
+      if (scratchCardData.gift && scratchCardData.giftDetails && scratchCardData.giftDetails !== "-") {
+        // Draw "+" symbol
+        prizeCtx.font = "bold 60px Nulshock, sans-serif";
+        prizeCtx.fillStyle = "#ff00ff";
+        prizeCtx.shadowColor = "rgba(255, 0, 255, 0.7)";
+        prizeCtx.shadowBlur = 20;
+        prizeCtx.fillText("+", prizeCanvas.width / 2, prizeCanvas.height / 2 + 180);
+
+        // Draw gift label (e.g., "FREE GIFT")
+        prizeCtx.font = "bold 28px Nulshock, sans-serif";
+        prizeCtx.fillStyle = "#ffffff";
+        prizeCtx.shadowColor = "transparent";
+        prizeCtx.shadowBlur = 0;
+        prizeCtx.fillText(scratchCardData.gift.toUpperCase(), prizeCanvas.width / 2, prizeCanvas.height / 2 + 240);
+
+        // Draw gift value (e.g., "FREE 500 TICKETS")
+        prizeCtx.font = "bold 36px Nulshock, sans-serif";
+        prizeCtx.fillStyle = "#33fff9";
+        prizeCtx.shadowColor = "rgba(51, 255, 249, 0.6)";
+        prizeCtx.shadowBlur = 15;
+        prizeCtx.fillText(scratchCardData.giftDetails.toUpperCase(), prizeCanvas.width / 2, prizeCanvas.height / 2 + 300);
+        prizeCtx.shadowColor = "transparent";
+        prizeCtx.shadowBlur = 0;
+      }
+
+      return prizeCanvas;
+    }
+
+    function initRevealCanvas() {
+      // Skip if edit mode is active
+      if (window.isEditModeActive && window.isEditModeActive()) {
+        return;
+      }
+
+      canvas = document.getElementById("revealCanvas");
+
+      // Set canvas size to match CSS dimensions
+      canvas.width = 670;
+      canvas.height = 780;
+
+      ctx = canvas.getContext("2d");
+
+      // Create mask canvas for tracking strokes
+      maskCanvas = document.createElement("canvas");
+      maskCanvas.width = canvas.width;
+      maskCanvas.height = canvas.height;
+      maskCtx = maskCanvas.getContext("2d");
+
+      // Create the prize image
+      prizeImage = createPrizeImage();
+
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Mouse events
+      canvas.addEventListener("mousedown", startDraw);
+      canvas.addEventListener("mousemove", draw);
+      canvas.addEventListener("mouseup", endDraw);
+      canvas.addEventListener("mouseleave", endDraw);
+
+      // Touch events
+      canvas.addEventListener("touchstart", startDraw, { passive: false });
+      canvas.addEventListener("touchmove", draw, { passive: false });
+      canvas.addEventListener("touchend", endDraw);
+    }
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+
+      if (e.touches) {
+        return {
+          x: (e.touches[0].clientX - rect.left) * scaleX,
+          y: (e.touches[0].clientY - rect.top) * scaleY,
+        };
+      }
+      return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY,
+      };
+    }
+
+    // Scratch audio - DISABLED
+    // let scratchAudio = null;
+
+    // function initScratchAudio() {
+    //     scratchAudio = new Audio('Scratch.mp3');
+    //     scratchAudio.loop = true;
+    //     scratchAudio.volume = 0.5;
+    // }
+
+    // Scratch visual effects
+    function startScratchEffect() {
+      const container = document.querySelector(".scratch-card-container");
+      const canvas = document.getElementById("revealCanvas");
+      if (container) container.classList.add("scratching");
+      if (canvas) canvas.classList.add("scratching");
+
+      // Trigger device vibration if supported
+      if (navigator.vibrate) {
+        navigator.vibrate(10);
+      }
+    }
+
+    function stopScratchEffect() {
+      const container = document.querySelector(".scratch-card-container");
+      const canvas = document.getElementById("revealCanvas");
+      if (container) container.classList.remove("scratching");
+      if (canvas) canvas.classList.remove("scratching");
+    }
+
+    // Create scratch particles at position
+    function createScratchParticles(x, y) {
+      const canvas = document.getElementById("revealCanvas");
+      if (!canvas) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const containerRect = document.querySelector(".scratch-card-container").getBoundingClientRect();
+
+      // Create 2-3 particles per scratch movement
+      const numParticles = Math.floor(Math.random() * 2) + 2;
+
+      for (let i = 0; i < numParticles; i++) {
+        const particle = document.createElement("div");
+        particle.className = "scratch-particle";
+
+        // Position relative to container
+        const offsetX = rect.left - containerRect.left + (x / canvas.width) * rect.width;
+        const offsetY = rect.top - containerRect.top + (y / canvas.height) * rect.height;
+
+        particle.style.left = offsetX + "px";
+        particle.style.top = offsetY + "px";
+
+        // Random direction for particle
+        const tx = (Math.random() - 0.5) * 30;
+        const ty = (Math.random() - 0.5) * 30 - 10;
+        particle.style.setProperty("--tx", tx + "px");
+        particle.style.setProperty("--ty", ty + "px");
+
+        document.querySelector(".scratch-card-container").appendChild(particle);
+
+        // Remove particle after animation
+        setTimeout(() => particle.remove(), 400);
+      }
+    }
+
+    function startDraw(e) {
+      // Don't draw in edit mode
+      if (window.isEditModeActive && window.isEditModeActive()) {
+        return;
+      }
+
+      e.preventDefault();
+      isDrawing = true;
+
+      // Hide hand gesture overlay when scratching starts
+      const handGesture = document.getElementById('handGesture');
+      if (handGesture) {
+        handGesture.classList.add('hidden');
+      }
+
+      // Start scratch visual effects
+      startScratchEffect();
+
+      const pos = getPos(e);
+      lastX = pos.x;
+      lastY = pos.y;
+
+      // Draw initial stroke
+      drawRevealStroke(pos.x, pos.y, pos.x, pos.y);
+
+      // Create initial particles
+      createScratchParticles(pos.x, pos.y);
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
+
+      // Don't draw in edit mode
+      if (window.isEditModeActive && window.isEditModeActive()) {
+        return;
+      }
+
+      e.preventDefault();
+
+      const pos = getPos(e);
+
+      // Draw stroke
+      drawRevealStroke(lastX, lastY, pos.x, pos.y);
+
+      // Create particles occasionally while scratching (not every frame for performance)
+      if (Math.random() < 0.05) {
+        createScratchParticles(pos.x, pos.y);
+      }
+
+      lastX = pos.x;
+      lastY = pos.y;
+
+      checkDrawProgress();
+    }
+
+    function drawRevealStroke(x1, y1, x2, y2) {
+      // Draw stroke on mask canvas
+      maskCtx.beginPath();
+      maskCtx.moveTo(x1, y1);
+      maskCtx.lineTo(x2, y2);
+      maskCtx.lineWidth = 120;
+      maskCtx.lineCap = "round";
+      maskCtx.lineJoin = "round";
+      maskCtx.strokeStyle = "#1a1a2e";
+      maskCtx.stroke();
+
+      // Draw circle for smooth corners
+      maskCtx.beginPath();
+      maskCtx.arc(x2, y2, 40, 0, Math.PI * 2);
+      maskCtx.fillStyle = "#1a1a2e";
+      maskCtx.fill();
+
+      // Render: prize visible through black strokes
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw the mask (black strokes)
+      ctx.drawImage(maskCanvas, 0, 0);
+
+      // Show prize only where strokes exist
+      ctx.globalCompositeOperation = "source-in";
+      ctx.drawImage(prizeImage, 0, 0);
+
+      // Add black background behind prize (destination-over)
+      ctx.globalCompositeOperation = "destination-over";
+      ctx.drawImage(maskCanvas, 0, 0);
+
+      // Reset
+      ctx.globalCompositeOperation = "source-over";
+    }
+
+    function endDraw() {
+      isDrawing = false;
+
+      // Stop scratch visual effects
+      stopScratchEffect();
+    }
+
+    function checkDrawProgress() {
+      if (hasRevealed) return;
+
+      const imageData = maskCtx.getImageData(0, 0, maskCanvas.width, maskCanvas.height);
+      const pixels = imageData.data;
+      let drawn = 0;
+
+      // Sample pixels for performance
+      for (let i = 3; i < pixels.length; i += 100) {
+        if (pixels[i] > 128) drawn++;
+      }
+
+      drawPercent = (drawn / (pixels.length / 100)) * 100;
+
+      // Trigger after ~15% scratched (2-3 swipes)
+      if (drawPercent > 15 && !hasRevealed) {
+        hasRevealed = true;
+        triggerRevealAnimation();
+      }
+    }
+
+
+    function triggerRevealAnimation() {
+      const cardContainer = document.querySelector(".scratch-card-container");
+
+      // Add shake and glow animation to card
+      cardContainer.classList.add("revealed");
+
+      // Save scratch card revealed state to session
+      updateSession({ scratchCardRevealed: true });
+
+      // Auto-redirect to prize summary after animation
+      setTimeout(() => {
+        if (window.isEditModeActive && window.isEditModeActive()) {
+          // In edit mode, just show the button instead
+          document.getElementById("continueSection").classList.add("visible");
+          return;
+        }
+        // Navigate to prize summary page
+        window.location.href = "prize-summary.html";
+      }, 1200);
+    }
+
+
+    function handleContinue() {
+      if (window.isEditModeActive && window.isEditModeActive()) {
+        return;
+      }
+      // Navigate to prize summary page
+      window.location.href = "prize-summary.html";
+    }
+
+    // Close dropdown
+    window.onclick = function (event) {
+      if (!event.target.matches("#lang-btn") && !event.target.closest("#lang-btn")) {
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        for (var i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (!openDropdown.classList.contains("hidden")) {
+            openDropdown.classList.add("hidden");
+          }
+        }
+      }
+    };
+
+    function goBack() {
+      if (window.isEditModeActive && window.isEditModeActive()) return;
+      // Go back to the page that navigated here (saved in session)
+      const session = getSession();
+      const source = session?.scratchCardSource;
+
+      if (source) {
+        // Use saved source page for accurate back navigation
+        window.location.href = source + ".html";
+      } else {
+        // Fallback: determine based on user type
+        const isNewPlayer = (session && session.isNewPlayer) || localStorage.getItem("isNewPlayer") === "true";
+        if (isNewPlayer) {
+          window.location.href = "welcome-newuser.html";
+        } else {
+          window.location.href = "chosen-offer.html";
+        }
+      }
+    }
+
+    // Fetch scratch card data from database based on user flow
+    async function fetchScratchCardData() {
+      try {
+        const session = getSession();
+
+        // Check if we have split topup data (Custom Top Up with Upgrade)
+        // For new users with split topup, we still want to fetch and show the new_user scratch card offer
+        if (session && session.splitTopup && session.splitTopup.customCost > 0) {
+          console.log("Using split topup data for scratch card:", session.splitTopup);
+
+          // For new users (split topup = upgrade flow), always fetch new_user scratch card
+          const cardType = "new_user";
+          console.log("Fetching new_user scratch card for split topup user");
+
+          // Fetch new_user scratchcard data from database
+          const response = await fetch(getApiUrl(`/api/scratch-card?cardType=${cardType}`));
+          const data = await response.json();
+
+          if (data.success && data.offer) {
+            // Use the new_user scratch card offer from database for display
+            scratchCardData = {
+              cost: data.offer.cost,
+              tizo: data.offer.tizo_credit,
+              costInRb: Math.round(data.offer.cost / 1000),
+              isNewUser: true,
+              freeGames: data.offer.free_games,
+              gift: data.offer.gift,
+              giftDetails: data.offer.gift_details,
+            };
+
+            console.log("Loaded new_user scratch card for split topup:", scratchCardData);
+
+            // Update session with the new_user scratch card values
+            // Include both regular bonus values and original bonus values for compatibility
+            updateSession({
+              scratchPrize: scratchCardData.tizo,
+              bonusCost: scratchCardData.cost,
+              bonusTizo: scratchCardData.tizo,
+              bonusFreeGames: data.offer.free_games || null,
+              bonusGift: data.offer.gift || null,
+              bonusGiftDetails: data.offer.gift_details || null,
+              // Also set original values for scratchcard-summary.html split topup display
+              originalBonusCost: scratchCardData.cost,
+              originalBonusTizo: scratchCardData.tizo,
+              originalBonusGift: data.offer.gift || null,
+              originalBonusGiftDetails: data.offer.gift_details || null,
+            });
+
+            // Recreate prize image with new data
+            if (canvas && ctx) {
+              prizeImage = createPrizeImage();
+            }
+          } else {
+            console.log("Failed to fetch new_user scratch card, using defaults");
+          }
+          return; // Skip further API fetch
+        }
+
+        // Check both session and localStorage for isNewPlayer
+        // IMPORTANT: Use strict boolean checks to avoid getting truthy objects
+        const isNewUser =
+          (session && session.isNewPlayer === true) ||
+          localStorage.getItem("isNewPlayer") === "true" ||
+          (session && session.splitTopup && session.splitTopup.hasCardUpgrade === true);
+
+        console.log("Fetching scratch card for:", "isNewUser:", isNewUser, "session:", session);
+
+        // Determine card type for API call
+        // For new users (regardless of card tier selected), always use "new_user" scratch card
+        // For existing users (Gold/Blue/Platinum), use "existing_user" to get the same scratch card
+        let cardType = "default";
+        if (isNewUser) {
+          cardType = "new_user";
+        } else {
+          // All existing users (regardless of card tier) use the same scratch card
+          cardType = "existing_user";
+        }
+
+        console.log("Fetching scratch card for:", cardType, "isNewUser:", isNewUser);
+
+        const response = await fetch(getApiUrl(`/api/scratch-card?cardType=${cardType}`));
+        const data = await response.json();
+
+        if (data.success && data.offer) {
+          scratchCardData = {
+            cost: data.offer.cost,
+            tizo: data.offer.tizo_credit,
+            costInRb: Math.round(data.offer.cost / 1000),
+            isNewUser: isNewUser,
+            freeGames: data.offer.free_games,
+            gift: data.offer.gift,
+            giftDetails: data.offer.gift_details,
+          };
+
+          // Save scratch card data to session
+          updateSession({
+            scratchPrize: scratchCardData.tizo,
+            bonusCost: scratchCardData.cost,
+            bonusTizo: scratchCardData.tizo,
+            bonusFreeGames: data.offer.free_games || null,
+            bonusGift: data.offer.gift || null,
+            bonusGiftDetails: data.offer.gift_details || null,
+          });
+
+          console.log("Scratch card data loaded:", scratchCardData);
+
+          // If canvas is already initialized, recreate prize image with new data
+          if (canvas && ctx) {
+            prizeImage = createPrizeImage();
+          }
+        } else {
+          console.log("Using default scratch card values");
+        }
+      } catch (error) {
+        console.error("Error fetching scratch card data:", error);
+        // Keep default values on error
+      }
+    }
+
+    // Initialize page with loader
+    initPageWithLoader({
+      onDataLoad: async () => {
+        applyLanguage(currentLang);
+        // Fetch scratch card data first, then initialize canvas
+        await fetchScratchCardData();
+        initRevealCanvas();
+        // Initialize scratch audio - DISABLED
+        // initScratchAudio();
+      },
+      minLoadTime: 300,
+    }).then(() => {
+
+    });
+  </script>
+
+</body>
+
+</html>

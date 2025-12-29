@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome New Player - Timezone</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Override body/html from style.css if needed, or rely on them */
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      background-color: transparent;
+      /* Allow video to show */
+    }
+
+    /* Content positioning */
+    .content {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100%;
+      width: 100%;
+      padding-top: 35%;
+      /* Adjusted matching reference spacing */
+    }
+
+    /* HI, PEMAIN BARU! */
+    .greeting-title {
+      font-family: "Nulshock", sans-serif;
+      font-size: 70px;
+      font-weight: bold;
+      color: #ffffff;
+      text-align: center;
+      line-height: 1.1;
+      text-transform: uppercase;
+      /* Simple clean white text as per Nulshock style in other pages, usually has specific styling */
+      margin-bottom: 8%;
+    }
+
+    /* Selamat datang di */
+    .welcome-text {
+      font-family: "Nulshock", sans-serif;
+      /* Using Nulshock to match "same font design" if they mean globally */
+      font-size: 36px;
+      font-weight: normal;
+      color: #ffffff;
+      text-align: center;
+      margin-bottom: 5px;
+      /* Reduced from 2% to bring it closer */
+      text-transform: none;
+      /* Keep "Selamat datang di" casing */
+    }
+
+    /* TIMEZONE logo image */
+    .timezone-logo {
+      width: 100%;
+      max-width: 650px;
+      height: auto;
+      margin-bottom: 5%;
+      object-fit: contain;
+      margin-top: -120px;
+    }
+
+    /* Cat character container */
+    .cat-container {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 800px;
+      height: 60%;
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      z-index: 5;
+    }
+
+    .cat-image {
+      width: 90%;
+      height: auto;
+      object-fit: contain;
+      object-position: bottom center;
+    }
+
+    @media (max-width: 768px) {
+      .content {
+        padding-top: 20%;
+      }
+
+      .greeting-title {
+        font-size: 2.5rem;
+      }
+
+      .timezone-logo {
+        font-size: 3rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- Video Background -->
+    <video class="video-bg" autoplay muted loop playsinline>
+      <source src="other-bg.mp4" type="video/mp4" />
+    </video>
+
+    <!-- Main Content -->
+    <div class="content">
+      <!-- HI, PEMAIN BARU! -->
+      <h1 id="greeting-text" class="greeting-title">HI,<br />PEMAIN BARU!</h1>
+
+      <!-- Selamat datang di -->
+      <p id="welcome-text-el" class="welcome-text">Selamat datang di</p>
+
+      <!-- TIMEZONE Logo -->
+      <!-- TIMEZONE Logo -->
+      <img src="timezone-branding.png" alt="TIMEZONE" class="timezone-logo" />
+    </div>
+
+    <!-- Cat Character -->
+    <div class="cat-container">
+      <!--<img src="static-cat.png" alt="Astronaut Cat" class="cat-image" />-->
+      <img src="cat-character.gif" alt="Astronaut Cat" class="cat-image">
+    </div>
+  </div>
+
+  
+    <script src="shell-connector.js"></script>
+<script src="page-loader.js"></script>
+  <script src="session-manager.js"></script>
+  <script src="background-music.js"></script>
+  <script src="language.js"></script>
+  <script>
+    const translations = {
+      en: {
+        greeting: "HI,<br>NEW PLAYER!",
+        welcome: "Welcome to",
+        langLabel: "English",
+      },
+      id: {
+        greeting: "HI,<br>PEMAIN BARU!",
+        welcome: "Selamat datang di",
+        langLabel: "Bahasa",
+      },
+    };
+
+    let currentLang = getCurrentLanguage();
+
+    function toggleLanguage() {
+      const dropdown = document.getElementById("lang-dropdown");
+      dropdown.classList.toggle("hidden");
+    }
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      const data = translations[lang];
+
+      document.getElementById("greeting-text").innerHTML = data.greeting;
+      document.getElementById("welcome-text-el").textContent = data.welcome;
+      document.getElementById("current-lang").textContent = data.langLabel;
+    }
+
+    function setLanguage(lang) {
+      saveLanguage(lang);
+      applyLanguage(lang);
+      document.getElementById("lang-dropdown").classList.add("hidden");
+    }
+
+    // Close dropdown when clicking outside
+    window.onclick = function (event) {
+      if (!event.target.matches("#lang-btn") && !event.target.closest("#lang-btn")) {
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        for (var i = 0; i < dropdowns.length; i++) {
+          var openDropdown = dropdowns[i];
+          if (!openDropdown.classList.contains("hidden")) {
+            openDropdown.classList.add("hidden");
+          }
+        }
+      }
+    };
+
+    function goBack() {
+      window.location.href = "welcome2.html";
+    }
+
+    function goHome() {
+      window.location.href = "welcome.html";
+    }
+
+    let navigationTimer = null;
+
+    function startNavigationTimer() {
+      if (navigationTimer) clearTimeout(navigationTimer);
+      navigationTimer = setTimeout(() => {
+        window.location.href = 'welcome-newuser.html';
+      }, 3000);
+    }
+
+    initPageWithLoader({
+      minLoadTime: 500,
+      onDataLoad: async () => {
+        applyLanguage(currentLang);
+      }
+    }).then(() => {
+      startNavigationTimer();
+    });
+
+    // Handle back button navigation (bfcache)
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) {
+        // Page restored from cache, restart timer
+        startNavigationTimer();
+      }
+    });
+  </script>
+</body>
+
+</html>

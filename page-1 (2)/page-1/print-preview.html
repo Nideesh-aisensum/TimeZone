@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timezone - Print Preview</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: transparent;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .preview-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .receipt {
+            background: white;
+            width: 350px;
+            padding: 30px 25px;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .branding-logo {
+            display: block;
+            width: clamp(220px, 70%, 300px);
+            margin: 0 auto;
+        }
+
+        .website {
+            font-size: 11px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .location {
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .location-name {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .location-date {
+            font-size: 12px;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px dashed #ccc;
+            margin: 15px 0;
+        }
+
+        .message {
+            text-align: center;
+            font-size: 12px;
+            color: #e91e63;
+            font-style: italic;
+            margin: 10px 0;
+            line-height: 1.4;
+        }
+
+        .order-number {
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            margin: 15px 0;
+            letter-spacing: 1px;
+        }
+
+        .section {
+            margin: 15px 0;
+        }
+
+        .section-title {
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin: 4px 0;
+        }
+
+        .row-label {
+            color: #555;
+        }
+
+        .row-value {
+            font-weight: 500;
+        }
+
+        .total-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #000;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .tizo-total {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .tizo-label {
+            font-size: 12px;
+            color: #555;
+        }
+
+        .tizo-amount {
+            font-size: 36px;
+            font-weight: bold;
+            color: #000;
+        }
+
+        .tizo-unit {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .footer-message {
+            text-align: center;
+            font-size: 11px;
+            color: #e91e63;
+            margin-top: 20px;
+            font-style: italic;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.1s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-print {
+            background: linear-gradient(180deg, #00bfff, #0066cc);
+            color: white;
+        }
+
+        .btn-next {
+            background: linear-gradient(180deg, #00cc66, #009944);
+            color: white;
+        }
+
+        /* Print styles for 80mm thermal paper */
+        @media print {
+            @page {
+                size: 80mm auto;
+                margin: 0;
+            }
+
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 80mm !important;
+                font-family: 'Courier New', monospace !important;
+            }
+
+            .preview-container {
+                gap: 0;
+                padding: 0;
+            }
+
+            .receipt {
+                width: 72mm !important;
+                max-width: 72mm !important;
+                margin: 0 auto !important;
+                padding: 3mm 4mm !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                font-size: 10px !important;
+            }
+
+            .receipt-header {
+                margin-bottom: 2mm !important;
+            }
+
+            .branding-logo {
+                width: 180px !important;
+            }
+
+            .website {
+                font-size: 8px !important;
+            }
+
+            .location {
+                margin: 2mm 0 !important;
+            }
+
+            .location-name {
+                font-size: 11px !important;
+            }
+
+            .location-date {
+                font-size: 9px !important;
+            }
+
+            .divider {
+                margin: 2mm 0 !important;
+                border-top: 1px dashed #000 !important;
+            }
+
+            .message {
+                font-size: 9px !important;
+                margin: 2mm 0 !important;
+                line-height: 1.3 !important;
+            }
+
+            .order-number {
+                font-size: 14px !important;
+                margin: 2mm 0 !important;
+                letter-spacing: 0.5px !important;
+            }
+
+            .section {
+                margin: 2mm 0 !important;
+            }
+
+            .section-title {
+                font-size: 10px !important;
+                margin-bottom: 1mm !important;
+            }
+
+            .row {
+                font-size: 9px !important;
+                margin: 1mm 0 !important;
+            }
+
+            .total-section {
+                margin-top: 3mm !important;
+                padding-top: 2mm !important;
+                border-top: 1px solid #000 !important;
+            }
+
+            .total-row {
+                font-size: 11px !important;
+                margin: 1mm 0 !important;
+            }
+
+            .tizo-total {
+                margin-top: 2mm !important;
+            }
+
+            .tizo-label {
+                font-size: 9px !important;
+            }
+
+            .tizo-amount {
+                font-size: 24px !important;
+            }
+
+            .tizo-unit {
+                font-size: 11px !important;
+            }
+
+            .footer-message {
+                font-size: 8px !important;
+                margin-top: 3mm !important;
+            }
+
+            .buttons {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Back Button -->
+    <img src="back-button.png" alt="Back" class="back-button" onclick="window.history.back()">
+
+    <div class="preview-container">
+        <div class="receipt">
+            <div class="receipt-header">
+                <img src="timezone-branding.png" alt="Timezone" class="branding-logo">
+
+                <div class="website">www.timezonegames.com</div>
+            </div>
+
+            <div class="location">
+                <div class="location-name" id="location-name">Lippo Mall Puri</div>
+                <div class="location-date" id="location-date"></div>
+            </div>
+
+            <hr class="divider">
+
+            <p class="message" id="message"></p>
+
+            <div class="order-number" id="order-number">0132TZ3990BL</div>
+
+            <hr class="divider">
+
+            <div class="section">
+                <div class="section-title" id="topup-section-title"></div>
+                <div class="row">
+                    <span class="row-label" id="nominal-label"></span>
+                    <span class="row-value" id="nominal-value">Rp150.000</span>
+                </div>
+                <div class="row">
+                    <span class="row-label">Total Tizo</span>
+                    <span class="row-value" id="topup-tizo">180 Tizo</span>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title" id="scratch-section-title"></div>
+                <div class="row">
+                    <span class="row-label" id="scratch-nominal-label"></span>
+                    <span class="row-value" id="scratch-nominal-value">Rp200.000</span>
+                </div>
+                <div class="row">
+                    <span class="row-label">Total Tizo</span>
+                    <span class="row-value" id="scratch-tizo">300 Tizo</span>
+                </div>
+            </div>
+
+            <div class="total-section">
+                <div class="total-row">
+                    <span id="total-bayar-label"></span>
+                    <span id="total-bayar-value">Rp350.000</span>
+                </div>
+                <div class="tizo-total">
+                    <div class="tizo-label" id="tizo-label"></div>
+                    <div class="tizo-amount">480</div>
+                    <div class="tizo-unit">Tizo</div>
+                </div>
+            </div>
+
+            <p class="footer-message" id="footer-message"></p>
+        </div>
+
+        <div class="buttons">
+            <button class="btn btn-print" onclick="handlePrint()" id="print-btn"></button>
+            <button class="btn btn-next" onclick="handleNext()" id="next-btn"></button>
+        </div>
+    </div>
+
+
+    <script src="shell-connector.js"></script>
+    <script src="page-loader.js"></script>
+    <script src="session-manager.js"></script>
+    <script src="language.js"></script>
+    <script>
+        // Set current page in session
+        setCurrentPage('print-preview');
+
+        const translations = {
+            en: {
+                locationDate: 'Thursday, 21/12/25 16:33 PM',
+                message: 'Please present this receipt to the cashier to complete the payment.',
+                topupSectionTitle: 'Top-up Package',
+                nominalLabel: 'Transaction Amount :',
+                scratchSectionTitle: 'Bonus Scratchcard',
+                scratchNominalLabel: 'Transaction Amount :',
+                totalBayarLabel: 'Total Payment:',
+                tizoLabel: 'You have received a total of:',
+                footerMessage: 'This offer is valid for ... of your cards.',
+                printBtn: 'PRINT',
+                nextBtn: 'NEXT'
+            },
+            id: {
+                locationDate: 'Kamis 21/12/25 16:33 PM',
+                message: 'Dimohon untuk menyerahkan struk ini kepada kasir untuk menyelesaikan pembayaran.',
+                topupSectionTitle: 'Paket Top-up',
+                nominalLabel: 'Nominal Transaksi :',
+                scratchSectionTitle: 'Bonus Scratchcard',
+                scratchNominalLabel: 'Nominal Transaksi :',
+                totalBayarLabel: 'Total Bayar:',
+                tizoLabel: 'Kamu menerima total:',
+                footerMessage: 'Penawaran ini berlaku untuk ... Kartu yang kamu miliki.',
+                printBtn: 'CETAK',
+                nextBtn: 'LANJUT'
+            }
+        };
+
+        let currentLang = getCurrentLanguage();
+
+        function applyLanguage(lang) {
+            currentLang = lang;
+            const data = translations[lang];
+
+            document.getElementById('location-date').textContent = data.locationDate;
+            document.getElementById('message').textContent = data.message;
+            document.getElementById('topup-section-title').textContent = data.topupSectionTitle;
+            document.getElementById('nominal-label').textContent = data.nominalLabel;
+            document.getElementById('scratch-section-title').textContent = data.scratchSectionTitle;
+            document.getElementById('scratch-nominal-label').textContent = data.scratchNominalLabel;
+            document.getElementById('total-bayar-label').textContent = data.totalBayarLabel;
+            document.getElementById('tizo-label').textContent = data.tizoLabel;
+            document.getElementById('footer-message').textContent = data.footerMessage;
+            document.getElementById('print-btn').textContent = data.printBtn;
+            document.getElementById('next-btn').textContent = data.nextBtn;
+        }
+
+        function setLanguage(lang) {
+            saveLanguage(lang);
+            applyLanguage(lang);
+        }
+
+        function handlePrint() {
+            window.print();
+        }
+
+        function handleNext() {
+            window.location.href = 'bill-summary.html?accepted=true';
+        }
+
+        function init() {
+            applyLanguage(currentLang);
+
+            const session = getSession();
+            if (session) {
+                const orderNumber = session.orderNumber || generateOrderNumber();
+                document.getElementById('order-number').textContent = orderNumber;
+
+                if (session.offerCost) {
+                    document.getElementById('nominal-value').textContent = formatCurrency(session.offerCost);
+                }
+                if (session.offerTizo) {
+                    document.getElementById('topup-tizo').textContent = session.offerTizo + ' Tizo';
+                }
+                if (session.bonusCost) {
+                    document.getElementById('scratch-nominal-value').textContent = formatCurrency(session.bonusCost);
+                }
+                if (session.bonusTizo) {
+                    document.getElementById('scratch-tizo').textContent = session.bonusTizo + ' Tizo';
+                }
+                if (session.totalCost) {
+                    document.getElementById('total-bayar-value').textContent = formatCurrency(session.totalCost);
+                }
+                if (session.totalTizo) {
+                    document.querySelector('.tizo-amount').textContent = session.totalTizo;
+                }
+            }
+
+            const now = new Date();
+            const days = currentLang === 'id'
+                ? ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu']
+                : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const day = days[now.getDay()];
+            const date = now.toLocaleDateString('en-GB').replace(/\//g, '/');
+            const time = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('location-date').textContent = `${day}, ${date} ${time}`;
+        }
+
+        // Initialize page with loader
+        initPageWithLoader({
+            onDataLoad: async () => {
+                init();
+            },
+            minLoadTime: 300
+        });
+    </script>
+</body>
+
+</html>
