@@ -667,10 +667,11 @@
 
         .scratch-title {
             font-family: "Nulshock", sans-serif;
-            font-size: 70px;
+            font-size: 65px;
             color: #fff;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.3);
             margin-bottom: 6px;
+            white-space: nowrap;
             /*max-width: 600px;*/
         }
 
@@ -704,7 +705,7 @@
                 <h1 id="main-title" class="scratch-title editable" data-id="main-title"
                     style="transform: translate(-4.15585px, -2.07795px) scale(1)">GOSOK DAN DAPATKAN HADIAH!</h1>
                 <p id="main-subtitle" class="scratch-subtitle editable" data-id="main-subtitle"
-                    style="transform: translate(-2.07794px, 4.15578px) scale(1)">BUKA MEGA TIZO MU!</p>
+                    style="transform: translate(-2.07794px, 4.15578px) scale(1)">BONUS TIZO MENANTIMU!</p>
             </div>
 
 
@@ -819,6 +820,8 @@
 
         const translations = {
             en: {
+                mainTitle: "SCRATCH & WIN!",
+                mainSubtitle: "UNLOCK YOUR SURPRISE TIZO DROP!",
                 topLabel: "Top-Up Chosen:",
                 topValue: "150 RIBU GET 180 TIZO",
                 surpriseTitle: "SURPRISE!",
@@ -829,12 +832,14 @@
                 totalTopup: "350 RIBU (150 RIBU + 200 RIBU)",
                 extraGames: "-",
                 bonusPrize: "-",
-                acceptText: "GRAB THIS BONUS",
+                acceptText: "GET THIS BONUS",
                 skipText: "SKIP",
                 langLabel: "English",
                 freeGift: "FREE GIFT"
             },
             id: {
+                mainTitle: "GOSOK & MENANGKAN!",
+                mainSubtitle: "BONUS TIZO MENANTIMU!",
                 topLabel: "Top-Up Dipilih:",
                 topValue: "150 RIBU DAPAT 180 TIZO",
                 surpriseTitle: "KEJUTAN!",
@@ -862,6 +867,10 @@
         function applyLanguage(lang) {
             currentLang = lang;
             const data = translations[lang];
+
+            // Apply header translations
+            document.getElementById('main-title').textContent = data.mainTitle;
+            document.getElementById('main-subtitle').textContent = data.mainSubtitle;
 
             // Apply static translations (top-label removed from HTML)
             document.getElementById('surprise-title').textContent = data.surpriseTitle;

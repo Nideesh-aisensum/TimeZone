@@ -157,20 +157,21 @@
       margin-top: 170px !important;
       margin-bottom: 50px;
       text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+      transition: opacity 0.3s ease;
     }
 
     /* Pick One Text styling */
     .pick-one-text {
       font-family: "Nulshock", sans-serif;
       font-size: 40px;
-      color: #48ffff;
+      color: #ffffff;
       text-transform: uppercase;
       letter-spacing: 3px;
       font-weight: bold;
       text-align: center;
-      margin-top: 280px;
+      margin-top: 248px;
       margin-bottom: 15px;
-      text-shadow: 0 0 15px rgba(184, 245, 255, 0.4);
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 20px rgba(72, 255, 255, 0.6);
       position: relative;
       z-index: 100;
     }
@@ -531,7 +532,7 @@
         nextBtn: "NEXT",
       },
       id: {
-        youChose: "INI PILIHAN MU",
+        youChose: "INI PILIHANMU",
         greatChoice: "REKOMENDASI SPESIAL",
         specialOffers: "<span style='font-size:40px; color:#b8f5ff; display:block; font-weight:bold; margin-top:15px;'>UNTUK KAMU</span>",
         pickOne: "PILIH SATU",
@@ -784,6 +785,16 @@
       const specialOffersEl = document.querySelector(".special-offers-text");
       if (specialOffersEl) {
         specialOffersEl.style.display = "none";
+      }
+
+      // Blackout "YOUR CHOSEN OPTION" text when an upsell is selected
+      const youChoseEl = document.getElementById("you-chose-text");
+      if (youChoseEl) {
+        if (cardId === "selected-offer") {
+          youChoseEl.style.opacity = "1";
+        } else {
+          youChoseEl.style.opacity = "0.2";
+        }
       }
     }
 
