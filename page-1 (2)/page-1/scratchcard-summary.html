@@ -1971,6 +1971,33 @@
 
       // Update Print Receipt
       updatePrintReceipt();
+
+      // Disable/grey out print button when no offers are selected
+      const nextButton = document.querySelector('.next-button');
+      const nextButtonBg = document.querySelector('.next-button-bg');
+      const nextButtonText = document.querySelector('.next-button-text');
+
+      const anyOfferSelected = topupSelected || scratchCardSelected || oodSelected || oohSelected || snacksSelected;
+
+      if (!anyOfferSelected) {
+        // Grey out the button
+        if (nextButton) {
+          nextButton.style.opacity = '0.5';
+          nextButton.style.pointerEvents = 'none';
+        }
+        if (nextButtonBg) {
+          nextButtonBg.style.filter = 'grayscale(100%)';
+        }
+      } else {
+        // Enable the button
+        if (nextButton) {
+          nextButton.style.opacity = '1';
+          nextButton.style.pointerEvents = 'auto';
+        }
+        if (nextButtonBg) {
+          nextButtonBg.style.filter = 'none';
+        }
+      }
     }
 
     function toggleLanguage() {
