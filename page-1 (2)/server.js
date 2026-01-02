@@ -8,6 +8,21 @@ const PORT = process.env.PORT || 3000;
 const BASE_DIR = __dirname;
 const LOCAL_URL = `http://localhost:${PORT}`;
 
+// Kiosk Configuration - set 'location' in .env to filter offers for this specific kiosk
+// Maps k1->Kiosk 1, k2->Kiosk 2, etc. to match Offer Builder venue checkboxes
+const KIOSK_LOCATION = process.env.location || null;
+const KIOSK_VENUE = KIOSK_LOCATION ? (() => {
+    // Map shorthand (k1, k2) to full venue name (Kiosk 1, Kiosk 2)
+    const locationMap = {
+        'k1': 'Kiosk 1',
+        'k2': 'Kiosk 2',
+        'k3': 'Kiosk 3',
+        'k4': 'Kiosk 4',
+        'k5': 'Kiosk 5'
+    };
+    return locationMap[KIOSK_LOCATION.toLowerCase()] || KIOSK_LOCATION;
+})() : null;
+
 // Cache for offers from database (used for TIZO calculation)
 let upsellOffersCache = null;
 
@@ -461,14 +476,22 @@ const server = http.createServer((req, res) => {
 
         const dbCardType = cardTypeMap[cardType.toLowerCase()] || cardType;
 
-        // Count only active offers within valid date range
-        const countQuery = `SELECT COUNT(*) as count FROM offers 
+        // Count only active offers within valid date range, filtered by venue if configured
+        let countQuery = `SELECT COUNT(*) as count FROM offers 
             WHERE card_type = $1 
             AND is_active = true 
             AND (start_date IS NULL OR start_date <= CURRENT_DATE) 
             AND (end_date IS NULL OR end_date >= CURRENT_DATE)`;
+        let params = [dbCardType];
 
-        pool.query(countQuery, [dbCardType])
+        // Apply venue filter if configured
+        if (KIOSK_VENUE) {
+            countQuery += ` AND (venue IS NULL OR venue = '{}' OR $2 = ANY(venue))`;
+            params.push(KIOSK_VENUE);
+            console.log(`[/api/layout-config] ✅ Venue filter APPLIED: ${KIOSK_VENUE}`);
+        }
+
+        pool.query(countQuery, params)
             .then(result => {
                 const count = parseInt(result.rows[0].count);
                 let layout;
@@ -694,7 +717,21 @@ const server = http.createServer((req, res) => {
             AND (start_date IS NULL OR start_date <= CURRENT_DATE) 
             AND (end_date IS NULL OR end_date >= CURRENT_DATE)`;
         let params = [];
-        let paramIndex = 1;
+
+        // DEBUG: Log venue filter status
+        console.log(`[/api/offers] 🔍 DEBUG: KIOSK_LOCATION=${KIOSK_LOCATION}, KIOSK_VENUE=${KIOSK_VENUE}`);
+        console.log(`[/api/offers] 🔍 DEBUG: offerId=${offerId}, cost=${cost}, cardType=${cardType}`);
+
+        // Filter by kiosk venue if configured (show offers matching venue OR global offers with empty venue)
+        // Apply to all requests except specific offerId lookups (icons need exact match)
+        if (KIOSK_VENUE && !offerId) {
+            query += ` AND (venue IS NULL OR venue = '{}' OR $1 = ANY(venue))`;
+            params.push(KIOSK_VENUE);
+            console.log(`[/api/offers] ✅ Venue filter APPLIED: ${KIOSK_VENUE}`);
+        } else {
+            console.log(`[/api/offers] ⚠️ Venue filter NOT applied (KIOSK_VENUE=${KIOSK_VENUE})`);
+        }
+        let paramIndex = params.length + 1; // Start after any venue param
 
         // If screensaverOnly, filter to only OOD, OOH, and Snacks categories
         if (screensaverOnly && !offerId && !cost) {
@@ -735,8 +772,17 @@ const server = http.createServer((req, res) => {
             query += ' ORDER BY cost DESC';
         }
 
+        // DEBUG: Log final query
+        console.log(`[/api/offers] 🔍 QUERY: ${query}`);
+        console.log(`[/api/offers] 🔍 PARAMS: ${JSON.stringify(params)}`);
+
         pool.query(query, params)
             .then(result => {
+                // DEBUG: Log results
+                console.log(`[/api/offers] ✅ Returned ${result.rows.length} offers`);
+                if (KIOSK_VENUE && result.rows.length > 0) {
+                    console.log(`[/api/offers] 🔍 Sample venues: ${result.rows.slice(0, 3).map(r => JSON.stringify(r.venue)).join(', ')}`);
+                }
                 res.writeHead(200, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({
                     success: true,
@@ -1233,6 +1279,15 @@ if (args.includes('--sync')) {
 
         // Show which DB we are using for API
         console.log(`\n🗄️  Local Database: ${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || 5433}`);
+
+        // Show kiosk configuration
+        if (KIOSK_LOCATION || KIOSK_VENUE) {
+            console.log(`\n🏪 Kiosk Config:`);
+            console.log(`   Location: ${KIOSK_LOCATION || '(not set)'}`);
+            console.log(`   Venue Filter: ${KIOSK_VENUE || '(not set - showing all offers)'}`);
+        } else {
+            console.log(`\n🏪 Kiosk Config: Not configured (showing all offers)`);
+        }
 
         // Load offers cache for TIZO calculation
         await loadUpsellOffersCache();

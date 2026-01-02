@@ -610,10 +610,22 @@
         // Initialize Language
         const currentLang = getCurrentLanguage();
         const tapHintText = currentLang === 'id' ? 'TEKAN UNTUK MELANJUTKAN' : 'TAP TO CONTINUE';
+        const mainText = currentLang === 'id' ? 'ISI SALDOMU\nDI SINI!' : 'TOP-UP\nHERE!';
+        const dapatLabel = currentLang === 'id' ? 'DAPATKAN' : 'GETS';
 
         // Update all tap hint elements
         document.querySelectorAll('.tap-hint').forEach(el => {
             el.textContent = tapHintText;
+        });
+
+        // Update all main headline text elements
+        document.querySelectorAll('#main-text-ood, #main-text-ooh, #main-text-snacks').forEach(el => {
+            el.innerHTML = mainText.replace('\n', '<br />');
+        });
+
+        // Update all DAPATKAN/GETS labels
+        document.querySelectorAll('.dapat-label').forEach(el => {
+            el.textContent = dapatLabel;
         });
 
         let currentSlide = 'ood'; // Start with OOD
