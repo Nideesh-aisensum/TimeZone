@@ -23,16 +23,19 @@ const KIOSK_VENUE = KIOSK_LOCATION ? (() => {
     return locationMap[KIOSK_LOCATION.toLowerCase()] || KIOSK_LOCATION;
 })() : null;
 
-// Cache for offers from database (used for TIZO calculation)
+// Cache for offers from database (used for Offers Page TIZO calculation - card-type specific)
 let upsellOffersCache = null;
 
+// Cache for UNIVERSAL custom top-up rates (used for Custom Top-Up page - NO card type)
+let customTopupRatesCache = null;
+
 /**
- * Load offers from database into cache
- * Uses the main 'offers' table (same as client) for consistent TIZO calculation
+ * Load offers from database into cache (for Offers Page - card-type specific)
+ * Uses the main 'offers' table
  */
 async function loadUpsellOffersCache() {
     try {
-        // Fetch all active offers from the offers table (same source as client)
+        // Fetch all active offers from the offers table
         const result = await pool.query(`
             SELECT 
                 card_type,
@@ -49,69 +52,96 @@ async function loadUpsellOffersCache() {
             topup_rb: parseInt(row.topup_rb),
             tizo_value: parseInt(row.tizo_value)
         }));
-        console.log('✅ Loaded', upsellOffersCache.length, 'TIZO rates from offers table');
+        console.log('✅ Loaded', upsellOffersCache.length, 'card-type TIZO rates from offers table');
         console.log('   Offers:', upsellOffersCache.slice(0, 10).map(o => `${o.card_type}:${o.topup_rb}RB=${o.tizo_value}TIZO`).join(', '), '...');
     } catch (err) {
         console.error('❌ Failed to load offers for TIZO calculation:', err.message);
     }
 }
 
+/**
+ * Load UNIVERSAL custom top-up rates from database
+ * Uses the 'custom_topup_rates' table - applies to ALL card types
+ */
+async function loadCustomTopupRatesCache() {
+    try {
+        const result = await pool.query(`
+            SELECT topup_rb, tizo_value
+            FROM custom_topup_rates
+            WHERE is_active = true
+            ORDER BY topup_rb DESC
+        `);
+        customTopupRatesCache = result.rows.map(row => ({
+            topup_rb: parseInt(row.topup_rb),
+            tizo_value: parseInt(row.tizo_value)
+        }));
+        console.log('✅ Loaded', customTopupRatesCache.length, 'UNIVERSAL custom top-up rates');
+        console.log('   Rates:', customTopupRatesCache.map(r => `${r.topup_rb}RB=${r.tizo_value}TIZO`).join(', '));
+    } catch (err) {
+        console.error('❌ Failed to load custom top-up rates:', err.message);
+        // Fallback to hardcoded rates if DB fails
+        customTopupRatesCache = [
+            { topup_rb: 2000, tizo_value: 4000 },
+            { topup_rb: 600, tizo_value: 1200 },
+            { topup_rb: 500, tizo_value: 900 },
+            { topup_rb: 400, tizo_value: 650 },
+            { topup_rb: 350, tizo_value: 550 },
+            { topup_rb: 300, tizo_value: 450 },
+            { topup_rb: 250, tizo_value: 350 },
+            { topup_rb: 200, tizo_value: 260 },
+            { topup_rb: 150, tizo_value: 180 },
+            { topup_rb: 100, tizo_value: 110 }
+        ];
+        console.log('⚠️ Using fallback hardcoded custom top-up rates');
+    }
+}
 
 /**
- * Calculate TIZO for custom topup amounts
+ * Calculate TIZO for CUSTOM TOP-UP amounts
  * 
- * Each card type has offers in the database. The minimum offer RB value
- * becomes the threshold - amounts below this use 1:1 ratio.
+ * NEW SYSTEM: Uses UNIVERSAL rates from custom_topup_rates table
+ * NO card type differentiation - same rates for all users
  * 
- * Example for Blue card (if smallest offer is 200 RB):
- * - 600 RB = 1200 TIZO (from offers table, 2x multiplier)
- * - Remaining 50 RB = 50 TIZO (1:1 since below smallest offer of 200 RB)
- * - Total = 1250 TIZO
+ * Example: 125 RB
+ * - 100 RB = 110 TIZO (from universal table)
+ * - Remaining 25 RB = 25 TIZO (1:1 ratio, below smallest offer of 100)
+ * - Total = 135 TIZO
  * 
- * @param {number} amountRb - Amount in Rb (e.g., 650 for 650,000 Rp)
- * @param {string} cardType - Card type (Red, Blue, Gold, Platinum)
+ * @param {number} amountRb - Amount in Rb (e.g., 125 for 125,000 Rp)
+ * @param {string} cardType - IGNORED for custom top-up (kept for backward compatibility)
  * @returns {number} - TIZO credit amount
  */
 function calculateCustomTizo(amountRb, cardType = 'red') {
     let totalTizo = 0;
     let remaining = amountRb;
+    const breakdownParts = [];
 
-    // Normalize card type (e.g. 'blue' -> 'Blue')
-    const normalizedCardType = cardType.charAt(0).toUpperCase() + cardType.slice(1).toLowerCase();
+    console.log(`[calculateCustomTizo] UNIVERSAL mode - Amount: ${amountRb} RB (card type ignored)`);
 
-    // Use upsellOffersCache from database
-    if (upsellOffersCache && upsellOffersCache.length > 0) {
-        // Filter offers for this card type and sort descending (largest first for greedy approach)
-        const cardOffers = upsellOffersCache
-            .filter(o => o.card_type === normalizedCardType)
-            .sort((a, b) => b.topup_rb - a.topup_rb);
-
-        // Dynamic minimum threshold = smallest offer for this card type
-        // Amounts below this will be 1:1 ratio
-        const minThreshold = cardOffers.length > 0
-            ? Math.min(...cardOffers.map(o => o.topup_rb))
-            : 0;
-
-        console.log(`[calculateCustomTizo] Card: ${normalizedCardType}, Amount: ${amountRb} RB, Dynamic min threshold: ${minThreshold} RB (from smallest offer)`);
-        console.log(`[calculateCustomTizo] Available offers:`, cardOffers.map(o => `${o.topup_rb}RB=${o.tizo_value}TIZO`).join(', '));
+    // Use universal custom top-up rates (sorted descending, largest first)
+    if (customTopupRatesCache && customTopupRatesCache.length > 0) {
+        console.log(`[calculateCustomTizo] Available universal rates:`, customTopupRatesCache.map(r => `${r.topup_rb}RB=${r.tizo_value}TIZO`).join(', '));
 
         // Greedy allocation - use largest offers first
-        for (const offer of cardOffers) {
-            while (remaining >= offer.topup_rb) {
-                totalTizo += offer.tizo_value;
-                remaining -= offer.topup_rb;
-                console.log(`[calculateCustomTizo] Used ${offer.topup_rb}RB = ${offer.tizo_value}TIZO, remaining: ${remaining}RB`);
+        for (const rate of customTopupRatesCache) {
+            while (remaining >= rate.topup_rb) {
+                totalTizo += rate.tizo_value;
+                remaining -= rate.topup_rb;
+                breakdownParts.push(`${rate.topup_rb}RB=${rate.tizo_value}`);
+                console.log(`[calculateCustomTizo] Used ${rate.topup_rb}RB = ${rate.tizo_value}TIZO, remaining: ${remaining}RB`);
             }
         }
     }
 
-    // Any remaining amount below minimum offer -> 1:1 ratio
+    // Any remaining amount below smallest offer (100 RB) -> 1:1 ratio
     if (remaining > 0) {
         console.log(`[calculateCustomTizo] Remaining ${remaining}RB below smallest offer, adding at 1:1 ratio`);
         totalTizo += remaining;
+        breakdownParts.push(`${remaining}RB=${remaining}(1:1)`);
     }
 
-    console.log(`[calculateCustomTizo] FINAL: ${amountRb} RB = ${totalTizo} TIZO (${normalizedCardType} card)`);
+    console.log(`[calculateCustomTizo] FINAL: ${amountRb} RB = ${totalTizo} TIZO`);
+    console.log(`[calculateCustomTizo] Breakdown: ${breakdownParts.join(' + ')}`);
     return totalTizo;
 }
 
@@ -817,6 +847,31 @@ const server = http.createServer((req, res) => {
         return;
     }
 
+    // API: Get UNIVERSAL custom top-up rates (for Custom Top-Up page)
+    // These rates apply to ALL card types - no card type differentiation
+    if (req.method === 'GET' && req.url === '/api/custom-topup-rates') {
+        pool.query('SELECT topup_rb, tizo_value, percent_increase FROM custom_topup_rates WHERE is_active = true ORDER BY topup_rb DESC')
+            .then(result => {
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: true,
+                    rates: result.rows.map(r => ({
+                        topup_rb: parseInt(r.topup_rb),
+                        tizo_value: parseInt(r.tizo_value),
+                        percent_increase: parseFloat(r.percent_increase)
+                    })),
+                    count: result.rows.length,
+                    message: 'Universal custom top-up rates (applies to all card types)'
+                }));
+            })
+            .catch(err => {
+                console.error('Database error:', err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, error: err.message }));
+            });
+        return;
+    }
+
     // API: Get upsell offer by RB value
     if (req.method === 'GET' && req.url.startsWith('/api/upsell-offer')) {
         const urlParams = new URL(req.url, LOCAL_URL);
@@ -1003,106 +1058,49 @@ const server = http.createServer((req, res) => {
 
     // API: Get custom topup upsell offers based on user's custom amount
     // Returns the two upsell box values for the 2nd upsell screen
+    // SIMPLIFIED: Uses +50RB and +100RB from user's amount, calculates TIZO using universal custom_topup_rates table
     if (req.method === 'GET' && req.url.startsWith('/api/custom-topup-upsell')) {
         const urlParams = new URL(req.url, LOCAL_URL);
         const rbValue = urlParams.searchParams.get('rb');
-        // Default to 'red' if not provided
-        const cardType = urlParams.searchParams.get('cardType') || 'red';
 
         if (!rbValue) {
             res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, error: 'rb parameter is required (amount in Rb, e.g., 1790 for 1,790,000 Rp)' }));
+            res.end(JSON.stringify({ success: false, error: 'rb parameter is required (amount in Rb, e.g., 125 for 125,000 Rp)' }));
             return;
         }
 
         const amountRb = parseInt(rbValue);
-        const normalizedCardType = cardType.charAt(0).toUpperCase() + cardType.slice(1).toLowerCase();
 
-        // Calculate base TIZO for custom amount
-        const customTizo = calculateCustomTizo(amountRb, cardType);
+        // Calculate base TIZO for custom amount using universal custom_topup_rates table
+        const customTizo = calculateCustomTizo(amountRb);
 
-        // Find the upsell RB values from custom_topup_upsell table
-        pool.query(
-            'SELECT * FROM custom_topup_upsell WHERE $1 BETWEEN range_min AND range_max LIMIT 1',
-            [amountRb]
-        )
-            .then(async result => {
-                let upsell1Rb, upsell2Rb;
+        // Calculate upsell RB values: simply add +50 and +100 to user's amount
+        const upsell1Rb = amountRb + 50;
+        const upsell2Rb = amountRb + 100;
 
-                if (result.rows.length > 0) {
-                    const row = result.rows[0];
-                    upsell1Rb = row.upsell_box_1;
-                    upsell2Rb = row.upsell_box_2;
-                } else {
-                    // Fallback: round up to nearest 50
-                    upsell1Rb = Math.ceil(amountRb / 50) * 50;
-                    upsell2Rb = upsell1Rb + 50;
-                }
+        // Calculate TIZO for upsells using the same universal custom_topup_rates table
+        const tizo1 = calculateCustomTizo(upsell1Rb);
+        const tizo2 = calculateCustomTizo(upsell2Rb);
 
-                // Check if upsell RB values exist in offers table
-                // If found, use DB TIZO. If not, cascade +50 from previous.
-                let tizo1, tizo2;
+        console.log(`[custom-topup-upsell] Base: ${amountRb}RB = ${customTizo} TIZO`);
+        console.log(`[custom-topup-upsell] Upsell 1: ${upsell1Rb}RB = ${tizo1} TIZO`);
+        console.log(`[custom-topup-upsell] Upsell 2: ${upsell2Rb}RB = ${tizo2} TIZO`);
 
-                try {
-                    // Check first upsell in offers table
-                    const offer1Result = await pool.query(
-                        'SELECT tizo_credit FROM offers WHERE ROUND(cost / 1000) = $1 AND card_type = $2 AND is_active = true LIMIT 1',
-                        [upsell1Rb, normalizedCardType]
-                    );
-
-                    if (offer1Result.rows.length > 0) {
-                        tizo1 = Math.round(parseFloat(offer1Result.rows[0].tizo_credit));
-                        console.log(`[custom-topup-upsell] Found ${upsell1Rb}RB in DB: ${tizo1} TIZO`);
-                    } else {
-                        tizo1 = customTizo + 50;
-                        console.log(`[custom-topup-upsell] ${upsell1Rb}RB not in DB, using customTizo + 50 = ${tizo1} TIZO`);
-                    }
-
-                    // Check second upsell in offers table
-                    const offer2Result = await pool.query(
-                        'SELECT tizo_credit FROM offers WHERE ROUND(cost / 1000) = $1 AND card_type = $2 AND is_active = true LIMIT 1',
-                        [upsell2Rb, normalizedCardType]
-                    );
-
-                    if (offer2Result.rows.length > 0) {
-                        tizo2 = Math.round(parseFloat(offer2Result.rows[0].tizo_credit));
-                        console.log(`[custom-topup-upsell] Found ${upsell2Rb}RB in DB: ${tizo2} TIZO`);
-                    } else {
-                        // Cascade from first upsell
-                        tizo2 = tizo1 + 50;
-                        console.log(`[custom-topup-upsell] ${upsell2Rb}RB not in DB, cascading from upsell1 + 50 = ${tizo2} TIZO`);
-                    }
-                } catch (lookupErr) {
-                    console.error('[custom-topup-upsell] DB lookup error:', lookupErr.message);
-                    // Fallback to simple +50/+100
-                    tizo1 = customTizo + 50;
-                    tizo2 = tizo1 + 50;
-                }
-
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({
-                    success: true,
-                    customAmount: amountRb,
-                    customTizo: customTizo,
-                    upsellBox1: {
-                        rb: upsell1Rb,
-                        tizo: tizo1
-                    },
-                    upsellBox2: {
-                        rb: upsell2Rb,
-                        tizo: tizo2
-                    },
-                    range: result.rows.length > 0 ? {
-                        min: result.rows[0].range_min,
-                        max: result.rows[0].range_max
-                    } : null
-                }));
-            })
-            .catch(err => {
-                console.error('Database error:', err);
-                res.writeHead(500, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, error: err.message }));
-            });
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: true,
+            customAmount: amountRb,
+            customTizo: customTizo,
+            upsellBox1: {
+                rb: upsell1Rb,
+                tizo: tizo1
+            },
+            upsellBox2: {
+                rb: upsell2Rb,
+                tizo: tizo2
+            },
+            message: 'Using universal custom_topup_rates table for all TIZO calculations'
+        }));
         return;
     }
 
@@ -1289,8 +1287,11 @@ if (args.includes('--sync')) {
             console.log(`\n🏪 Kiosk Config: Not configured (showing all offers)`);
         }
 
-        // Load offers cache for TIZO calculation
+        // Load offers cache for TIZO calculation (Offers Page - card-type specific)
         await loadUpsellOffersCache();
+
+        // Load UNIVERSAL custom top-up rates cache (Custom Top-Up page - NO card type)
+        await loadCustomTopupRatesCache();
 
         // Start periodic sync automatically
         startPeriodicSync(periodicInterval);

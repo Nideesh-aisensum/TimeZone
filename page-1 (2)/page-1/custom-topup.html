@@ -643,8 +643,8 @@
         const MIN_AMOUNT_THOUSANDS = 10; // Min 10,000 (10 thousands)
         const MAX_AMOUNT_THOUSANDS = 2000; // Max 2,000,000 (2000 thousands)
 
-        // Cache for upsell_offers data from database (sorted descending by topup_rb)
-        let upsellOffersCache = null;
+        // Cache for UNIVERSAL custom top-up rates (NO card type differentiation)
+        let customTopupRatesCache = null;
 
         // Cache for new user offers (Blue, Gold, Platinum) with actual TIZO values from database
         let newUserOffersCache = {
@@ -654,44 +654,42 @@
         };
 
         /**
-         * Fetch TIZO rates from database (offers table)
-         * Fetches offers for all card types and caches them
+         * Fetch UNIVERSAL custom top-up rates from database
+         * Uses the NEW custom_topup_rates table - applies to ALL card types
          */
-        async function fetchTizoRates() {
-            if (upsellOffersCache) return upsellOffersCache;
+        async function fetchCustomTopupRates() {
+            if (customTopupRatesCache) return customTopupRatesCache;
 
             try {
-                // Fetch offers for all card types (Red, Blue, Gold, Platinum)
-                const cardTypes = ['Red', 'Blue', 'Gold', 'Platinum'];
-                let allOffers = [];
+                const response = await fetch(getApiUrl('/api/custom-topup-rates'));
+                const data = await response.json();
 
-                for (const cardType of cardTypes) {
-                    try {
-                        const response = await fetch(getApiUrl(`/api/offers?cardType=${cardType}`));
-                        const data = await response.json();
-                        if (data.success && data.offers) {
-                            // Map offers to uniform format and add card_type
-                            const mappedOffers = data.offers.map(o => ({
-                                card_type: cardType,
-                                topup_rb: Math.round(parseFloat(o.cost) / 1000), // Convert cost to RB (thousands)
-                                tizo_value: Math.round(parseFloat(o.tizo_credit))
-                            }));
-                            allOffers = allOffers.concat(mappedOffers);
-                            console.log(`✅ Loaded ${cardType} offers:`, mappedOffers.length, 'entries');
-                        }
-                    } catch (err) {
-                        console.warn(`⚠️ Could not fetch ${cardType} offers:`, err.message);
-                    }
+                if (data.success && data.rates) {
+                    // Already sorted descending by server
+                    customTopupRatesCache = data.rates;
+                    console.log('✅ Loaded UNIVERSAL custom top-up rates:', customTopupRatesCache.length, 'entries');
+                    console.log('   Rates:', customTopupRatesCache.map(r => `${r.topup_rb}RB=${r.tizo_value}TIZO`).join(', '));
+                    return customTopupRatesCache;
                 }
-
-                // Sort descending by topup_rb for greedy breakdown
-                upsellOffersCache = allOffers.sort((a, b) => b.topup_rb - a.topup_rb);
-                console.log('✅ Total TIZO rates loaded:', upsellOffersCache.length, 'entries');
-                return upsellOffersCache;
             } catch (error) {
-                console.error('❌ Failed to fetch TIZO rates:', error);
+                console.error('❌ Failed to fetch universal custom top-up rates:', error);
             }
-            return null;
+
+            // Fallback to hardcoded rates if API fails
+            customTopupRatesCache = [
+                { topup_rb: 2000, tizo_value: 4000 },
+                { topup_rb: 600, tizo_value: 1200 },
+                { topup_rb: 500, tizo_value: 900 },
+                { topup_rb: 400, tizo_value: 650 },
+                { topup_rb: 350, tizo_value: 550 },
+                { topup_rb: 300, tizo_value: 450 },
+                { topup_rb: 250, tizo_value: 350 },
+                { topup_rb: 200, tizo_value: 260 },
+                { topup_rb: 150, tizo_value: 180 },
+                { topup_rb: 100, tizo_value: 110 }
+            ];
+            console.log('⚠️ Using fallback hardcoded custom top-up rates');
+            return customTopupRatesCache;
         }
 
         /**
@@ -723,74 +721,39 @@
 
 
         /**
-         * Calculate TIZO for custom topup amounts based on Card Tier
+         * Calculate TIZO for CUSTOM TOP-UP amounts
          * 
-         * Logic:
-         * 1. Get user's active card type (Red, Blue, Gold, Platinum).
-         * 2. Filter offers to ONLY those matching the card type.
-         * 3. Greedy allocation: distinct largest offers first.
-         * 4. Remainder < smallest offer gets 1:1 ratio.
+         * NEW SYSTEM: Uses UNIVERSAL rates from custom_topup_rates table
+         * NO card type differentiation - same rates for all users
+         * 
+         * Example: 125 RB
+         * - 100 RB = 110 TIZO (from universal table)
+         * - Remaining 25 RB = 25 TIZO (1:1 ratio, below smallest offer of 100)
+         * - Total = 135 TIZO
          */
         function calculateCustomTizo(amountRb) {
             let totalTizo = 0;
             let remaining = amountRb;
             let breakdownParts = []; // Track breakdown for console logging
 
-            // Get user's card type from session
-            const session = typeof getSession === 'function' ? getSession() : null;
-            // Default to 'Red' if no session (e.g. direct access or error) -> but typically there should be a card selected.
-            // Map session card names (lowercase) to DB card types (Title Case)
-            let userCardType = 'Red'; // Fallback
-            if (session && session.selectedCard) {
-                const map = {
-                    'red': 'Red',
-                    'blue': 'Blue',
-                    'gold': 'Gold',
-                    'platinum': 'Platinum',
-                    'silver': 'Platinum' // Handle legacy Silver as Platinum if needed
-                };
-                userCardType = map[session.selectedCard.toLowerCase()] || 'Red';
+            console.log(`[TIZO Calculator] UNIVERSAL mode - Amount: ${amountRb} RB (card type ignored)`);
 
-                // Special case: New Player might have 'new_user' or null, treat as Red for custom topup?
-                // The requirements say "Red card users (welcome card)".
-                if (session.selectedCard === 'new_user') userCardType = 'Red';
-            } else {
-                // Try localStorage fallback
-                const storedCard = localStorage.getItem('selectedCard');
-                if (storedCard) {
-                    const map = { 'red': 'Red', 'blue': 'Blue', 'gold': 'Gold', 'platinum': 'Platinum', 'silver': 'Platinum' };
-                    userCardType = map[storedCard.toLowerCase()] || 'Red';
-                }
-            }
+            if (customTopupRatesCache && customTopupRatesCache.length > 0) {
+                // Log available rates
+                console.log(`[TIZO Calculator] Available universal rates:`,
+                    customTopupRatesCache.map(r => `${r.topup_rb}RB=${r.tizo_value}TIZO`).join(', '));
 
-            console.log(`[TIZO Calculator] Card: ${userCardType}, Amount: ${amountRb} RB`);
-
-            if (upsellOffersCache && upsellOffersCache.length > 0) {
-                // Filter offers for this specific card type
-                // AND ensure we only pick offers that fit into the remaining amount
-                // Sort descending to prioritize largest bundles
-                // Note: The API returns all offers. We must filter by card_type matches.
-
-                // Data comes from /api/upsell-offers-all which now has card_type
-                const validOffers = upsellOffersCache
-                    .filter(o => o.card_type === userCardType)
-                    .sort((a, b) => b.topup_rb - a.topup_rb);
-
-                // Log available offers
-                console.log(`[TIZO Calculator] Available offers for ${userCardType}:`,
-                    validOffers.map(o => `${o.topup_rb}RB=${o.tizo_value}TIZO`).join(', '));
-
-                // Greedy allocation
-                for (const offer of validOffers) {
-                    while (remaining >= offer.topup_rb) {
-                        totalTizo += offer.tizo_value;
-                        remaining -= offer.topup_rb;
-                        breakdownParts.push(`${offer.topup_rb}RB=${offer.tizo_value}`);
+                // Greedy allocation - use largest offers first (already sorted descending)
+                for (const rate of customTopupRatesCache) {
+                    while (remaining >= rate.topup_rb) {
+                        totalTizo += rate.tizo_value;
+                        remaining -= rate.topup_rb;
+                        breakdownParts.push(`${rate.topup_rb}RB=${rate.tizo_value}`);
                     }
                 }
             }
 
-            // Remainder gets 1:1 ratio
+            // Remainder gets 1:1 ratio (below smallest offer of 100 RB)
             if (remaining > 0) {
                 totalTizo += remaining;
                 breakdownParts.push(`${remaining}RB=${remaining} (1:1)`);
@@ -1116,8 +1079,8 @@
 
         // Initialize
         async function init() {
-            // Fetch TIZO rates from database first
-            await fetchTizoRates();
+            // Fetch UNIVERSAL custom top-up rates from database first
+            await fetchCustomTopupRates();
 
             // Fetch new user offers for accurate TIZO values (if this is a new user session)
             const session = typeof getSession === 'function' ? getSession() : null;

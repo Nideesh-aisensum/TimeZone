@@ -619,10 +619,9 @@
       const baseAmountRb = Math.round(customTopupData.amount / 1000); // Convert to Rb
 
       try {
-        // Fetch upsell offers from database API
-        const cardType = getCardType();
-        console.log(`Fetching upsell offers for ${baseAmountRb} RB, Card Type: ${cardType}`);
-        const response = await fetch(getApiUrl(`/api/custom-topup-upsell?rb=${baseAmountRb}&cardType=${cardType}`));
+        // Fetch upsell offers from database API (uses universal custom_topup_rates table)
+        console.log(`Fetching upsell offers for ${baseAmountRb} RB`);
+        const response = await fetch(getApiUrl(`/api/custom-topup-upsell?rb=${baseAmountRb}`));
         const data = await response.json();
 
         if (data.success) {
