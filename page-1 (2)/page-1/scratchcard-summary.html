@@ -928,7 +928,7 @@
               style="display: none; margin-top: 15px; transform: translate(0px, -15.9999px) scale(1); align-items: center; gap: 20px; width: 100%; justify-content: center; pointer-events: none;">
               <h3 id="free-gifts-title" class="section-title editable" data-id="free-gifts-title"
                 style="color: rgb(242, 202, 2); font-size: 22px; transform: translate(0, 0) scale(1.2); pointer-events: none;">
-                FREE GIFT
+                <span id="free-gifts-label-text" data-free-gift-label="true">FREE GIFT</span>
                 <span id="free-gifts-value" class="editable" data-id="free-gifts-value"
                   style="color: rgb(172, 252, 255); font-size: 22px; font-weight: bold; transform: translate(0, 0) scale(1.2)">
                   -
@@ -2790,7 +2790,9 @@
 
         // For split topup, the scratch section shows the card offer (original scratchcard)
         bonusCost = parseInt(session.originalBonusCost) || 0;
-        bonusTizo = parseInt(session.originalBonusTizo) || 0;
+        // Use explicit check for 0 since parseInt returns NaN for undefined
+        const parsedOriginalBonusTizo = parseInt(session.originalBonusTizo);
+        bonusTizo = Number.isFinite(parsedOriginalBonusTizo) ? parsedOriginalBonusTizo : 0;
 
         // Show the custom topup section with the remaining amount
         const customTopupDisplay = document.getElementById("custom-topup-display");
@@ -2807,7 +2809,9 @@
         // For custom topup without split data, use session values set by scratch-card.html
         // Only fall back to defaults if session values are not available
         bonusCost = parseInt(session.bonusCost) || 100000;
-        bonusTizo = parseInt(session.bonusTizo) || 100;
+        // Use explicit check for 0 since || treats 0 as falsy
+        const parsedBonusTizo = parseInt(session.bonusTizo);
+        bonusTizo = Number.isFinite(parsedBonusTizo) ? parsedBonusTizo : 100;
 
         // Update session to ensure consistency
         updateSession({
@@ -2817,7 +2821,9 @@
       } else {
         // Preset offers use data passed from scratch-card.html (from DB) - ensure numbers
         bonusCost = parseInt(session.bonusCost) || 100000;
-        bonusTizo = parseInt(session.bonusTizo) || 400; // Default to 400 for standard
+        // Use explicit check for 0 since || treats 0 as falsy
+        const parsedBonusTizoStd = parseInt(session.bonusTizo);
+        bonusTizo = Number.isFinite(parsedBonusTizoStd) ? parsedBonusTizoStd : 400; // Default to 400 for standard
       }
 
       const bonusCostInRb = Math.round(bonusCost / 1000);
