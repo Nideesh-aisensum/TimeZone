@@ -582,23 +582,64 @@ const server = http.createServer((req, res) => {
         query += ' ORDER BY cost DESC, id DESC LIMIT 1';
 
         pool.query(query, params)
-            .then(result => {
+            .then(async result => {
                 if (result.rows.length > 0) {
                     const offer = result.rows[0];
+
+                    // Fetch prizes from prize pool
+                    let prizes = [];
+                    let selectedPrize = null;
+                    try {
+                        const prizesResult = await pool.query(
+                            'SELECT * FROM scratch_card_prizes WHERE scratch_card_id = $1 AND is_active = true ORDER BY id',
+                            [offer.id]
+                        );
+                        if (prizesResult.rows.length > 0) {
+                            prizes = prizesResult.rows.map(p => ({
+                                id: p.id,
+                                prize_type: p.prize_type,
+                                prize_value: parseInt(p.prize_value),
+                                prize_label: p.prize_label,
+                                probability: parseFloat(p.probability)
+                            }));
+
+                            // Weighted random selection
+                            const totalWeight = prizes.reduce((sum, p) => sum + p.probability, 0);
+                            let random = Math.random() * totalWeight;
+                            selectedPrize = prizes[0];
+                            for (const prize of prizes) {
+                                random -= prize.probability;
+                                if (random <= 0) {
+                                    selectedPrize = prize;
+                                    break;
+                                }
+                            }
+                            console.log(`[Scratch Card] Selected prize: ${selectedPrize.prize_label}`);
+                        }
+                    } catch (prizeErr) {
+                        console.error('Error fetching prizes:', prizeErr);
+                    }
+
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({
                         success: true,
                         offer: {
                             id: offer.id,
                             cost: parseFloat(offer.cost),
-                            tizo_credit: parseFloat(offer.tizo_credit),
+                            tizo_credit: selectedPrize ? selectedPrize.prize_value : (parseFloat(offer.tizo_credit) || 0),
                             card_type: offer.card_type,
                             category: offer.category,
                             free_games: offer.free_games || null,
                             gift: offer.gift || null,
-                            gift_details: offer.gift_details || null
+                            gift_details: offer.gift_details || null,
+                            // New prize pool fields
+                            has_prize_pool: prizes.length > 0,
+                            prizes: prizes,
+                            selected_prize: selectedPrize
                         },
-                        message: `Scratch card offer for ${dbCardType || 'default'}`
+                        message: selectedPrize
+                            ? `Scratch card - Won: ${selectedPrize.prize_label}`
+                            : `Scratch card offer for ${dbCardType || 'default'}`
                     }));
                 } else {
                     // Fallback: If no specific card offer found (e.g. Gold) and we were looking for one,
@@ -657,6 +698,73 @@ const server = http.createServer((req, res) => {
             })
             .catch(err => {
                 console.error('Database error:', err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, error: err.message }));
+            });
+        return;
+    }
+
+    // API: Get scratch card prizes and randomly select one
+    // Returns all available prizes for a scratch card + a randomly selected winner
+    if (req.method === 'GET' && req.url.startsWith('/api/scratch-card-prizes')) {
+        const urlParams = new URL(req.url, LOCAL_URL);
+        const scratchCardId = urlParams.searchParams.get('scratchCardId');
+
+        if (!scratchCardId) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, error: 'scratchCardId parameter is required' }));
+            return;
+        }
+
+        pool.query(
+            'SELECT * FROM scratch_card_prizes WHERE scratch_card_id = $1 AND is_active = true ORDER BY id',
+            [parseInt(scratchCardId)]
+        )
+            .then(result => {
+                if (result.rows.length === 0) {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: true,
+                        prizes: [],
+                        selectedPrize: null,
+                        message: 'No prizes found for this scratch card'
+                    }));
+                    return;
+                }
+
+                const prizes = result.rows.map(p => ({
+                    id: p.id,
+                    prize_type: p.prize_type,
+                    prize_value: parseInt(p.prize_value),
+                    prize_label: p.prize_label,
+                    probability: parseFloat(p.probability)
+                }));
+
+                // Weighted random selection based on probability
+                const totalWeight = prizes.reduce((sum, p) => sum + p.probability, 0);
+                let random = Math.random() * totalWeight;
+                let selectedPrize = prizes[0]; // fallback
+
+                for (const prize of prizes) {
+                    random -= prize.probability;
+                    if (random <= 0) {
+                        selectedPrize = prize;
+                        break;
+                    }
+                }
+
+                console.log(`[Scratch Card] Selected prize for card ${scratchCardId}: ${selectedPrize.prize_label}`);
+
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: true,
+                    prizes: prizes,
+                    selectedPrize: selectedPrize,
+                    message: `Won: ${selectedPrize.prize_label}`
+                }));
+            })
+            .catch(err => {
+                console.error('Database error fetching prizes:', err);
                 res.writeHead(500, { 'Content-Type': 'application/json' });
                 res.end(JSON.stringify({ success: false, error: err.message }));
             });
@@ -1058,7 +1166,8 @@ const server = http.createServer((req, res) => {
 
     // API: Get custom topup upsell offers based on user's custom amount
     // Returns the two upsell box values for the 2nd upsell screen
-    // SIMPLIFIED: Uses +50RB and +100RB from user's amount, calculates TIZO using universal custom_topup_rates table
+    // USES DATABASE: Looks up upsell box values from custom_topup_upsell table (rounded tier values)
+    // Then calculates TIZO for those amounts using universal custom_topup_rates table
     if (req.method === 'GET' && req.url.startsWith('/api/custom-topup-upsell')) {
         const urlParams = new URL(req.url, LOCAL_URL);
         const rbValue = urlParams.searchParams.get('rb');
@@ -1074,33 +1183,71 @@ const server = http.createServer((req, res) => {
         // Calculate base TIZO for custom amount using universal custom_topup_rates table
         const customTizo = calculateCustomTizo(amountRb);
 
-        // Calculate upsell RB values: simply add +50 and +100 to user's amount
-        const upsell1Rb = amountRb + 50;
-        const upsell2Rb = amountRb + 100;
+        // Look up upsell box values from custom_topup_upsell table
+        // This gives us rounded tier values (e.g., 1568 -> upsell1: 1600, upsell2: 1650)
+        pool.query(
+            'SELECT upsell_box_1, upsell_box_2 FROM custom_topup_upsell WHERE $1 >= range_min AND $1 <= range_max LIMIT 1',
+            [amountRb]
+        )
+            .then(result => {
+                let upsell1Rb, upsell2Rb;
 
-        // Calculate TIZO for upsells using the same universal custom_topup_rates table
-        const tizo1 = calculateCustomTizo(upsell1Rb);
-        const tizo2 = calculateCustomTizo(upsell2Rb);
+                if (result.rows.length > 0) {
+                    // Use database values (rounded tier values)
+                    upsell1Rb = parseInt(result.rows[0].upsell_box_1);
+                    upsell2Rb = parseInt(result.rows[0].upsell_box_2);
+                    console.log(`[custom-topup-upsell] Found DB entry for ${amountRb}RB: Box1=${upsell1Rb}, Box2=${upsell2Rb}`);
+                } else {
+                    // Fallback: calculate based on rounding to nearest 50
+                    // Round up to next 50 for upsell1, then +50 for upsell2
+                    upsell1Rb = Math.ceil(amountRb / 50) * 50;
+                    if (upsell1Rb === amountRb) upsell1Rb += 50; // Ensure it's higher than current
+                    upsell2Rb = upsell1Rb + 50;
+                    console.log(`[custom-topup-upsell] No DB entry, using fallback for ${amountRb}RB: Box1=${upsell1Rb}, Box2=${upsell2Rb}`);
+                }
 
-        console.log(`[custom-topup-upsell] Base: ${amountRb}RB = ${customTizo} TIZO`);
-        console.log(`[custom-topup-upsell] Upsell 1: ${upsell1Rb}RB = ${tizo1} TIZO`);
-        console.log(`[custom-topup-upsell] Upsell 2: ${upsell2Rb}RB = ${tizo2} TIZO`);
+                // Calculate TIZO for upsells using the same universal custom_topup_rates table
+                const tizo1 = calculateCustomTizo(upsell1Rb);
+                const tizo2 = calculateCustomTizo(upsell2Rb);
 
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-            success: true,
-            customAmount: amountRb,
-            customTizo: customTizo,
-            upsellBox1: {
-                rb: upsell1Rb,
-                tizo: tizo1
-            },
-            upsellBox2: {
-                rb: upsell2Rb,
-                tizo: tizo2
-            },
-            message: 'Using universal custom_topup_rates table for all TIZO calculations'
-        }));
+                console.log(`[custom-topup-upsell] Base: ${amountRb}RB = ${customTizo} TIZO`);
+                console.log(`[custom-topup-upsell] Upsell 1: ${upsell1Rb}RB = ${tizo1} TIZO`);
+                console.log(`[custom-topup-upsell] Upsell 2: ${upsell2Rb}RB = ${tizo2} TIZO`);
+
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: true,
+                    customAmount: amountRb,
+                    customTizo: customTizo,
+                    upsellBox1: {
+                        rb: upsell1Rb,
+                        tizo: tizo1
+                    },
+                    upsellBox2: {
+                        rb: upsell2Rb,
+                        tizo: tizo2
+                    },
+                    message: 'Upsell box values from custom_topup_upsell table, TIZO from universal custom_topup_rates'
+                }));
+            })
+            .catch(err => {
+                console.error('[custom-topup-upsell] Database error:', err);
+                // Fallback to simple calculation on error
+                const upsell1Rb = Math.ceil(amountRb / 50) * 50;
+                const upsell2Rb = upsell1Rb + 50;
+                const tizo1 = calculateCustomTizo(upsell1Rb);
+                const tizo2 = calculateCustomTizo(upsell2Rb);
+
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: true,
+                    customAmount: amountRb,
+                    customTizo: customTizo,
+                    upsellBox1: { rb: upsell1Rb, tizo: tizo1 },
+                    upsellBox2: { rb: upsell2Rb, tizo: tizo2 },
+                    message: 'Using fallback calculation (DB error)'
+                }));
+            });
         return;
     }
 
