@@ -978,89 +978,80 @@
         // Determine if cost is in RB or full value (if > 1000, it's full value)
         const baseRb = rawCost > 1000 ? Math.round(rawCost / 1000) : rawCost;
 
-        // Get base TIZO from selected offer data
-        const baseTizo = Math.round(parseFloat(selectedOfferData.tizoCredit)) || baseRb;
+        console.log("Base RB:", baseRb);
 
-        // Get card type for fetching correct offers
-        const cardType = selectedOfferData?.cardType || '';
-
-        console.log("Base RB:", baseRb, "Base TIZO:", baseTizo, "Card Type:", cardType);
-
-        // Calculate upsell RB values: +50 and +100 from base
-        const upsell1Rb = baseRb + 50;
-        const upsell2Rb = baseRb + 100;
-
-        // Try to fetch actual offers from database for these RB values
-        // If found, use the database TIZO. If NOT found, fall back to base + 50/100
-        const [offer1, offer2] = await Promise.all([
-          fetchOfferByRb(upsell1Rb, cardType),
-          fetchOfferByRb(upsell2Rb, cardType)
-        ]);
-
-        // First upsell: use DB TIZO if found, otherwise base + 50
-        const upsell1Tizo = offer1 ? Math.round(offer1.tizo_credit) : (baseTizo + 50);
-
-        // Second upsell: use DB TIZO if found, otherwise first upsell TIZO + 50 (cascade)
-        const upsell2Tizo = offer2 ? Math.round(offer2.tizo_credit) : (upsell1Tizo + 50);
-
-        additionalOffers = [
-          { id: 'upsell-1', rb: upsell1Rb, tizo: upsell1Tizo, fromDb: !!offer1 },
-          { id: 'upsell-2', rb: upsell2Rb, tizo: upsell2Tizo, fromDb: !!offer2 }
-        ];
-
-        console.log("Upsell offers:", additionalOffers.map(o =>
-          `${o.rb}RB = ${o.tizo}TIZO ${o.fromDb ? '(from DB)' : '(base + ' + (o.rb - baseRb) + ')'}`
-        ).join(', '));
-
-        updateAdditionalOffersDisplay();
-        const offersCountEl = document.getElementById("offers-count");
-        if (offersCountEl) {
-          offersCountEl.textContent = additionalOffers.length;
-        }
-      } catch (error) {
-        console.error("Error fetching upsell offers:", error);
-      }
-    }
-
-    // Fetch offer from offers table by RB value and card type
-    async function fetchOfferByRb(rbValue, cardType) {
-      try {
-        const cost = rbValue * 1000; // Convert RB to full cost
-        let url = getApiUrl(`/api/offers?cost=${cost}`);
-        if (cardType) {
-          url += `&cardType=${cardType}`;
-        }
-
-        const response = await fetch(url);
+        // Use the same TIZO calculation as custom-topup-upsell.html
+        // Fetch upsell offers using universal custom_topup_rates table
+        const response = await fetch(getApiUrl(`/api/custom-topup-upsell?rb=${baseRb}`));
         const data = await response.json();
 
-        if (data.success && data.offers && data.offers.length > 0) {
-          console.log(`Found offer for ${rbValue}RB:`, data.offers[0].tizo_credit, 'TIZO');
-          return data.offers[0];
-        }
-        return null;
-      } catch (error) {
-        return null;
-      }
-    }
-    async function fetchUpsellTizo(rbValue) {
-      try {
-        const response = await fetch(getApiUrl(`/api/upsell-offer?rb=${rbValue}`));
-        // Silently handle 404 (RB not in database) - fallback will be used
-        if (!response.ok) {
-          return null;
-        }
-        const data = await response.json();
         if (data.success) {
-          return data.offer;
+          // Update the base offer's TIZO with calculated value from server
+          const calculatedBaseTizo = data.customTizo;
+          document.getElementById("selected-tizo").textContent = calculatedBaseTizo;
+
+          // Update old TIZO strikethrough value (same as RB value - base value before bonus)
+          const oldTizoEl = document.getElementById("selected-old-tizo");
+          if (oldTizoEl) {
+            oldTizoEl.textContent = baseRb;
+          }
+
+          // Get upsell values from API response (calculated using universal rates)
+          const upsell1Rb = data.upsellBox1.rb;
+          const upsell1Tizo = data.upsellBox1.tizo;
+          const upsell2Rb = data.upsellBox2.rb;
+          const upsell2Tizo = data.upsellBox2.tizo;
+
+          additionalOffers = [
+            { id: 'upsell-1', rb: upsell1Rb, tizo: upsell1Tizo },
+            { id: 'upsell-2', rb: upsell2Rb, tizo: upsell2Tizo }
+          ];
+
+          console.log("✅ Using universal TIZO calculation (same as custom-topup-upsell)");
+          console.log(`Base: ${baseRb}RB = ${calculatedBaseTizo}TIZO`);
+          console.log(`Upsell 1: ${upsell1Rb}RB = ${upsell1Tizo}TIZO`);
+          console.log(`Upsell 2: ${upsell2Rb}RB = ${upsell2Tizo}TIZO`);
+
+          updateAdditionalOffersDisplay();
+          const offersCountEl = document.getElementById("offers-count");
+          if (offersCountEl) {
+            offersCountEl.textContent = additionalOffers.length;
+          }
+        } else {
+          console.warn("⚠️ API returned error, using fallback");
+          generateFallbackOffers(baseRb);
         }
-        return null;
       } catch (error) {
-        // Silently fail - fallback calculation will be used
-        return null;
+        console.error("❌ Error fetching upsell offers:", error);
+        // Fallback if API fails
+        const rawCost = parseFloat(selectedOfferData.cost);
+        const baseRb = rawCost > 1000 ? Math.round(rawCost / 1000) : rawCost;
+        generateFallbackOffers(baseRb);
       }
     }
 
+    // Fallback function if API is unavailable (matches custom-topup-upsell.html pattern)
+    function generateFallbackOffers(baseRb) {
+      const baseTizo = Math.round(parseFloat(selectedOfferData.tizoCredit)) || baseRb;
+
+      // Simple fallback: +50 and +100 TIZO from base
+      const upsell1Rb = baseRb + 50;
+      const upsell2Rb = baseRb + 100;
+      const upsell1Tizo = baseTizo + 50;
+      const upsell2Tizo = baseTizo + 100;
+
+      additionalOffers = [
+        { id: 'upsell-1', rb: upsell1Rb, tizo: upsell1Tizo },
+        { id: 'upsell-2', rb: upsell2Rb, tizo: upsell2Tizo }
+      ];
+
+      console.log("Using fallback TIZO calculation");
+      updateAdditionalOffersDisplay();
+      const offersCountEl = document.getElementById("offers-count");
+      if (offersCountEl) {
+        offersCountEl.textContent = additionalOffers.length;
+      }
+    }
     async function updateAdditionalOffersDisplay() {
       const cardColors = ["SMALL-BUTTON-purple.png", "SMALL-BUTTON-ORANGE.png"];
 
