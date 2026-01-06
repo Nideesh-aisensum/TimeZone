@@ -7,7 +7,7 @@
     'use strict';
 
     // Dashboard API configuration
-    const DASHBOARD_API_URL = 'http://34.101.58.118/api/kiosk';
+    const DASHBOARD_API_URL = 'https://timezone-dashboard.aisensum.com/api/kiosk';
 
     // Get kiosk ID from environment or default
     const KIOSK_ID = (function () {

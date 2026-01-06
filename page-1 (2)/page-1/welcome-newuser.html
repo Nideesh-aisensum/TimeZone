@@ -380,7 +380,7 @@
                 <img src="500-tickets.png" alt="Added Image" class="editable added-element tickets-animated"
                     data-id="added-1-1765384562311"
                     style="max-width: 200px;height: auto;position: absolute;top: 50%;left: 50%;z-index: 50;transform: translate(calc(-50% + 7.2279px), calc(-50% + 340.612px)) scale(3.2);">
-                <p class="editable added-element added-text old-tizo" data-id="text-1-1765427733445"
+                <p class="editable added-element added-text old-tizo" data-id="text-1-1765427733445" id="old-tizo-value"
                     style="position: absolute;top: 48%;left: 50%;transform: translate(calc(-50% - 37.6666px), calc(-50% - 37.3333px)) scale(2);z-index: 50;font-family: Nulshock, sans-serif;font-size: 1.5rem;text-align: center;margin: 0px;max-width: 80%;color: rgba(172, 252, 255, 0.5) !important;text-decoration: line-through 3px rgb(220, 38, 38) !important;">
                     600</p>
                 <p class="editable added-element added-text old-tizo" data-id="text-2-1765428135540"
@@ -611,6 +611,12 @@
                         if (tizoValueEl) {
                             tizoValueEl.textContent = tizoCredit;
                             adjustTizoFontSize(tizoValueEl);
+                        }
+
+                        // Update the old strikethrough TIZO value (same as RB value)
+                        const oldTizoEl = document.getElementById('old-tizo-value');
+                        if (oldTizoEl) {
+                            oldTizoEl.textContent = costInRb;
                         }
 
                         // Update free gift display if gift exists

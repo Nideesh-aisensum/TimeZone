@@ -648,9 +648,9 @@
 
         // Cache for new user offers (Blue, Gold, Platinum) with actual TIZO values from database
         let newUserOffersCache = {
-            blue: { costRb: 600, tizo: 1200 },    // Fallback defaults
-            gold: { costRb: 1200, tizo: 2500 },   // Fallback defaults
-            platinum: { costRb: 2000, tizo: 5000 } // Fallback defaults
+            blue: { costRb: 500, tizo: 1000 },    // ≥500k → Blue card
+            gold: { costRb: 2000, tizo: 4000 },   // ≥2jt → Gold card
+            platinum: { costRb: 3000, tizo: 6000 } // ≥3jt → Platinum card (higher threshold)
         };
 
         /**
@@ -696,26 +696,70 @@
          * Fetch new user offers from database to get actual TIZO values
          * for Blue, Gold, and Platinum new user cards
          */
+        /**
+         * Fetch card upgrade offers from database
+         * - Blue: Uses new_user_blue offer (for 500k threshold)
+         * - Gold: Uses regular Gold offers, finds the 2jt offer
+         * - Platinum: Uses regular Platinum offers, finds the highest value
+         */
         async function fetchNewUserOffers() {
-            const cardTypes = ['blue', 'gold', 'platinum'];
+            // Fetch Blue from new_user_blue
+            try {
+                const blueResponse = await fetch(getApiUrl('/api/offers?cardType=new_user_blue'));
+                const blueData = await blueResponse.json();
 
-            for (const cardType of cardTypes) {
-                try {
-                    const response = await fetch(getApiUrl(`/api/offers?cardType=new_user_${cardType}`));
-                    const data = await response.json();
-
-                    if (data.success && data.offers && data.offers.length > 0) {
-                        const offer = data.offers[0];
-                        const costRb = Math.round(parseFloat(offer.cost) / 1000);
-                        const tizo = Math.round(parseFloat(offer.tizo_credit));
-
-                        newUserOffersCache[cardType] = { costRb, tizo };
-                        console.log(`✅ Loaded New User ${cardType} offer:`, costRb, 'Rb =', tizo, 'TIZO');
-                    }
-                } catch (error) {
-                    console.error(`❌ Failed to fetch New User ${cardType} offer:`, error);
-                    // Keep using fallback defaults
+                if (blueData.success && blueData.offers && blueData.offers.length > 0) {
+                    const offer = blueData.offers[0];
+                    const tizo = Math.round(parseFloat(offer.tizo_credit));
+                    newUserOffersCache.blue.tizo = tizo;
+                    console.log(`✅ Blue threshold: ${newUserOffersCache.blue.costRb}k = ${tizo} TIZO`);
                 }
+            } catch (error) {
+                console.error('❌ Failed to fetch Blue offer:', error);
+            }
+
+            // Fetch Gold from regular Gold offers (find 2jt offer)
+            try {
+                const goldResponse = await fetch(getApiUrl('/api/offers?cardType=gold'));
+                const goldData = await goldResponse.json();
+
+                if (goldData.success && goldData.offers && goldData.offers.length > 0) {
+                    // Find the offer closest to 2jt (2,000,000)
+                    const targetCost = 2000000;
+                    const goldOffer = goldData.offers.find(o => Math.round(parseFloat(o.cost)) === targetCost);
+
+                    if (goldOffer) {
+                        const tizo = Math.round(parseFloat(goldOffer.tizo_credit));
+                        newUserOffersCache.gold.tizo = tizo;
+                        console.log(`✅ Gold threshold: ${newUserOffersCache.gold.costRb}k = ${tizo} TIZO (from regular Gold offers)`);
+                    } else {
+                        console.log('⚠️ No 2jt Gold offer found, using fallback');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Failed to fetch Gold offers:', error);
+            }
+
+            // Fetch Platinum from regular Platinum offers (find highest value)
+            try {
+                const platResponse = await fetch(getApiUrl('/api/offers?cardType=platinum'));
+                const platData = await platResponse.json();
+
+                if (platData.success && platData.offers && platData.offers.length > 0) {
+                    // Find the highest cost offer for platinum
+                    const sortedOffers = platData.offers.sort((a, b) => parseFloat(b.cost) - parseFloat(a.cost));
+                    const platOffer = sortedOffers[0];
+
+                    if (platOffer) {
+                        const costRb = Math.round(parseFloat(platOffer.cost) / 1000);
+                        const tizo = Math.round(parseFloat(platOffer.tizo_credit));
+                        // Update both threshold and TIZO for platinum
+                        newUserOffersCache.platinum = { costRb, tizo };
+                        console.log(`✅ Platinum threshold: ${costRb}k = ${tizo} TIZO (from regular Platinum offers)`);
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Failed to fetch Platinum offers:', error);
             }
         }
 
@@ -874,16 +918,11 @@
             // Show upgrade popup based on amount tier (only for new players)
             // Use actual TIZO values from database cache
             if (isNewPlayer) {
-                const platOffer = newUserOffersCache.platinum;
                 const goldOffer = newUserOffersCache.gold;
                 const blueOffer = newUserOffersCache.blue;
 
-                if (amountThousands >= platOffer.costRb) {
-                    // Platinum threshold - go directly to platinum card page
-                    storeSplitTopupData('platinum', platOffer.costRb, platOffer.tizo, amountThousands);
-                    window.location.href = 'welcome-platinum-card.html';
-                    return;
-                } else if (amountThousands >= goldOffer.costRb) {
+                // Only Blue (≥500k) and Gold (≥2jt) upgrades - NO Platinum path
+                if (amountThousands >= goldOffer.costRb) {
                     // Gold threshold - go directly to gold card page
                     storeSplitTopupData('gold', goldOffer.costRb, goldOffer.tizo, amountThousands);
                     window.location.href = 'welcome-gold-card.html';
