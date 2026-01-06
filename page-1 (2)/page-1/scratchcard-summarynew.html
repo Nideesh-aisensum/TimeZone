@@ -693,7 +693,7 @@
               style="display: flex !important; margin-top: 15px; transform: translate(0px, -15.9999px) scale(1); align-items: center; gap: 20px; width: 100%; justify-content: center">
               <h3 id="free-gifts-title" class="section-title editable" data-id="free-gifts-title"
                 style="color: rgb(242, 202, 2); font-size: 22px; transform: translate(0, 0) scale(1.2)">
-                FREE GIFT
+                GETS
               </h3>
               <div class="gift-item"
                 style="display: flex; align-items: center; gap: 10px; margin-top: -5px; justify-content: center">
@@ -729,7 +729,7 @@
               <!-- Free Gift Row (dynamic, shown when gift exists) -->
               <div id="gift-row" class="gift-row hidden" style="display: flex; opacity: 1; text-decoration: none">
                 <span id="gift-label" class="gift-label editable" data-id="gift-label"
-                  style="font-weight: bold; transform: translate(0px, 0) scale(1.2)">FREE GIFT</span>
+                  style="font-weight: bold; transform: translate(0px, 0) scale(1.2)">GETS</span>
                 <span id="gift-value" class="gift-value editable" data-id="gift-value"
                   style="font-weight: bold; transform: translate(0, 0) scale(1.2); margin-left: 20px">DORITOS</span>
               </div>
@@ -759,7 +759,7 @@
               <!-- OOD Gift Row (dynamic, shown when gift exists) -->
               <div id="ood-gift-row" class="gift-row hidden"
                 style="display: none; opacity: 1; text-decoration: none; margin-top: 10px;">
-                <span class="gift-label" style="font-weight: bold;">FREE GIFT</span>
+                <span class="gift-label" style="font-weight: bold;">GETS</span>
                 <span id="ood-gift-value" class="gift-value" style="font-weight: bold; margin-left: 20px">-</span>
               </div>
             </div>
@@ -788,7 +788,7 @@
               <!-- OOH Gift Row (dynamic, shown when gift exists) -->
               <div id="ooh-gift-row" class="gift-row hidden"
                 style="display: none; opacity: 1; text-decoration: none; margin-top: 10px;">
-                <span class="gift-label" style="font-weight: bold;">FREE GIFT</span>
+                <span class="gift-label" style="font-weight: bold;">GETS</span>
                 <span id="ooh-gift-value" class="gift-value" style="font-weight: bold; margin-left: 20px">-</span>
               </div>
             </div>
@@ -817,7 +817,7 @@
               <!-- Snacks Gift Row (dynamic, shown when gift exists) -->
               <div id="snacks-gift-row" class="gift-row hidden"
                 style="display: none; opacity: 1; text-decoration: none; margin-top: 10px;">
-                <span class="gift-label" style="font-weight: bold;">FREE GIFT</span>
+                <span class="gift-label" style="font-weight: bold;">GETS</span>
                 <span id="snacks-gift-value" class="gift-value" style="font-weight: bold; margin-left: 20px">-</span>
               </div>
             </div>
@@ -1672,7 +1672,7 @@
           giftRow.classList.remove("hidden");
           giftRow.style.display = "flex";
         }
-        if (giftLabelEl) giftLabelEl.textContent = "FREE GIFT";
+        if (giftLabelEl) giftLabelEl.textContent = "GETS";
         if (giftValueEl) giftValueEl.textContent = giftDetails.toUpperCase();
       } else {
         if (giftRow) giftRow.classList.add("hidden");
