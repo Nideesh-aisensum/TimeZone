@@ -3,7 +3,7 @@
  * Handles API base URL resolution for file:// protocol vs server usage
  */
 const API_BASE_URL = (window.location.protocol === 'file:')
-    ? 'http://localhost:3000'
+    ? 'http://34.101.58.118'
     : ''; // If served via HTTP, use relative paths (empty base)
 
 /**
