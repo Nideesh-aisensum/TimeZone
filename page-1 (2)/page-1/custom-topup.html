@@ -911,9 +911,10 @@
             }
 
             // Navigate to custom topup upsell page (for existing users)
-            // Exception: If at maximum amount (2JT), go directly to scratch card - no upsell possible
-            if (amountThousands >= MAX_AMOUNT_THOUSANDS) {
-                // Maximum amount reached - no upsell, go directly to scratch card
+            // Exception: If amount is above 1.9JT (1900), go directly to scratch card - no upsell possible
+            const UPSELL_SKIP_THRESHOLD = 1900; // 1.9JT - amounts above this skip upsell
+            if (amountThousands > UPSELL_SKIP_THRESHOLD) {
+                // Above 1.9JT - no meaningful upsell available, go directly to scratch card
                 if (typeof updateSession === 'function') {
                     updateSession({
                         offerCost: actualAmount,
@@ -922,7 +923,7 @@
                         scratchCardSource: 'custom-topup'
                     });
                 }
-                console.log('Maximum amount reached - skipping upsell, going to scratch card');
+                console.log('Amount above 1.9JT - skipping upsell, going directly to scratch card');
                 window.location.href = 'scratch-card.html';
             } else {
                 window.location.href = 'custom-topup-upsell.html';

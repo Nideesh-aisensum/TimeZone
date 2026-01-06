@@ -6,14 +6,13 @@ echo.
 
 REM Install dependencies
 echo Installing dependencies...
-pip install pywebview keyboard pyinstaller pywin32 Pillow
+python -m pip install pywebview keyboard pyinstaller pywin32 Pillow
 
 echo.
 echo Building EXE with page-1 assets...
 echo This may take a few minutes...
 echo.
 
-REM Use the spec file which includes all page-1 assets
 REM Use the spec file which includes all page-1 assets
 python -m PyInstaller --clean KioskApp.spec
 

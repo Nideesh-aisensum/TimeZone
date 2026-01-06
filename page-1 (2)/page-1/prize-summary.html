@@ -705,7 +705,7 @@
                 <h1 id="main-title" class="scratch-title editable" data-id="main-title"
                     style="transform: translate(-4.15585px, -2.07795px) scale(1)">GOSOK DAN DAPATKAN HADIAH!</h1>
                 <p id="main-subtitle" class="scratch-subtitle editable" data-id="main-subtitle"
-                    style="transform: translate(-2.07794px, 4.15578px) scale(1)">BONUS TIZO MENANTIMU!</p>
+                    style="transform: translate(-2.07794px, 4.15578px) scale(1)">KEJUTAN MENANTIMU!</p>
             </div>
 
 
@@ -739,7 +739,7 @@
                         <div class="prize-plus editable" data-id="prize-plus" bis_skin_checked="1"
                             style="transform: translate(-7.99997px, -32.0001px) scale(1);">+</div>
                         <p id="free-gift-label" class="free-gift-label editable" data-id="free-gift-label"
-                            style="transform: translate(-2.66663px, -48.0001px) scale(1);">FREE GIFT</p>
+                            style="transform: translate(-2.66663px, -48.0001px) scale(1);">GETS</p>
                         <p id="free-gift-value" class="free-gift-value editable" data-id="free-gift-value"
                             style="transform: translate(0px, -40.0001px) scale(1);">COCA-COLA</p>
                     </div>
@@ -767,7 +767,7 @@
                             RIBU + 100 RIBU)</span>
                     </div>
                     <div class="summary-row editable" data-id="summary-row-3" bis_skin_checked="1">
-                        <span class="summary-label editable" data-id="label-extra-games">FREE GIFT</span>
+                        <span class="summary-label editable" data-id="label-extra-games">GETS</span>
                         <span class="summary-value editable" data-id="value-extra-games"
                             id="extra-games">Coca-Cola</span>
                     </div>
@@ -821,7 +821,7 @@
         const translations = {
             en: {
                 mainTitle: "SCRATCH & WIN!",
-                mainSubtitle: "UNLOCK YOUR SURPRISE TIZO DROP!",
+                mainSubtitle: "UNLOCK YOUR SURPRISE!",
                 topLabel: "Top-Up Chosen:",
                 topValue: "150 RIBU GET 180 TIZO",
                 surpriseTitle: "SURPRISE!",
@@ -835,11 +835,11 @@
                 acceptText: "GET THIS BONUS",
                 skipText: "SKIP",
                 langLabel: "English",
-                freeGift: "FREE GIFT"
+                freeGift: "GETS"
             },
             id: {
                 mainTitle: "GOSOK & MENANGKAN!",
-                mainSubtitle: "BONUS TIZO MENANTIMU!",
+                mainSubtitle: "KEJUTAN MENANTIMU!",
                 topLabel: "Top-Up Dipilih:",
                 topValue: "150 RIBU DAPAT 180 TIZO",
                 surpriseTitle: "KEJUTAN!",
@@ -853,7 +853,7 @@
                 acceptText: "AMBIL BONUS INI",
                 skipText: "LEWATI SAJA",
                 langLabel: "Bahasa",
-                freeGift: "GRATIS HADIAH"
+                freeGift: "DAPAT"
             }
         };
 
@@ -903,7 +903,8 @@
             // Get scratch card data from session (already saved by scratch-card.html)
             const session = getSession();
             const bonusCost = session?.bonusCost || 100000;
-            const bonusTizo = session?.bonusTizo || 200;
+            // Use typeof check to handle 0 values properly (0 is falsy but valid)
+            const bonusTizo = typeof session?.bonusTizo === 'number' ? session.bonusTizo : 200;
 
             // Save bonus acceptance to session, then continue to summary
             updateSession({
@@ -953,8 +954,22 @@
 
             // Get scratch card prize data
             const bonusCost = session.bonusCost || 100000;
-            const bonusTizo = session.bonusTizo || 200;
+            // Use typeof check to properly handle 0 values (0 is falsy but valid)
+            const bonusTizo = typeof session.bonusTizo === 'number' ? session.bonusTizo : 200;
             const bonusCostInRb = Math.round(bonusCost / 1000);
+
+            // Get selected prize from prize pool (if available)
+            const selectedPrize = session.scratchCardSelectedPrize;
+            const hasPrizePool = session.scratchCardHasPrizePool || false;
+
+            // Determine prize type and value
+            let prizeValue = bonusTizo;
+            let prizeType = 'TIZO'; // Default
+
+            if (selectedPrize && hasPrizePool) {
+                prizeValue = selectedPrize.prize_value;
+                prizeType = selectedPrize.prize_type; // 'TIZO', 'GAMES', or 'TICKETS'
+            }
 
             // Get top-up data
             const offerCost = session.offerCost || 150000;
@@ -962,7 +977,7 @@
             const offerCostInRb = Math.round(offerCost / 1000);
 
             // Get gift label and details from session
-            // gift = label (e.g., "FREE GAMES", "HADIAH TAMBAHAN")
+            // gift = label (e.g., "FREE GIFT", "HADIAH TAMBAHAN")
             // giftDetails = value (e.g., "5 Games", "1 Keychain")
             const giftLabel = session.bonusGift;
             const giftDetails = session.bonusGiftDetails;
@@ -970,8 +985,17 @@
 
             // Calculate totals
             const totalCost = offerCost + bonusCost;
-            const totalTizo = offerTizo + bonusTizo;
+            const totalTizo = offerTizo + (prizeType === 'TIZO' && prizeValue > 0 ? prizeValue : 0);
             const totalCostInRb = Math.round(totalCost / 1000);
+
+            // Check if we should show prize section (only if value > 0)
+            const showPrizeSection = prizeValue > 0;
+
+            // Check if we have a valid gift
+            const hasValidGift = giftLabel && giftLabel.trim() !== '' &&
+                giftLabel.toLowerCase() !== 'nil' &&
+                giftDetails && giftDetails.trim() !== '' &&
+                giftDetails !== '-';
 
             // Update prize display (inside the card)
             const prizeLabel = document.getElementById('prize-label');
@@ -984,26 +1008,113 @@
             }
 
             const prizeAmount = document.querySelector('.prize-amount');
-            if (prizeAmount) {
-                prizeAmount.textContent = bonusTizo;
+            const prizeUnitEl = document.querySelector('.prize-unit');
+            const prizeDisplay = document.querySelector('.prize-display');
+
+            if (showPrizeSection) {
+                // Show prize amount and unit
+                if (prizeAmount) {
+                    prizeAmount.textContent = prizeValue;
+                    prizeAmount.style.display = '';
+                }
+                if (prizeUnitEl) {
+                    prizeUnitEl.textContent = prizeType;
+                    prizeUnitEl.style.display = '';
+                    // Apply different colors based on prize type
+                    if (prizeType === 'GAMES') {
+                        prizeUnitEl.style.color = '#ff66cc';
+                    } else if (prizeType === 'TICKETS') {
+                        prizeUnitEl.style.color = '#ffcc00';
+                    } else {
+                        prizeUnitEl.style.color = '';
+                    }
+                }
+            } else {
+                // Hide prize amount and unit when value is 0 (nil)
+                if (prizeAmount) {
+                    prizeAmount.style.display = 'none';
+                }
+                if (prizeUnitEl) {
+                    prizeUnitEl.style.display = 'none';
+                }
+            }
+
+            // Update subtitle to match prize type or show gift message
+            const surpriseSubtitle = document.getElementById('surprise-subtitle');
+            if (surpriseSubtitle) {
+                if (!showPrizeSection && hasValidGift) {
+                    // No prize, only gift
+                    surpriseSubtitle.textContent = currentLang === 'id' ? 'HADIAH GRATIS UNTUKMU!' : 'FREE GIFT FOR YOU!';
+                } else if (prizeType === 'GAMES') {
+                    surpriseSubtitle.textContent = currentLang === 'id' ? 'EXTRA GAMES UNTUKMU!' : 'EXTRA GAMES FOR YOU!';
+                } else if (prizeType === 'TICKETS') {
+                    surpriseSubtitle.textContent = currentLang === 'id' ? 'EXTRA TICKETS UNTUKMU!' : 'EXTRA TICKETS FOR YOU!';
+                } else {
+                    surpriseSubtitle.textContent = currentLang === 'id' ? 'EXTRA TIZO UNTUKMU!' : 'EXTRA TIZO FOR YOU!';
+                }
             }
 
             // Update free gift section inside the card (dynamic)
             const freeGiftSection = document.getElementById('free-gift-section');
             const freeGiftLabelEl = document.getElementById('free-gift-label');
             const freeGiftValueEl = document.getElementById('free-gift-value');
+            const prizePlusEl = document.querySelector('.prize-plus');
+            // prizeDisplay already declared above
 
-            if (giftLabel && giftLabel.trim() !== '' && giftDetails && giftDetails.trim() !== '' && giftDetails !== '-') {
+            if (hasValidGift) {
                 // Show the free gift section
                 if (freeGiftSection) {
                     freeGiftSection.classList.remove('hidden');
+                    // If no prize section, adjust gift position to fill the prize area
+                    if (!showPrizeSection) {
+                        // Use relative positioning, not absolute
+                        freeGiftSection.style.position = 'relative';
+                        freeGiftSection.style.top = '';
+                        freeGiftSection.style.left = '';
+                        freeGiftSection.style.transform = 'translateY(70px)'; // Move down for better positioning
+                        freeGiftSection.style.marginTop = '0';
+                        freeGiftSection.style.textAlign = 'center';
+                    } else {
+                        freeGiftSection.style.position = '';
+                        freeGiftSection.style.top = '';
+                        freeGiftSection.style.left = '';
+                        freeGiftSection.style.transform = '';
+                        freeGiftSection.style.marginTop = '';
+                        freeGiftSection.style.textAlign = '';
+                    }
+                }
+                // Hide the "+" if no prize section
+                if (prizePlusEl) {
+                    prizePlusEl.style.display = showPrizeSection ? '' : 'none';
                 }
                 if (freeGiftLabelEl) {
                     const normalizedLabel = giftLabel.trim().toUpperCase();
                     freeGiftLabelEl.textContent = normalizedLabel === "FREE GIFT" ? defaultFreeGiftText : normalizedLabel;
+                    // Reset transforms and make font bigger if only gift is shown
+                    if (!showPrizeSection) {
+                        freeGiftLabelEl.style.fontSize = '36px';
+                        freeGiftLabelEl.style.transform = 'none';
+                        freeGiftLabelEl.style.marginBottom = '20px';
+                    } else {
+                        freeGiftLabelEl.style.fontSize = '';
+                        freeGiftLabelEl.style.transform = '';
+                        freeGiftLabelEl.style.marginBottom = '';
+                    }
                 }
                 if (freeGiftValueEl) {
                     freeGiftValueEl.textContent = giftDetails.toUpperCase();
+                    // Reset transforms and make font bigger if only gift is shown
+                    if (!showPrizeSection) {
+                        freeGiftValueEl.style.fontSize = '72px';
+                        freeGiftValueEl.style.transform = 'none';
+                        freeGiftValueEl.style.color = '#33fff9';
+                        freeGiftValueEl.style.textShadow = '0 0 20px rgba(51, 255, 249, 0.7)';
+                    } else {
+                        freeGiftValueEl.style.fontSize = '';
+                        freeGiftValueEl.style.transform = '';
+                        freeGiftValueEl.style.color = '';
+                        freeGiftValueEl.style.textShadow = '';
+                    }
                 }
             } else {
                 // Hide the free gift section if no gift

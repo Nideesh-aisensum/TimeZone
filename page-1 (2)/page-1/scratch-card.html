@@ -498,7 +498,7 @@
         <h1 id="main-title" class="scratch-title editable" data-id="main-title"
           style="transform: translate(-4.15585px, -2.07795px) scale(1)">GOSOK DAN DAPATKAN HADIAH!</h1>
         <p id="main-subtitle" class="scratch-subtitle editable" data-id="main-subtitle"
-          style="transform: translate(-2.07794px, 4.15578px) scale(1)">BONUS TIZO MENANTIMU!</p>
+          style="transform: translate(-2.07794px, 4.15578px) scale(1)">KEJUTAN MENANTIMU!</p>
       </div>
 
       <!-- Scratch Card -->
@@ -558,7 +558,7 @@
     const translations = {
       en: {
         mainTitle: "SCRATCH & WIN!",
-        mainSubtitle: "UNLOCK YOUR SURPRISE TIZO DROP!",
+        mainSubtitle: "UNLOCK YOUR SURPRISE!",
         continueText: "CLAIM REWARD",
         skipText: "SKIP",
         acceptText: "GET THIS BONUS",
@@ -567,7 +567,7 @@
       },
       id: {
         mainTitle: "GOSOK & MENANGKAN!",
-        mainSubtitle: "BONUS TIZO MENANTIMU!",
+        mainSubtitle: "KEJUTAN MENANTIMU!",
         continueText: "KLAIM HADIAH",
         skipText: "LEWATI SAJA",
         acceptText: "AMBIL BONUS INI",
@@ -591,6 +591,10 @@
       tizo: 200, // Default: 200 TIZO
       costInRb: 100, // Display value
       isNewUser: false,
+      // Prize pool fields
+      hasPrizePool: false,
+      selectedPrize: null, // { prize_type, prize_value, prize_label }
+      prizes: [], // All available prizes
     };
 
     function toggleLanguage() {
@@ -649,42 +653,82 @@
       prizeCtx.textBaseline = "middle";
       prizeCtx.fillText(`${scratchCardData.costInRb} RIBU ${dapatText}`, prizeCanvas.width / 2, prizeCanvas.height / 2 - 140);
 
-      // Draw TIZO amount - large prize amount with gradient (using dynamic value)
-      prizeCtx.font = "bold 200px Nulshock, sans-serif";
-      const textGradient = prizeCtx.createLinearGradient(0, prizeCanvas.height / 2 - 100, 0, prizeCanvas.height / 2 + 100);
-      textGradient.addColorStop(0, "#00ffff");
-      textGradient.addColorStop(0.5, "#00aaff");
-      textGradient.addColorStop(1, "#0066ff");
-      prizeCtx.fillStyle = textGradient;
-      prizeCtx.fillText(scratchCardData.tizo.toString(), prizeCanvas.width / 2, prizeCanvas.height / 2 - 20);
+      // Determine prize display based on prize pool or default TIZO
+      let prizeValue = scratchCardData.tizo;
+      let prizeLabel = "TIZO";
 
-      // Draw "TIZO" label
-      prizeCtx.font = "bold 56px Nulshock, sans-serif";
-      prizeCtx.fillStyle = "#00ffff";
-      prizeCtx.fillText("TIZO", prizeCanvas.width / 2, prizeCanvas.height / 2 + 100);
+      if (scratchCardData.selectedPrize) {
+        prizeValue = scratchCardData.selectedPrize.prize_value;
+        prizeLabel = scratchCardData.selectedPrize.prize_type;
+      }
 
-      // Draw free gift section if available (+ symbol and gift details)
-      if (scratchCardData.gift && scratchCardData.giftDetails && scratchCardData.giftDetails !== "-") {
-        // Draw "+" symbol
-        prizeCtx.font = "bold 60px Nulshock, sans-serif";
-        prizeCtx.fillStyle = "#ff00ff";
-        prizeCtx.shadowColor = "rgba(255, 0, 255, 0.7)";
-        prizeCtx.shadowBlur = 20;
-        prizeCtx.fillText("+", prizeCanvas.width / 2, prizeCanvas.height / 2 + 180);
+      // Check if we should show TIZO/GAMES/TICKETS section (only if value > 0)
+      const showPrizeSection = prizeValue > 0;
+
+      // Check if we have a free gift
+      const hasGift = scratchCardData.gift && scratchCardData.giftDetails &&
+        scratchCardData.giftDetails !== "-" &&
+        scratchCardData.gift.toLowerCase() !== "nil";
+
+      if (showPrizeSection) {
+        // Draw prize amount - large prize amount with gradient
+        prizeCtx.font = "bold 200px Nulshock, sans-serif";
+        const textGradient = prizeCtx.createLinearGradient(0, prizeCanvas.height / 2 - 100, 0, prizeCanvas.height / 2 + 100);
+
+        // Different colors for different prize types
+        if (prizeLabel === 'GAMES') {
+          textGradient.addColorStop(0, "#ff00ff");
+          textGradient.addColorStop(0.5, "#ff66cc");
+          textGradient.addColorStop(1, "#ff00aa");
+        } else if (prizeLabel === 'TICKETS') {
+          textGradient.addColorStop(0, "#ffff00");
+          textGradient.addColorStop(0.5, "#ffcc00");
+          textGradient.addColorStop(1, "#ff9900");
+        } else {
+          // TIZO - cyan/blue gradient
+          textGradient.addColorStop(0, "#00ffff");
+          textGradient.addColorStop(0.5, "#00aaff");
+          textGradient.addColorStop(1, "#0066ff");
+        }
+
+        prizeCtx.fillStyle = textGradient;
+        prizeCtx.fillText(prizeValue.toString(), prizeCanvas.width / 2, prizeCanvas.height / 2 - 20);
+
+        // Draw prize type label
+        prizeCtx.font = "bold 56px Nulshock, sans-serif";
+        prizeCtx.fillStyle = prizeLabel === 'GAMES' ? "#ff66cc" : (prizeLabel === 'TICKETS' ? "#ffcc00" : "#00ffff");
+        prizeCtx.fillText(prizeLabel, prizeCanvas.width / 2, prizeCanvas.height / 2 + 100);
+      }
+
+      // Draw free gift section if available
+      if (hasGift) {
+        // Adjust vertical position based on whether prize section is shown
+        const giftYOffset = showPrizeSection ? 0 : -100; // Move up if no prize section
+
+        if (showPrizeSection) {
+          // Draw "+" symbol (only when there's also a prize)
+          prizeCtx.font = "bold 60px Nulshock, sans-serif";
+          prizeCtx.fillStyle = "#ff00ff";
+          prizeCtx.shadowColor = "rgba(255, 0, 255, 0.7)";
+          prizeCtx.shadowBlur = 20;
+          prizeCtx.fillText("+", prizeCanvas.width / 2, prizeCanvas.height / 2 + 180 + giftYOffset);
+        }
 
         // Draw gift label (e.g., "FREE GIFT")
-        prizeCtx.font = "bold 28px Nulshock, sans-serif";
+        prizeCtx.font = showPrizeSection ? "bold 28px Nulshock, sans-serif" : "bold 40px Nulshock, sans-serif";
         prizeCtx.fillStyle = "#ffffff";
         prizeCtx.shadowColor = "transparent";
         prizeCtx.shadowBlur = 0;
-        prizeCtx.fillText(scratchCardData.gift.toUpperCase(), prizeCanvas.width / 2, prizeCanvas.height / 2 + 240);
+        const giftLabelY = showPrizeSection ? (prizeCanvas.height / 2 + 240 + giftYOffset) : (prizeCanvas.height / 2 - 40);
+        prizeCtx.fillText(scratchCardData.gift.toUpperCase(), prizeCanvas.width / 2, giftLabelY);
 
-        // Draw gift value (e.g., "FREE 500 TICKETS")
-        prizeCtx.font = "bold 36px Nulshock, sans-serif";
+        // Draw gift value (e.g., "DORITOS")
+        prizeCtx.font = showPrizeSection ? "bold 36px Nulshock, sans-serif" : "bold 80px Nulshock, sans-serif";
         prizeCtx.fillStyle = "#33fff9";
         prizeCtx.shadowColor = "rgba(51, 255, 249, 0.6)";
         prizeCtx.shadowBlur = 15;
-        prizeCtx.fillText(scratchCardData.giftDetails.toUpperCase(), prizeCanvas.width / 2, prizeCanvas.height / 2 + 300);
+        const giftValueY = showPrizeSection ? (prizeCanvas.height / 2 + 300 + giftYOffset) : (prizeCanvas.height / 2 + 60);
+        prizeCtx.fillText(scratchCardData.giftDetails.toUpperCase(), prizeCanvas.width / 2, giftValueY);
         prizeCtx.shadowColor = "transparent";
         prizeCtx.shadowBlur = 0;
       }
@@ -1021,9 +1065,16 @@
               freeGames: data.offer.free_games,
               gift: data.offer.gift,
               giftDetails: data.offer.gift_details,
+              // Prize pool fields
+              hasPrizePool: data.offer.has_prize_pool || false,
+              selectedPrize: data.offer.selected_prize || null,
+              prizes: data.offer.prizes || [],
             };
 
             console.log("Loaded new_user scratch card for split topup:", scratchCardData);
+            if (scratchCardData.selectedPrize) {
+              console.log("Selected prize:", scratchCardData.selectedPrize);
+            }
 
             // Update session with the new_user scratch card values
             // Include both regular bonus values and original bonus values for compatibility
@@ -1039,6 +1090,9 @@
               originalBonusTizo: scratchCardData.tizo,
               originalBonusGift: data.offer.gift || null,
               originalBonusGiftDetails: data.offer.gift_details || null,
+              // Prize pool data
+              scratchCardHasPrizePool: scratchCardData.hasPrizePool,
+              scratchCardSelectedPrize: scratchCardData.selectedPrize,
             });
 
             // Recreate prize image with new data
@@ -1085,6 +1139,10 @@
             freeGames: data.offer.free_games,
             gift: data.offer.gift,
             giftDetails: data.offer.gift_details,
+            // Prize pool fields
+            hasPrizePool: data.offer.has_prize_pool || false,
+            selectedPrize: data.offer.selected_prize || null,
+            prizes: data.offer.prizes || [],
           };
 
           // Save scratch card data to session
@@ -1095,9 +1153,15 @@
             bonusFreeGames: data.offer.free_games || null,
             bonusGift: data.offer.gift || null,
             bonusGiftDetails: data.offer.gift_details || null,
+            // Prize pool data
+            scratchCardHasPrizePool: scratchCardData.hasPrizePool,
+            scratchCardSelectedPrize: scratchCardData.selectedPrize,
           });
 
           console.log("Scratch card data loaded:", scratchCardData);
+          if (scratchCardData.selectedPrize) {
+            console.log("Selected prize:", scratchCardData.selectedPrize);
+          }
 
           // If canvas is already initialized, recreate prize image with new data
           if (canvas && ctx) {
