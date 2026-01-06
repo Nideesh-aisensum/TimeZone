@@ -155,6 +155,29 @@
     <script src="shell-connector.js"></script>
     <script src="session-manager.js"></script>
     <script src="language.js"></script>
+    <script src="dashboard-api.js"></script>
+
+    <script>
+        // Send session complete to dashboard
+        const sessionData = getSessionData();
+        console.log('📊 Session data for dashboard:', sessionData);
+
+        if (window.Dashboard) {
+            window.Dashboard.sendSessionComplete({
+                isNewUser: sessionData?.isNewPlayer || false,
+                cardType: sessionData?.selectedCard || 'unknown',
+                amount: sessionData?.finalPayment || sessionData?.totalCost || 0,
+                offerId: sessionData?.selectedOffer,
+                offerType: sessionData?.selectedOffer ? 'fixed_offer' : 'custom_topup',
+                offerCost: sessionData?.offerCost,
+                bonusPercent: 0,
+                oodAccepted: sessionData?.oodAccepted || false,
+                oohAccepted: sessionData?.oohAccepted || false,
+                snacksAccepted: sessionData?.snacksAccepted || false,
+                scratchCardAccepted: sessionData?.scratchCardAccepted || false
+            });
+        }
+    </script>
 
     <script>
         // Set current page in session - this is the final page

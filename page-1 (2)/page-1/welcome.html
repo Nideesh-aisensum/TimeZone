@@ -186,6 +186,7 @@
   <script src="session-manager.js"></script>
   <script src="shell-connector.js"></script>
   <script src="language.js"></script>
+  <script src="dashboard-api.js"></script>
   <script>
     // Start fresh session ONLY if:
     // 1. Coming from screensaver (fresh start)
@@ -200,6 +201,11 @@
       startNewSession(true);
       localStorage.removeItem("tizo_restart"); // Clear restart flag
       console.log("Started fresh session (from screensaver or explicit restart)");
+
+      // Send session_start to dashboard
+      if (window.Dashboard && window.Dashboard.sendSessionStart) {
+        window.Dashboard.sendSessionStart();
+      }
     } else {
       // User navigated back - preserve their session
       setCurrentPage("welcome");

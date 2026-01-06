@@ -313,6 +313,7 @@
     <script src="shell-connector.js"></script>
     <script src="session-manager.js"></script>
     <script src="language.js"></script>
+    <script src="dashboard-api.js"></script>
 
     <script>
         // Set current page in session
@@ -409,6 +410,12 @@
             console.log('Feedback submitted:', selectedRating);
             // Store feedback
             localStorage.setItem('feedbackRating', selectedRating);
+
+            // Send feedback to dashboard
+            if (window.Dashboard && window.Dashboard.sendFeedback) {
+                console.log('📝 Sending feedback to dashboard:', selectedRating);
+                window.Dashboard.sendFeedback({ rating: selectedRating });
+            }
 
             // Navigate to enjoy page
             window.location.href = 'enjoy.html';

@@ -645,13 +645,13 @@
         prizeCtx.fill();
       }
 
-      // Draw cost text (e.g., "100 RIBU DAPAT") - using dynamic value
-      const dapatText = currentLang === "id" ? "DAPAT" : "GET";
+      // Draw cost text - Bold text only, GET/DAPAT shown separately in gift section
+      const boldText = currentLang === "id" ? "TAMBAH 50 RB" : "ADD 50 RB";
       prizeCtx.font = "bold 32px Nulshock, sans-serif";
       prizeCtx.fillStyle = "#00ffff";
       prizeCtx.textAlign = "center";
       prizeCtx.textBaseline = "middle";
-      prizeCtx.fillText(`${scratchCardData.costInRb} RIBU ${dapatText}`, prizeCanvas.width / 2, prizeCanvas.height / 2 - 140);
+      prizeCtx.fillText(boldText, prizeCanvas.width / 2, prizeCanvas.height / 2 - 140);
 
       // Determine prize display based on prize pool or default TIZO
       let prizeValue = scratchCardData.tizo;
@@ -714,13 +714,14 @@
           prizeCtx.fillText("+", prizeCanvas.width / 2, prizeCanvas.height / 2 + 180 + giftYOffset);
         }
 
-        // Draw gift label (e.g., "GETS")
+        // Draw gift label - language aware (GET for English, DAPAT for Bahasa)
         prizeCtx.font = showPrizeSection ? "bold 28px Nulshock, sans-serif" : "bold 40px Nulshock, sans-serif";
         prizeCtx.fillStyle = "#ffffff";
         prizeCtx.shadowColor = "transparent";
         prizeCtx.shadowBlur = 0;
         const giftLabelY = showPrizeSection ? (prizeCanvas.height / 2 + 240 + giftYOffset) : (prizeCanvas.height / 2 - 40);
-        prizeCtx.fillText(scratchCardData.gift.toUpperCase(), prizeCanvas.width / 2, giftLabelY);
+        const giftLabelText = currentLang === "id" ? "DAPAT" : "GET";
+        prizeCtx.fillText(giftLabelText, prizeCanvas.width / 2, giftLabelY);
 
         // Draw gift value (e.g., "DORITOS")
         prizeCtx.font = showPrizeSection ? "bold 36px Nulshock, sans-serif" : "bold 80px Nulshock, sans-serif";
