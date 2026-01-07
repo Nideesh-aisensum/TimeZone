@@ -253,13 +253,17 @@ async function getTableData(pool, tableName) {
 
 async function getTableColumns(pool, tableName) {
     const query = `
-        SELECT column_name 
+        SELECT column_name, data_type, udt_name
         FROM information_schema.columns 
         WHERE table_schema = 'public' 
         AND table_name = $1
     `;
     const result = await pool.query(query, [tableName]);
-    return result.rows.map(row => row.column_name);
+    return result.rows.map(row => ({
+        name: row.column_name,
+        dataType: row.data_type,
+        udtName: row.udt_name // e.g., 'jsonb', '_text' for text[]
+    }));
 }
 
 async function syncTable(tableName) {
@@ -269,8 +273,9 @@ async function syncTable(tableName) {
         const cloudData = await getTableData(cloudPool, tableName);
         console.log(`   📥 Fetched ${cloudData.length} rows from cloud`);
 
-        // 2. Get column names
-        const columns = await getTableColumns(cloudPool, tableName);
+        // 2. Get column info (name + type)
+        const columnInfo = await getTableColumns(cloudPool, tableName);
+        const columns = columnInfo.map(c => c.name);
 
         // 3. Begin transaction on LOCAL
         const client = await localPool.connect();
@@ -284,9 +289,22 @@ async function syncTable(tableName) {
             // 5. INSERT cloud data into LOCAL
             if (cloudData.length > 0) {
                 for (const row of cloudData) {
-                    const values = columns.map(col => row[col]);
+                    // Process values - handle different column types
+                    const values = columnInfo.map(colInfo => {
+                        const val = row[colInfo.name];
+                        if (val === null) return null;
+
+                        // JSONB columns - stringify JS objects to JSON
+                        if (colInfo.udtName === 'jsonb' && typeof val === 'object') {
+                            return JSON.stringify(val);
+                        }
+
+                        // PostgreSQL arrays (text[], int[], etc.) - pass as-is
+                        // node-postgres handles arrays correctly
+                        return val;
+                    });
                     const placeholders = columns.map((_, i) => `$${i + 1}`).join(', ');
-                    const columnNames = columns.map(col => `"${col}"`).join(', '); // Quote columns to be safe
+                    const columnNames = columns.map(col => `"${col}"`).join(', ');
 
                     await client.query(
                         `INSERT INTO "${tableName}" (${columnNames}) VALUES (${placeholders})`,
@@ -586,35 +604,76 @@ const server = http.createServer((req, res) => {
                 if (result.rows.length > 0) {
                     const offer = result.rows[0];
 
-                    // Fetch prizes from prize pool
+                    // Check for gift pool from OfferBuilder (gift_pool JSON column)
                     let prizes = [];
                     let selectedPrize = null;
+                    let isRandomGift = true;
+
                     try {
-                        const prizesResult = await pool.query(
-                            'SELECT * FROM scratch_card_prizes WHERE scratch_card_id = $1 AND is_active = true ORDER BY id',
-                            [offer.id]
-                        );
-                        if (prizesResult.rows.length > 0) {
-                            prizes = prizesResult.rows.map(p => ({
-                                id: p.id,
-                                prize_type: p.prize_type,
-                                prize_value: parseInt(p.prize_value),
-                                prize_label: p.prize_label,
-                                probability: parseFloat(p.probability)
+                        // Parse gift_pool if it's a string (JSON stored as text)
+                        let giftPool = offer.gift_pool;
+                        if (typeof giftPool === 'string') {
+                            try {
+                                giftPool = JSON.parse(giftPool);
+                            } catch (parseErr) {
+                                console.error('[Scratch Card] Failed to parse gift_pool JSON:', parseErr);
+                                giftPool = null;
+                            }
+                        }
+
+                        console.log(`[Scratch Card] offer.id=${offer.id}, gift_pool type=${typeof giftPool}, is_random_gift=${offer.is_random_gift}`);
+                        console.log(`[Scratch Card] gift_pool:`, giftPool);
+
+                        // First, check if offer has gift_pool (from OfferBuilder)
+                        if (giftPool && Array.isArray(giftPool) && giftPool.length > 0) {
+                            console.log(`[Scratch Card] Using gift_pool from OfferBuilder (${giftPool.length} items)`);
+                            isRandomGift = offer.is_random_gift !== false; // Default to true
+
+                            // Map gift_pool entries to prize format
+                            prizes = giftPool.map((gift, index) => ({
+                                id: index + 1,
+                                prize_type: gift.type, // 'TIZO', 'Gift'
+                                prize_value: parseInt(gift.value) || 0,
+                                prize_label: gift.label || (gift.type === 'TIZO' ? `${gift.value} TIZO` : gift.label),
+                                probability: 1 // Equal probability for OfferBuilder gifts
                             }));
 
-                            // Weighted random selection
-                            const totalWeight = prizes.reduce((sum, p) => sum + p.probability, 0);
-                            let random = Math.random() * totalWeight;
-                            selectedPrize = prizes[0];
-                            for (const prize of prizes) {
-                                random -= prize.probability;
-                                if (random <= 0) {
-                                    selectedPrize = prize;
-                                    break;
-                                }
+                            // Random selection from gift pool
+                            if (isRandomGift && prizes.length > 0) {
+                                const randomIndex = Math.floor(Math.random() * prizes.length);
+                                selectedPrize = prizes[randomIndex];
+                                console.log(`[Scratch Card] Randomly selected: ${selectedPrize.prize_label}`);
+                            } else if (prizes.length > 0) {
+                                selectedPrize = prizes[0]; // First prize if not random
                             }
-                            console.log(`[Scratch Card] Selected prize: ${selectedPrize.prize_label}`);
+                        } else {
+                            // Fallback: Fetch prizes from scratch_card_prizes table
+                            const prizesResult = await pool.query(
+                                'SELECT * FROM scratch_card_prizes WHERE scratch_card_id = $1 AND is_active = true ORDER BY id',
+                                [offer.id]
+                            );
+                            if (prizesResult.rows.length > 0) {
+                                prizes = prizesResult.rows.map(p => ({
+                                    id: p.id,
+                                    prize_type: p.prize_type,
+                                    prize_value: parseInt(p.prize_value),
+                                    prize_label: p.prize_label,
+                                    probability: parseFloat(p.probability)
+                                }));
+
+                                // Weighted random selection
+                                const totalWeight = prizes.reduce((sum, p) => sum + p.probability, 0);
+                                let random = Math.random() * totalWeight;
+                                selectedPrize = prizes[0];
+                                for (const prize of prizes) {
+                                    random -= prize.probability;
+                                    if (random <= 0) {
+                                        selectedPrize = prize;
+                                        break;
+                                    }
+                                }
+                                console.log(`[Scratch Card] Selected prize from table: ${selectedPrize.prize_label}`);
+                            }
                         }
                     } catch (prizeErr) {
                         console.error('Error fetching prizes:', prizeErr);

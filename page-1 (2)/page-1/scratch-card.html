@@ -656,19 +656,39 @@
       // Determine prize display based on prize pool or default TIZO
       let prizeValue = scratchCardData.tizo;
       let prizeLabel = "TIZO";
+      let giftText = null; // Text for 'Gift' type prizes (e.g., "DORITOS", "400 TICKETS")
 
       if (scratchCardData.selectedPrize) {
-        prizeValue = scratchCardData.selectedPrize.prize_value;
-        prizeLabel = scratchCardData.selectedPrize.prize_type;
+        const prize = scratchCardData.selectedPrize;
+        prizeValue = prize.prize_value || 0;
+        prizeLabel = prize.prize_type;
+
+        // For 'Gift' type, the prize_label contains the actual gift (e.g., "DORITOS", "400 TICKETS")
+        if (prize.prize_type === 'Gift') {
+          giftText = prize.prize_label;
+          prizeValue = 0; // Gift type doesn't show a numeric value
+        }
       }
 
       // Check if we should show TIZO/GAMES/TICKETS section (only if value > 0)
       const showPrizeSection = prizeValue > 0;
 
-      // Check if we have a free gift
-      const hasGift = scratchCardData.gift && scratchCardData.giftDetails &&
+      // Check if we have a free gift (from gift_pool or legacy giftDetails)
+      // Prioritize gift_pool selection, fallback to legacy fields
+      let hasGift = false;
+      let displayGiftText = null;
+
+      if (giftText) {
+        // Gift from gift_pool (priority)
+        hasGift = true;
+        displayGiftText = giftText;
+      } else if (!scratchCardData.selectedPrize && scratchCardData.gift && scratchCardData.giftDetails &&
         scratchCardData.giftDetails !== "-" &&
-        scratchCardData.gift.toLowerCase() !== "nil";
+        scratchCardData.gift.toLowerCase() !== "nil") {
+        // Legacy gift fields (only if no gift_pool selection)
+        hasGift = true;
+        displayGiftText = scratchCardData.giftDetails;
+      }
 
       if (showPrizeSection) {
         // Draw prize amount - large prize amount with gradient
@@ -701,7 +721,7 @@
       }
 
       // Draw free gift section if available
-      if (hasGift) {
+      if (hasGift && displayGiftText) {
         // Adjust vertical position based on whether prize section is shown
         const giftYOffset = showPrizeSection ? 0 : -100; // Move up if no prize section
 
@@ -723,13 +743,13 @@
         const giftLabelText = currentLang === "id" ? "DAPAT" : "GET";
         prizeCtx.fillText(giftLabelText, prizeCanvas.width / 2, giftLabelY);
 
-        // Draw gift value (e.g., "DORITOS")
+        // Draw gift value (e.g., "DORITOS", "400 TICKETS")
         prizeCtx.font = showPrizeSection ? "bold 36px Nulshock, sans-serif" : "bold 80px Nulshock, sans-serif";
         prizeCtx.fillStyle = "#33fff9";
         prizeCtx.shadowColor = "rgba(51, 255, 249, 0.6)";
         prizeCtx.shadowBlur = 15;
         const giftValueY = showPrizeSection ? (prizeCanvas.height / 2 + 300 + giftYOffset) : (prizeCanvas.height / 2 + 60);
-        prizeCtx.fillText(scratchCardData.giftDetails.toUpperCase(), prizeCanvas.width / 2, giftValueY);
+        prizeCtx.fillText(displayGiftText.toUpperCase(), prizeCanvas.width / 2, giftValueY);
         prizeCtx.shadowColor = "transparent";
         prizeCtx.shadowBlur = 0;
       }
@@ -1079,18 +1099,36 @@
 
             // Update session with the new_user scratch card values
             // Include both regular bonus values and original bonus values for compatibility
+            // Use selectedPrize values if available from gift_pool
+            let bonusTizoValue = scratchCardData.tizo;
+            let bonusGiftValue = data.offer.gift || null;
+            let bonusGiftDetailsValue = data.offer.gift_details || null;
+
+            if (scratchCardData.selectedPrize) {
+              const prize = scratchCardData.selectedPrize;
+              if (prize.prize_type === 'TIZO') {
+                bonusTizoValue = prize.prize_value || 0;
+                bonusGiftValue = null;
+                bonusGiftDetailsValue = null;
+              } else if (prize.prize_type === 'Gift') {
+                bonusTizoValue = 0;
+                bonusGiftValue = 'Free Gift';
+                bonusGiftDetailsValue = prize.prize_label || '';
+              }
+            }
+
             updateSession({
-              scratchPrize: scratchCardData.tizo,
+              scratchPrize: bonusTizoValue,
               bonusCost: scratchCardData.cost,
-              bonusTizo: scratchCardData.tizo,
+              bonusTizo: bonusTizoValue,
               bonusFreeGames: data.offer.free_games || null,
-              bonusGift: data.offer.gift || null,
-              bonusGiftDetails: data.offer.gift_details || null,
+              bonusGift: bonusGiftValue,
+              bonusGiftDetails: bonusGiftDetailsValue,
               // Also set original values for scratchcard-summary.html split topup display
               originalBonusCost: scratchCardData.cost,
-              originalBonusTizo: scratchCardData.tizo,
-              originalBonusGift: data.offer.gift || null,
-              originalBonusGiftDetails: data.offer.gift_details || null,
+              originalBonusTizo: bonusTizoValue,
+              originalBonusGift: bonusGiftValue,
+              originalBonusGiftDetails: bonusGiftDetailsValue,
               // Prize pool data
               scratchCardHasPrizePool: scratchCardData.hasPrizePool,
               scratchCardSelectedPrize: scratchCardData.selectedPrize,
@@ -1147,13 +1185,31 @@
           };
 
           // Save scratch card data to session
+          // Use selectedPrize values if available from gift_pool
+          let bonusTizoValue = scratchCardData.tizo;
+          let bonusGiftValue = data.offer.gift || null;
+          let bonusGiftDetailsValue = data.offer.gift_details || null;
+
+          if (scratchCardData.selectedPrize) {
+            const prize = scratchCardData.selectedPrize;
+            if (prize.prize_type === 'TIZO') {
+              bonusTizoValue = prize.prize_value || 0;
+              bonusGiftValue = null;
+              bonusGiftDetailsValue = null;
+            } else if (prize.prize_type === 'Gift') {
+              bonusTizoValue = 0;
+              bonusGiftValue = 'Free Gift';
+              bonusGiftDetailsValue = prize.prize_label || '';
+            }
+          }
+
           updateSession({
-            scratchPrize: scratchCardData.tizo,
+            scratchPrize: bonusTizoValue,
             bonusCost: scratchCardData.cost,
-            bonusTizo: scratchCardData.tizo,
+            bonusTizo: bonusTizoValue,
             bonusFreeGames: data.offer.free_games || null,
-            bonusGift: data.offer.gift || null,
-            bonusGiftDetails: data.offer.gift_details || null,
+            bonusGift: bonusGiftValue,
+            bonusGiftDetails: bonusGiftDetailsValue,
             // Prize pool data
             scratchCardHasPrizePool: scratchCardData.hasPrizePool,
             scratchCardSelectedPrize: scratchCardData.selectedPrize,
