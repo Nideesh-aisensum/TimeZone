@@ -266,9 +266,69 @@ async function getTableColumns(pool, tableName) {
     }));
 }
 
+/**
+ * Ensure local table has all columns that exist in the cloud table
+ * Automatically adds missing columns to local DB
+ */
+async function ensureMissingColumns(tableName) {
+    try {
+        // Get columns from cloud
+        const cloudColumnsQuery = `
+            SELECT column_name, data_type, udt_name, character_maximum_length
+            FROM information_schema.columns
+            WHERE table_schema = 'public' AND table_name = $1
+        `;
+        const cloudResult = await cloudPool.query(cloudColumnsQuery, [tableName]);
+        const cloudColumns = cloudResult.rows;
+
+        // Get columns from local
+        const localResult = await localPool.query(cloudColumnsQuery, [tableName]);
+        const localColumns = new Set(localResult.rows.map(r => r.column_name));
+
+        // Find missing columns
+        const missingColumns = cloudColumns.filter(col => !localColumns.has(col.column_name));
+
+        if (missingColumns.length > 0) {
+            console.log(`   🔧 Adding ${missingColumns.length} missing column(s) to local table...`);
+
+            for (const col of missingColumns) {
+                let type = col.data_type;
+
+                // Handle ARRAY types
+                if (col.data_type === 'ARRAY') {
+                    if (col.udt_name.startsWith('_')) {
+                        type = col.udt_name.substring(1) + '[]';
+                    } else {
+                        type = 'text[]';
+                    }
+                } else if (col.udt_name === 'jsonb') {
+                    type = 'jsonb';
+                } else if (col.udt_name === 'geometry') {
+                    type = 'geometry';
+                }
+
+                // Add length for varchar/char
+                if (['character varying', 'varchar'].includes(col.data_type) && col.character_maximum_length) {
+                    type += `(${col.character_maximum_length})`;
+                }
+
+                const alterSql = `ALTER TABLE "${tableName}" ADD COLUMN IF NOT EXISTS "${col.column_name}" ${type}`;
+                await localPool.query(alterSql);
+                console.log(`      ✅ Added column: ${col.column_name} (${type})`);
+            }
+        }
+    } catch (err) {
+        console.error(`   ⚠️ Error checking/adding columns for ${tableName}:`, err.message);
+        // Don't throw - continue with sync even if column check fails
+    }
+}
+
 async function syncTable(tableName) {
     console.log(`\n🔄 Syncing table: ${tableName}`);
     try {
+        // 0. Ensure local table has all columns from cloud (auto-migration)
+        await ensureMissingColumns(tableName);
+
         // 1. Fetch all data from CLOUD
         const cloudData = await getTableData(cloudPool, tableName);
         console.log(`   📥 Fetched ${cloudData.length} rows from cloud`);
