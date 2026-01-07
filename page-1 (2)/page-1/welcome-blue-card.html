@@ -426,10 +426,42 @@
             window.location.href = 'welcome.html';
         }
 
+        // Fetch new user blue offer from database to get gift details
+        async function fetchNewUserBlueOffer() {
+            try {
+                const response = await fetch(getApiUrl('/api/offers?cardType=new_user_blue'));
+                const data = await response.json();
+
+                if (data.success && data.offers && data.offers.length > 0) {
+                    const offer = data.offers[0];
+
+                    // Get gift data from the offer
+                    const gift = offer.gift || 'Nil';
+                    const giftDetails = offer.gift_details || '';
+
+                    if (gift && gift !== 'Nil' && giftDetails) {
+                        // Store gift data in session for later use on scratchcard-summary
+                        updateSession({
+                            newUserGift: gift,
+                            newUserGiftDetails: giftDetails
+                        });
+                        console.log('Blue card gift loaded:', { gift, giftDetails });
+                    }
+                } else {
+                    console.log('No new_user_blue offers found in database');
+                }
+            } catch (error) {
+                console.error('Error fetching blue card offer:', error);
+            }
+        }
+
         // Direct initialization
-        (function () {
+        (async function () {
             // Apply language immediately
             applyLanguage(currentLang);
+
+            // Fetch gift data for blue card
+            await fetchNewUserBlueOffer();
         })();
     </script>
 </body>

@@ -426,10 +426,61 @@
                 window.location.href = 'welcome.html';
             }
 
+            // Fetch new user gold offer from database to get gift details
+            async function fetchNewUserGoldOffer() {
+                try {
+                    const response = await fetch(getApiUrl('/api/offers?cardType=new_user_gold'));
+                    const data = await response.json();
+
+                    if (data.success && data.offers && data.offers.length > 0) {
+                        const offer = data.offers[0];
+
+                        // Get gift data from the offer
+                        const gift = offer.gift || 'Nil';
+                        const giftDetails = offer.gift_details || '';
+
+                        if (gift && gift !== 'Nil' && giftDetails) {
+                            // Store gift data in session for later use on scratchcard-summary
+                            updateSession({
+                                newUserGift: gift,
+                                newUserGiftDetails: giftDetails
+                            });
+                            console.log('Gold card gift loaded:', { gift, giftDetails });
+                        }
+                    } else {
+                        console.log('No new_user_gold offers found in database, trying gold offers');
+
+                        // Fallback: Try to fetch regular gold offers
+                        const fallbackResponse = await fetch(getApiUrl('/api/offers?cardType=gold'));
+                        const fallbackData = await fallbackResponse.json();
+
+                        if (fallbackData.success && fallbackData.offers && fallbackData.offers.length > 0) {
+                            // Get the first/best gold offer
+                            const offer = fallbackData.offers[0];
+                            const gift = offer.gift || 'Nil';
+                            const giftDetails = offer.gift_details || '';
+
+                            if (gift && gift !== 'Nil' && giftDetails) {
+                                updateSession({
+                                    newUserGift: gift,
+                                    newUserGiftDetails: giftDetails
+                                });
+                                console.log('Gold card gift loaded from fallback:', { gift, giftDetails });
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error fetching gold card offer:', error);
+                }
+            }
+
             // Direct initialization
-            (function () {
+            (async function () {
                 // Apply language immediately
                 applyLanguage(currentLang);
+
+                // Fetch gift data for gold card
+                await fetchNewUserGoldOffer();
             })();
         </script>
 </body>

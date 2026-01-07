@@ -536,7 +536,8 @@
                     isNewPlayer: true,
                     newUserGift: existingGift,
                     newUserGiftDetails: existingGiftDetails,
-                    selectedCardCount: 1 // Default to 1 card for new user blue card
+                    selectedCardCount: 1, // Default to 1 card for new user blue card
+                    splitTopup: null // Clear any stale custom top-up upgrade data
                 });
 
                 console.log('New user offer saved:', { offerCost, offerTizo, gift: existingGift, giftDetails: existingGiftDetails });

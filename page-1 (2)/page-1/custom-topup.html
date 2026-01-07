@@ -924,12 +924,18 @@
                 // Only Blue (≥500k) and Gold (≥2jt) upgrades - NO Platinum path
                 if (amountThousands >= goldOffer.costRb) {
                     // Gold threshold - go directly to gold card page
-                    storeSplitTopupData('gold', goldOffer.costRb, goldOffer.tizo, amountThousands);
+                    // Use the FULL entered amount for TIZO calculation (universal rates)
+                    // This ensures consistency: 2jt entered = calculated TIZO from universal table
+                    const fullCalcTizo = calculateCustomTizo(amountThousands);
+                    storeSplitTopupData('gold', amountThousands, fullCalcTizo, amountThousands);
                     window.location.href = 'welcome-gold-card.html';
                     return;
                 } else if (amountThousands >= blueOffer.costRb) {
                     // Blue Elite threshold - go directly to blue card page
-                    storeSplitTopupData('blue', blueOffer.costRb, blueOffer.tizo, amountThousands);
+                    // Use the FULL entered amount for TIZO calculation (universal rates)
+                    // This ensures 600k entered = 1200 TIZO (from universal rates table)
+                    const fullCalcTizo = calculateCustomTizo(amountThousands);
+                    storeSplitTopupData('blue', amountThousands, fullCalcTizo, amountThousands);
                     window.location.href = 'welcome-blue-card.html';
                     return;
                 } else {
