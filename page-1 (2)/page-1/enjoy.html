@@ -164,17 +164,41 @@
 
         if (window.Dashboard) {
             window.Dashboard.sendSessionComplete({
+                // User info
                 isNewUser: sessionData?.isNewPlayer || false,
                 cardType: sessionData?.selectedCard || 'unknown',
+                cardQuantity: sessionData?.cardQuantity || 1,
+
+                // Transaction amounts
                 amount: sessionData?.finalPayment || sessionData?.totalCost || 0,
                 offerId: sessionData?.selectedOffer,
                 offerType: sessionData?.selectedOffer ? 'fixed_offer' : 'custom_topup',
-                offerCost: sessionData?.offerCost,
+                offerCost: sessionData?.offerCost || 0,
+                offerTizo: sessionData?.offerTizo || 0,
+                totalTizo: sessionData?.totalTizo || 0,
+
+                // Bonus/Promo acceptance
                 bonusPercent: 0,
                 oodAccepted: sessionData?.oodAccepted || false,
                 oohAccepted: sessionData?.oohAccepted || false,
                 snacksAccepted: sessionData?.snacksAccepted || false,
-                scratchCardAccepted: sessionData?.scratchCardAccepted || false
+
+                // Scratch card details
+                scratchCardAccepted: sessionData?.scratchCardAccepted || false,
+                scratchCardRevealed: sessionData?.scratchCardRevealed || false,
+                scratchPrize: sessionData?.scratchPrize || 0,
+
+                // Bonus details
+                bonusAccepted: sessionData?.bonusAccepted || false,
+                bonusCost: sessionData?.bonusCost || 0,
+                bonusTizo: sessionData?.bonusTizo || 0,
+                bonusGift: sessionData?.bonusGift || null,
+                bonusGiftDetails: sessionData?.bonusGiftDetails || null,
+                bonusFreeGames: sessionData?.bonusFreeGames || 0,
+
+                // 2nd Upsell tracking (when user upgrades from original offer)
+                secondUpsellAccepted: sessionData?.secondUpsellAccepted || false,
+                originalOfferCost: sessionData?.originalOfferCost || null
             });
         }
     </script>

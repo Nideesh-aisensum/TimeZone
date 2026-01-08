@@ -838,10 +838,21 @@
         localStorage.setItem("customTopUpAmount", selectedAdditionalOffer.cost);
         localStorage.setItem("customTopUpTizo", selectedAdditionalOffer.tizoCredit);
 
-        // Update session
+        // Get original offer cost for dashboard analytics
+        const originalCost = customTopupData?.amount || 0;
+
+        // Update session with upsell data + track 2nd upsell
         updateSession({
           offerCost: parseFloat(selectedAdditionalOffer.cost),
           offerTizo: parseFloat(selectedAdditionalOffer.tizoCredit),
+          secondUpsellAccepted: true,
+          originalOfferCost: originalCost
+        });
+
+        console.log("Custom topup upsell accepted:", {
+          originalCost: originalCost,
+          newCost: selectedAdditionalOffer.cost,
+          newTizo: selectedAdditionalOffer.tizoCredit
         });
       } else {
         // Keep original custom topup

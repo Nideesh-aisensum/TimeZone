@@ -1219,15 +1219,28 @@
         const newOfferCost = parseFloat(chosenCard.dataset.cost) || 0;
         const newOfferTizo = parseFloat(chosenCard.dataset.tizoCredit) || 0;
 
-        // REPLACE the original offer with the new selected offer
+        // Get original offer cost for dashboard analytics
+        const session = getSession();
+        const originalCost = session?.offerCost || 0;
+
+        // Check if 2nd upsell was selected (additional-offer-2)
+        // 1st upsell = additional-offer-1, 2nd upsell = additional-offer-2
+        const isSecondUpsell = chosenCard.id === 'additional-offer-2';
+
+        // REPLACE the original offer with the new selected offer + track which upsell
         updateSession({
           offerCost: newOfferCost,
           offerTizo: newOfferTizo,
+          secondUpsellAccepted: isSecondUpsell,
+          originalOfferCost: originalCost
         });
 
         console.log("Offer REPLACED with upsell:", {
-          offerCost: newOfferCost,
-          offerTizo: newOfferTizo,
+          originalCost: originalCost,
+          newOfferCost: newOfferCost,
+          newOfferTizo: newOfferTizo,
+          upsellCardId: chosenCard.id,
+          secondUpsellAccepted: isSecondUpsell
         });
       } else {
         // User didn't select any upsell - keep original offer (already in session)

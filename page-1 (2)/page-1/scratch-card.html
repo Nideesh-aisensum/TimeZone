@@ -691,33 +691,27 @@
       }
 
       if (showPrizeSection) {
-        // Draw prize amount - large prize amount with gradient
-        prizeCtx.font = "bold 200px Nulshock, sans-serif";
-        const textGradient = prizeCtx.createLinearGradient(0, prizeCanvas.height / 2 - 100, 0, prizeCanvas.height / 2 + 100);
+        // Display prize in same format as gift display (DAPAT/GET label + value below)
+        // This ensures TIZO, GAMES, TICKETS all look consistent with Gift prizes
 
-        // Different colors for different prize types
-        if (prizeLabel === 'GAMES') {
-          textGradient.addColorStop(0, "#ff00ff");
-          textGradient.addColorStop(0.5, "#ff66cc");
-          textGradient.addColorStop(1, "#ff00aa");
-        } else if (prizeLabel === 'TICKETS') {
-          textGradient.addColorStop(0, "#ffff00");
-          textGradient.addColorStop(0.5, "#ffcc00");
-          textGradient.addColorStop(1, "#ff9900");
-        } else {
-          // TIZO - cyan/blue gradient
-          textGradient.addColorStop(0, "#00ffff");
-          textGradient.addColorStop(0.5, "#00aaff");
-          textGradient.addColorStop(1, "#0066ff");
-        }
+        // Draw DAPAT/GET label - same position as gift label
+        prizeCtx.font = "bold 40px Nulshock, sans-serif";
+        prizeCtx.fillStyle = "#ffffff";
+        prizeCtx.shadowColor = "transparent";
+        prizeCtx.shadowBlur = 0;
+        const prizeLabelText = currentLang === "id" ? "DAPAT" : "GET";
+        prizeCtx.fillText(prizeLabelText, prizeCanvas.width / 2, prizeCanvas.height / 2 - 40);
 
-        prizeCtx.fillStyle = textGradient;
-        prizeCtx.fillText(prizeValue.toString(), prizeCanvas.width / 2, prizeCanvas.height / 2 - 20);
-
-        // Draw prize type label
-        prizeCtx.font = "bold 56px Nulshock, sans-serif";
-        prizeCtx.fillStyle = prizeLabel === 'GAMES' ? "#ff66cc" : (prizeLabel === 'TICKETS' ? "#ffcc00" : "#00ffff");
-        prizeCtx.fillText(prizeLabel, prizeCanvas.width / 2, prizeCanvas.height / 2 + 100);
+        // Draw prize value with unit (e.g., "120 TIZO", "10 GAMES", "400 TICKETS")
+        // Same position as gift value display
+        prizeCtx.font = "bold 80px Nulshock, sans-serif";
+        prizeCtx.fillStyle = "#33fff9";
+        prizeCtx.shadowColor = "rgba(51, 255, 249, 0.6)";
+        prizeCtx.shadowBlur = 15;
+        const prizeDisplayText = `${prizeValue} ${prizeLabel}`;
+        prizeCtx.fillText(prizeDisplayText, prizeCanvas.width / 2, prizeCanvas.height / 2 + 60);
+        prizeCtx.shadowColor = "transparent";
+        prizeCtx.shadowBlur = 0;
       }
 
       // Draw free gift section if available
@@ -1110,6 +1104,16 @@
                 bonusTizoValue = prize.prize_value || 0;
                 bonusGiftValue = null;
                 bonusGiftDetailsValue = null;
+              } else if (prize.prize_type === 'GAMES') {
+                // GAMES prize - the prize itself is the offer, no separate gift
+                bonusTizoValue = prize.prize_value || 0;
+                bonusGiftValue = null;
+                bonusGiftDetailsValue = null;
+              } else if (prize.prize_type === 'TICKETS') {
+                // TICKETS prize - the prize itself is the offer, no separate gift
+                bonusTizoValue = prize.prize_value || 0;
+                bonusGiftValue = null;
+                bonusGiftDetailsValue = null;
               } else if (prize.prize_type === 'Gift') {
                 bonusTizoValue = 0;
                 bonusGiftValue = 'Free Gift';
@@ -1193,6 +1197,16 @@
           if (scratchCardData.selectedPrize) {
             const prize = scratchCardData.selectedPrize;
             if (prize.prize_type === 'TIZO') {
+              bonusTizoValue = prize.prize_value || 0;
+              bonusGiftValue = null;
+              bonusGiftDetailsValue = null;
+            } else if (prize.prize_type === 'GAMES') {
+              // GAMES prize - the prize itself is the offer, no separate gift
+              bonusTizoValue = prize.prize_value || 0;
+              bonusGiftValue = null;
+              bonusGiftDetailsValue = null;
+            } else if (prize.prize_type === 'TICKETS') {
+              // TICKETS prize - the prize itself is the offer, no separate gift
               bonusTizoValue = prize.prize_value || 0;
               bonusGiftValue = null;
               bonusGiftDetailsValue = null;

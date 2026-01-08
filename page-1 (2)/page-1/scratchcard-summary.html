@@ -2828,11 +2828,27 @@
 
       const bonusCostInRb = Math.round(bonusCost / 1000);
 
-      // Get gift data from session - check multiple possible keys
-      giftDetails = session.bonusGiftDetails || session.giftDetails || session.newUserGiftDetails || null;
+      // Get gift data from session - but respect prize pool logic
+      // If there's a selected prize from prize pool that is NOT a 'Gift' type,
+      // then the prize itself is the offer and there should be no separate gift
+      const selectedPrize = session.scratchCardSelectedPrize;
+      const hasPrizePool = session.scratchCardHasPrizePool || false;
 
-      // Also check for scratch card specific gift data
-      if (!giftDetails && session.scratchCardGift) {
+      if (hasPrizePool && selectedPrize && selectedPrize.prize_type !== 'Gift') {
+        // Prize is TIZO, GAMES, or TICKETS - no separate gift
+        giftDetails = null;
+      } else {
+        // No prize pool or prize is 'Gift' type - use session gift data
+        giftDetails = session.bonusGiftDetails || null;
+
+        // Only fallback to legacy fields if bonusGiftDetails is explicitly not set
+        if (!giftDetails && !hasPrizePool) {
+          giftDetails = session.giftDetails || session.newUserGiftDetails || null;
+        }
+      }
+
+      // Also check for scratch card specific gift data (only if no prize pool overrides)
+      if (!giftDetails && session.scratchCardGift && !hasPrizePool) {
         giftDetails = session.scratchCardGift;
       }
 

@@ -727,10 +727,11 @@
                     <!-- Prize Display - INSIDE CARD -->
                     <div class="prize-display editable" data-id="prize-display" bis_skin_checked="1">
                         <p id="prize-label" class="prize-label editable" data-id="prize-label"
-                            style="transform: translate(0px, 40px) scale(1);">100 RB DAPAT</p>
-                        <div class="prize-amount editable" data-id="prize-amount"
-                            style="transform: translate(-2.6666px, 20px) scale(1);" bis_skin_checked="1">400</div>
-                        <div class="prize-unit editable" data-id="prize-unit" bis_skin_checked="1">TIZO</div>
+                            style="transform: translate(0px, 40px) scale(1);">TAMBAH 50 RB</p>
+                        <p id="prize-get-label" class="free-gift-label editable" data-id="prize-get-label"
+                            style="transform: translate(0px, 70px) scale(1); font-size: 36px;">DAPAT</p>
+                        <p id="prize-value-display" class="free-gift-value editable" data-id="prize-value-display"
+                            style="transform: translate(0px, 100px) scale(1); font-size: 72px;">120 TIZO</p>
                     </div>
 
                     <!-- Free Gift Section - INSIDE CARD (dynamic, shown when free gift exists) -->
@@ -1008,35 +1009,30 @@
                 }
             }
 
-            const prizeAmount = document.querySelector('.prize-amount');
-            const prizeUnitEl = document.querySelector('.prize-unit');
+            const prizeValueDisplay = document.getElementById('prize-value-display');
             const prizeDisplay = document.querySelector('.prize-display');
 
             if (showPrizeSection) {
-                // Show prize amount and unit
-                if (prizeAmount) {
-                    prizeAmount.textContent = prizeValue;
-                    prizeAmount.style.display = '';
+                // Show prize value with unit combined (e.g., "120 TIZO", "10 GAMES")
+                if (prizeValueDisplay) {
+                    prizeValueDisplay.textContent = `${prizeValue} ${prizeType}`;
+                    prizeValueDisplay.style.display = '';
                 }
-                if (prizeUnitEl) {
-                    prizeUnitEl.textContent = prizeType;
-                    prizeUnitEl.style.display = '';
-                    // Apply different colors based on prize type
-                    if (prizeType === 'GAMES') {
-                        prizeUnitEl.style.color = '#ff66cc';
-                    } else if (prizeType === 'TICKETS') {
-                        prizeUnitEl.style.color = '#ffcc00';
-                    } else {
-                        prizeUnitEl.style.color = '';
-                    }
+                // Show and update the DAPAT/GET label for prize
+                const prizeGetLabel = document.getElementById('prize-get-label');
+                if (prizeGetLabel) {
+                    prizeGetLabel.textContent = currentLang === 'id' ? 'DAPAT' : 'GET';
+                    prizeGetLabel.style.display = '';
                 }
             } else {
-                // Hide prize amount and unit when value is 0 (nil)
-                if (prizeAmount) {
-                    prizeAmount.style.display = 'none';
+                // Hide prize value display when value is 0 (nil)
+                if (prizeValueDisplay) {
+                    prizeValueDisplay.style.display = 'none';
                 }
-                if (prizeUnitEl) {
-                    prizeUnitEl.style.display = 'none';
+                // Hide the DAPAT/GET label when no prize
+                const prizeGetLabel = document.getElementById('prize-get-label');
+                if (prizeGetLabel) {
+                    prizeGetLabel.style.display = 'none';
                 }
             }
 
