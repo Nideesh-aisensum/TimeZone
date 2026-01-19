@@ -426,7 +426,7 @@
                 window.location.href = 'welcome.html';
             }
 
-            // Fetch new user gold offer from database to get gift details
+            // Fetch new user gold offer from database to get gift details AND tizo_credit
             async function fetchNewUserGoldOffer() {
                 try {
                     const response = await fetch(getApiUrl('/api/offers?cardType=new_user_gold'));
@@ -438,6 +438,11 @@
                         // Get gift data from the offer
                         const gift = offer.gift || 'Nil';
                         const giftDetails = offer.gift_details || '';
+                        const tizoCredit = offer.tizo_credit || 0;
+
+                        // Get current session and splitTopup
+                        const session = typeof getSession === 'function' ? getSession() : null;
+                        const currentSplitTopup = session?.splitTopup || null;
 
                         if (gift && gift !== 'Nil' && giftDetails) {
                             // Store gift data in session for later use on scratchcard-summary
@@ -446,6 +451,24 @@
                                 newUserGiftDetails: giftDetails
                             });
                             console.log('Gold card gift loaded:', { gift, giftDetails });
+                        }
+
+                        // IMPORTANT: Update splitTopup.cardOfferTizo with the ACTUAL tizo_credit from New User - Gold offer
+                        // This ensures the scratch card summary shows 4200 TIZO instead of 4000 from custom_topup_rates
+                        if (currentSplitTopup && tizoCredit > 0) {
+                            const updatedSplitTopup = {
+                                ...currentSplitTopup,
+                                cardOfferTizo: Math.round(tizoCredit)
+                            };
+                            updateSession({
+                                splitTopup: updatedSplitTopup,
+                                offerTizo: Math.round(tizoCredit) + (currentSplitTopup.customTizo || 0)
+                            });
+                            console.log('Gold card TIZO updated from offer:', { 
+                                oldTizo: currentSplitTopup.cardOfferTizo, 
+                                newTizo: Math.round(tizoCredit),
+                                totalTizo: Math.round(tizoCredit) + (currentSplitTopup.customTizo || 0)
+                            });
                         }
                     } else {
                         console.log('No new_user_gold offers found in database, trying gold offers');
