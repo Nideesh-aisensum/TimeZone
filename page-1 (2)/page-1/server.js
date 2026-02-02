@@ -171,6 +171,10 @@ const cloudPool = new Pool({
     connectionTimeoutMillis: 10000,
 });
 
+// Dedicated client for LISTEN/NOTIFY (real-time sync)
+let notifyClient = null;
+let isListening = false;
+
 // Alias localPool as pool for backward compatibility with existing API routes
 const pool = localPool;
 
@@ -460,12 +464,80 @@ async function syncAllTables() {
     lastSyncTime = Date.now();
 }
 
+/**
+ * Setup real-time listener for database changes
+ * Uses PostgreSQL LISTEN/NOTIFY for instant sync instead of polling
+ */
+async function setupRealtimeListener() {
+    if (isListening) {
+        console.log('⚠️  Real-time listener already active');
+        return;
+    }
+
+    try {
+        // Create dedicated client for LISTEN
+        notifyClient = await cloudPool.connect();
+        console.log('\n🔔 Setting up real-time database listener...');
+
+        // Listen for notifications on 'kiosk_data_change' channel
+        await notifyClient.query('LISTEN kiosk_data_change');
+        isListening = true;
+        console.log('✅ Real-time listener active on channel: kiosk_data_change');
+        console.log('   📡 Kiosk will sync immediately when cloud data changes\n');
+
+        // Handle incoming notifications
+        notifyClient.on('notification', async (msg) => {
+            if (msg.channel === 'kiosk_data_change') {
+                try {
+                    const payload = JSON.parse(msg.payload);
+                    console.log(`\n🔔 Database change detected!`);
+                    console.log(`   Table: ${payload.table}`);
+                    console.log(`   Operation: ${payload.operation}`);
+                    console.log(`   Time: ${new Date(payload.timestamp).toLocaleTimeString()}`);
+                    console.log('   🔄 Triggering immediate sync...\n');
+                    
+                    // Trigger immediate sync
+                    await syncAllTables();
+                    console.log('✅ Real-time sync completed\n');
+                } catch (err) {
+                    console.error('❌ Error processing notification:', err.message);
+                }
+            }
+        });
+
+        // Handle connection errors
+        notifyClient.on('error', (err) => {
+            console.error('❌ Notification client error:', err.message);
+            isListening = false;
+            // Attempt to reconnect after 5 seconds
+            setTimeout(() => {
+                console.log('🔄 Attempting to reconnect real-time listener...');
+                setupRealtimeListener();
+            }, 5000);
+        });
+
+        // Handle connection end
+        notifyClient.on('end', () => {
+            console.log('⚠️  Notification client disconnected');
+            isListening = false;
+        });
+
+    } catch (err) {
+        console.error('❌ Failed to setup real-time listener:', err.message);
+        console.log('⚠️  Falling back to periodic sync mode');
+        isListening = false;
+    }
+}
+
+/**
+ * Fallback periodic sync (used if real-time listener fails)
+ * Also useful as a safety net to catch any missed notifications
+ */
 async function startPeriodicSync(minutes) {
     const ms = minutes * 60 * 1000;
-    console.log(`\n⏰ Periodic sync enabled: executing every ${minutes} minutes...`);
+    console.log(`\n⏰ Fallback periodic sync: every ${minutes} minutes (safety net)`);
 
     // Run immediately once
-    // wrapping in try-catch to prevent crashing main server
     try {
         await syncAllTables();
     } catch (e) {
@@ -474,7 +546,7 @@ async function startPeriodicSync(minutes) {
 
     setInterval(async () => {
         try {
-            console.log(`\n⏰ Triggering periodic sync (${new Date().toLocaleTimeString()})...`);
+            console.log(`\n⏰ Fallback periodic sync (${new Date().toLocaleTimeString()})...`);
             await syncAllTables();
         } catch (e) {
             console.error('Periodic sync failed:', e.message);
@@ -1562,8 +1634,14 @@ if (args.includes('--sync')) {
         // Load UNIVERSAL custom top-up rates cache (Custom Top-Up page - NO card type)
         await loadCustomTopupRatesCache();
 
-        // Start periodic sync automatically
-        startPeriodicSync(periodicInterval);
+        // Setup real-time listener for instant sync
+        await setupRealtimeListener();
+
+        // Start fallback periodic sync (safety net, runs less frequently)
+        // If real-time listener is working, this acts as a backup
+        // Increase interval to 30 minutes since real-time sync handles most updates
+        const fallbackInterval = isListening ? 30 : periodicInterval;
+        startPeriodicSync(fallbackInterval);
 
         console.log(`\n📂 Open your pages:`);
         console.log(`   ${LOCAL_URL}/kiosk                         ⭐ KIOSK SHELL (Persistent BG)`);
@@ -1574,5 +1652,28 @@ if (args.includes('--sync')) {
         console.log(`   ${LOCAL_URL}/page-1/welcome.html`);
         console.log(`\n💾 Auto-save enabled - changes will be saved directly to files!`);
         console.log(`\nPress Ctrl+C to stop the server.\n`);
+    });
+
+    // Graceful shutdown handler
+    process.on('SIGINT', async () => {
+        console.log('\n\n🛑 Shutting down server...');
+        
+        // Close real-time listener
+        if (notifyClient) {
+            try {
+                await notifyClient.query('UNLISTEN kiosk_data_change');
+                notifyClient.release();
+                console.log('✅ Real-time listener closed');
+            } catch (err) {
+                console.error('⚠️  Error closing listener:', err.message);
+            }
+        }
+        
+        // Close database pools
+        await localPool.end();
+        await cloudPool.end();
+        console.log('✅ Database connections closed');
+        console.log('👋 Goodbye!\n');
+        process.exit(0);
     });
 }
