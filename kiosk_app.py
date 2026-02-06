@@ -64,6 +64,19 @@ class PrinterAPI:
     
     def __init__(self):
         self.selected_printer = None  # Will be set during startup
+        self._kiosk_app = None  # Reference to KioskApp for shutdown
+    
+    def shutdown_kiosk(self):
+        """Shutdown the kiosk application - called from JavaScript exit handler"""
+        log("========== SHUTDOWN REQUESTED FROM JS ==========")
+        if self._kiosk_app:
+            self._kiosk_app.close_app()
+            return {"success": True, "message": "Shutting down..."}
+        else:
+            log("ERROR: No kiosk app reference")
+            import os
+            os._exit(0)
+            return {"success": True, "message": "Force exit"}
     
     def print_receipt_image(self, image_data_base64):
         """Print receipt as image - preserves design. Called from JavaScript with base64 image."""
@@ -148,6 +161,124 @@ class PrinterAPI:
             log(f"❌ Print image error: {e}")
             return {"success": False, "message": str(e)}
     
+    def print_receipt_data(self, data):
+        """Print receipt from structured data using exact ESC/POS commands (Matches thermal_printer.py)"""
+        log("========== PRINT DATA RECEIPT ==========")
+        try:
+            printer_name = self.selected_printer
+            if not printer_name:
+                raise Exception("No printer selected! Please restart and select a printer.")
+            
+            log(f"Using printer: {printer_name}")
+            log(f"Receipt data: {data}")
+            
+            # ESC/POS commands
+            ESC = chr(27)
+            INIT = ESC + '@'
+            CENTER = ESC + 'a1'
+            LEFT = ESC + 'a0'
+            BOLD_ON = ESC + 'E1'
+            BOLD_OFF = ESC + 'E0'
+            CUT = ESC + 'i'
+            LF = chr(10)
+            
+            # Helper for formatting rows
+            def format_row(label, value, width=42):
+                space = width - len(str(label)) - len(str(value))
+                if space < 1: space = 1
+                return str(label) + " " * space + str(value)
+
+            receipt = []
+            receipt.append(INIT)
+            receipt.append(CENTER)
+            
+            # Header
+            receipt.append(BOLD_ON + "TIMEZONE" + BOLD_OFF)
+            receipt.append("www.timezonegames.com")
+            receipt.append("")
+            
+            # Location & Date
+            if data.get('locationName'):
+                receipt.append(BOLD_ON + str(data.get('locationName')) + BOLD_OFF)
+            
+            now = datetime.now()
+            receipt.append(now.strftime('%d/%m/%Y %I:%M %p'))
+            receipt.append("")
+            
+            receipt.append(LEFT)
+            receipt.append("-" * 42)
+            
+            # Message
+            receipt.append(CENTER)
+            receipt.append(BOLD_ON + "PLEASE PROCEED TO COUNTER" + BOLD_OFF)
+            receipt.append(BOLD_ON + "FOR PAYMENT" + BOLD_OFF)
+            receipt.append("")
+            
+            # Order Number
+            order_num = data.get('orderNumber', '----')
+            receipt.append(BOLD_ON + f"ORDER #: {order_num}" + BOLD_OFF)
+            receipt.append("")
+            
+            receipt.append(LEFT)
+            receipt.append("-" * 42)
+            
+            # Items Section
+            receipt.append(BOLD_ON + "ITEMS:" + BOLD_OFF)
+            receipt.append("")
+            
+            items = data.get('items', [])
+            for item in items:
+                # Item Label
+                receipt.append(item.get('label', ''))
+                # Cost and Tizo on next line or same line? 
+                # Let's do: Label ...... Cost
+                #           ............. Tizo
+                cost = item.get('cost', '')
+                tizo = item.get('tizo', '')
+                
+                if cost:
+                    receipt.append(format_row("  Price:", cost))
+                if tizo:
+                    receipt.append(format_row("  Tizo:", tizo))
+                receipt.append("")
+
+            receipt.append("-" * 42)
+            
+            # Totals
+            total_pay = data.get('totalPayment', '0')
+            total_tizo = data.get('totalTizo', '0')
+            
+            receipt.append(format_row(BOLD_ON + "TOTAL PAYMENT:", total_pay + BOLD_OFF))
+            receipt.append(format_row(BOLD_ON + "TOTAL TIZO:", total_tizo + BOLD_OFF))
+            
+            receipt.append("=" * 42)
+            receipt.append(CENTER)
+            receipt.append(BOLD_ON + "TERIMA KASIH!" + BOLD_OFF)
+            receipt.append("")
+            receipt.append(LF + LF + LF + LF)
+            receipt.append(CUT)
+            
+            final_text = "\n".join(receipt)
+            
+            # Send to printer
+            hPrinter = win32print.OpenPrinter(printer_name)
+            try:
+                hJob = win32print.StartDocPrinter(hPrinter, 1, ("Kiosk Receipt Data", None, "RAW"))
+                try:
+                    win32print.StartPagePrinter(hPrinter)
+                    win32print.WritePrinter(hPrinter, final_text.encode('utf-8'))
+                    win32print.EndPagePrinter(hPrinter)
+                finally:
+                    win32print.EndDocPrinter(hPrinter)
+            finally:
+                win32print.ClosePrinter(hPrinter)
+            
+            log(f"✅ Data print sent to {printer_name}")
+            return {"success": True, "message": f"Printed to {printer_name}"}
+        except Exception as e:
+            log(f"❌ Print data error: {e}")
+            return {"success": False, "message": str(e)}
+
     def print_receipt(self, receipt_text=None):
         """Print thermal receipt - called from JavaScript with receipt content"""
         log("========== PRINT BUTTON CLICKED ==========")
@@ -491,13 +622,15 @@ def select_printer():
         log(f"Printer specified via command line: {printer_name}")
         return printer_name
     
-    # Check for command line argument: --default (skip selection, use default)
-    if len(sys.argv) > 1 and sys.argv[1] == '--default':
+    # Check for explicit --select flag to show menu, otherwise use default
+    if '--select' not in sys.argv:
         try:
             default_printer = win32print.GetDefaultPrinter()
-            log(f"Using default printer (--default flag): {default_printer}")
+            log(f"Auto-selecting default printer: {default_printer}")
+            print(f"Auto-selecting default printer: {default_printer}")
             return default_printer
-        except:
+        except Exception as e:
+            log(f"Error getting default printer: {e}")
             return None
     
     print("\n" + "=" * 60)
@@ -1085,7 +1218,7 @@ class KioskApp:
         def on_loaded():
             log("Page loaded event triggered")
             try:
-                # Inject JavaScript - block right-click, override print to use thermal printer directly
+                # Inject JavaScript - block right-click, use native print for CSS styling
                 js_code = """
                 (function() {
                     console.log('=== KIOSK MODE LOADED ===');
@@ -1097,62 +1230,9 @@ class KioskApp:
                     }, true);
                     console.log('Right-click context menu disabled');
                     
-                    // Override window.print() to extract HTML and print directly to thermal printer
-                    var originalPrint = window.print.bind(window);
-                    window.print = async function() {
-                        console.log('=== PRINT INTERCEPTED (Direct HTML Method) ===');
-                        console.log('pywebview:', typeof pywebview);
-                        console.log('pywebview.api:', pywebview && pywebview.api);
-                        
-                        // Check if pywebview API is available
-                        if (typeof pywebview === 'undefined' || !pywebview.api) {
-                            console.error('pywebview API not available');
-                            alert('Print API not ready. Please wait and try again.');
-                            return;
-                        }
-                        
-                        // Find the print receipt element - look for .print-receipt first, then .receipt
-                        var receiptElement = document.querySelector('.print-receipt');
-                        if (!receiptElement) {
-                            receiptElement = document.querySelector('.receipt');
-                        }
-                        if (!receiptElement) {
-                            receiptElement = document.querySelector('.preview-ticket');
-                        }
-                        
-                        console.log('Receipt element found:', !!receiptElement);
-                        
-                        if (!receiptElement) {
-                            console.error('No receipt element found');
-                            alert('No receipt content found to print.');
-                            return;
-                        }
-                        
-                        try {
-                            // Extract text content from receipt for thermal printing
-                            var receiptHTML = receiptElement.innerHTML;
-                            console.log('Receipt HTML length:', receiptHTML.length);
-                            
-                            // Call Python API to print the receipt HTML directly
-                            if (pywebview.api.print_receipt_html) {
-                                console.log('Calling print_receipt_html...');
-                                var result = await pywebview.api.print_receipt_html(receiptHTML);
-                                console.log('Print result:', JSON.stringify(result));
-                                if (result && !result.success) {
-                                    alert('Print error: ' + result.message);
-                                } else if (result && result.success) {
-                                    console.log('PRINT SUCCESS!');
-                                }
-                            } else {
-                                console.error('print_receipt_html method not found');
-                                alert('Print method not available.');
-                            }
-                        } catch (error) {
-                            console.error('Print error:', error);
-                            alert('Print error: ' + error.message);
-                        }
-                    };
-                    console.log('Direct HTML print override active - No system print dialog');
+                    // DO NOT override window.print() - let it use native browser print
+                    // This ensures CSS @media print styles are respected for proper receipt formatting
+                    console.log('Native browser print enabled - CSS @media print styles will be applied');
                 })();
                 """
                 self.window.evaluate_js(js_code)
@@ -1199,6 +1279,7 @@ if __name__ == '__main__':
     
     # Step 2: Start kiosk app
     app = KioskApp()
+    printer_api._kiosk_app = app  # Link so JS can call shutdown
     app.run()
     
     # Restore Windows settings

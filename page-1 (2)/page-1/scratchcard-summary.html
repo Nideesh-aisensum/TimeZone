@@ -1112,7 +1112,7 @@
         <img src="timezone-branding.png" alt="Timezone" class="preview-logo" />
         <div class="preview-website">www.timezonegames.com</div>
         <div class="preview-location">
-          <div class="preview-location-name" id="preview-location-name">Lippo Mall Puri</div>
+          <div class="preview-location-name" id="preview-location-name">Loading...</div>
           <div class="preview-location-date" id="preview-date">Kamis 21/12/25 16:33 PM</div>
         </div>
         <hr class="preview-divider" />
@@ -1255,7 +1255,7 @@
     </div>
 
     <div class="print-location">
-      <div class="print-location-name" id="print-location-name">Lippo Mall Puri</div>
+      <div class="print-location-name" id="print-location-name">Loading...</div>
       <div class="print-location-date" id="print-date">Jumat, 12 Des 2025 13.18</div>
     </div>
 
@@ -1415,6 +1415,7 @@
 
 
   <script src="api-config.js"></script>
+  <script src="html2canvas.min.js"></script>
   <script src="shell-connector.js"></script>
   <script src="page-loader.js"></script>
   <script src="session-manager.js"></script>
@@ -1547,6 +1548,7 @@
     let bonusCost = 0;
     let bonusTizo = 0;
     let giftDetails = null;
+    let kioskPlaceName = null;
     let showCalculation = false; // Only show for existing users with custom top-up
 
     function toggleTopup() {
@@ -2203,21 +2205,15 @@
       }
     }
 
-    function confirmPrint() {
+    async function confirmPrint() {
       closePrintPreview();
 
       // CRITICAL FIX: Remove hidden elements from print-receipt before printing
-      // The thermal printer/kiosk app doesn't respect CSS display:none and extracts all text
-      // So we must physically remove hidden elements from the DOM before printing
       const printReceipt = document.querySelector('.print-receipt');
       if (printReceipt) {
-        // Find all elements with display:none and remove them from the DOM
         const hiddenElements = printReceipt.querySelectorAll('[style*="display: none"], [style*="display:none"]');
-        hiddenElements.forEach(el => {
-          el.remove();
-        });
+        hiddenElements.forEach(el => el.remove());
 
-        // Also remove any elements with empty/dash values that shouldn't print
         const allBonusRows = printReceipt.querySelectorAll('.print-row');
         allBonusRows.forEach(row => {
           const valueSpan = row.querySelector('span:last-child');
@@ -2227,50 +2223,86 @@
         });
       }
 
-      // In kiosk mode (pywebview), the page runs inside an iframe
-      // Check both window.pywebview and parent.pywebview for kiosk detection
-      const isKioskMode = (window.pywebview && window.pywebview.api) ||
-        (window.parent && window.parent.pywebview && window.parent.pywebview.api) ||
-        (window.parent !== window); // Running in iframe = likely kiosk
+      // Use html2canvas to render receipt as image, then send to thermal printer
+      // This avoids the system print dialog and produces exact visual output
+      const printReceiptEl = document.querySelector('.print-receipt');
+      if (!printReceiptEl) {
+        console.error('No print receipt element found');
+        window.location.href = "feedback.html";
+        return;
+      }
 
-      if (isKioskMode) {
-        // In kiosk mode - use thermal printer API (no system dialog)
-        // Access API from parent frame if available
+      // Make receipt visible temporarily for html2canvas
+      // Use 288px width with scale:2 so output = 576px (thermal printer native width)
+      printReceiptEl.style.display = 'block';
+      printReceiptEl.style.position = 'absolute';
+      printReceiptEl.style.left = '-9999px';
+      printReceiptEl.style.top = '0';
+      printReceiptEl.style.width = '192px';
+      printReceiptEl.style.maxWidth = '192px';
+      printReceiptEl.style.padding = '6px';
+      printReceiptEl.style.background = 'white';
+      printReceiptEl.style.color = '#000';
+      printReceiptEl.style.fontFamily = '"Courier New", monospace';
+      printReceiptEl.style.fontSize = '12px';
+
+      // Apply inline styles for proper rendering by html2canvas
+      printReceiptEl.querySelectorAll('.print-header').forEach(el => { el.style.textAlign = 'center'; el.style.marginBottom = '8px'; });
+      printReceiptEl.querySelectorAll('.print-logo-img').forEach(el => { el.style.width = '120px'; el.style.height = 'auto'; el.style.display = 'block'; el.style.margin = '0 auto 3px auto'; });
+      printReceiptEl.querySelectorAll('.print-website').forEach(el => { el.style.fontSize = '10px'; el.style.color = '#000'; el.style.textAlign = 'center'; });
+      printReceiptEl.querySelectorAll('.print-location').forEach(el => { el.style.textAlign = 'center'; el.style.margin = '10px 0'; });
+      printReceiptEl.querySelectorAll('.print-location-name').forEach(el => { el.style.fontWeight = 'bold'; el.style.fontSize = '16px'; el.style.color = '#000'; });
+      printReceiptEl.querySelectorAll('.print-location-date').forEach(el => { el.style.fontSize = '11px'; el.style.color = '#000'; el.style.fontWeight = 'bold'; });
+      printReceiptEl.querySelectorAll('.print-divider').forEach(el => { el.style.border = 'none'; el.style.borderTop = '1px dashed #000'; el.style.margin = '8px 0'; });
+      printReceiptEl.querySelectorAll('.print-message').forEach(el => { el.style.textAlign = 'center'; el.style.fontSize = '10px'; el.style.color = '#000'; el.style.fontWeight = 'bold'; el.style.margin = '8px 0'; el.style.lineHeight = '1.4'; });
+      printReceiptEl.querySelectorAll('.print-order-number').forEach(el => { el.style.textAlign = 'center'; el.style.fontSize = '16px'; el.style.fontWeight = 'bold'; el.style.color = '#000'; el.style.margin = '8px 0'; el.style.letterSpacing = '2px'; });
+      printReceiptEl.querySelectorAll('.print-section').forEach(el => { el.style.margin = '10px 0'; el.style.paddingBottom = '8px'; el.style.borderBottom = '1px dashed #000'; });
+      printReceiptEl.querySelectorAll('.print-section-title').forEach(el => { el.style.fontWeight = 'bold'; el.style.fontSize = '12px'; el.style.marginBottom = '6px'; el.style.color = '#000'; });
+      printReceiptEl.querySelectorAll('.print-row').forEach(el => { el.style.display = 'flex'; el.style.justifyContent = 'space-between'; el.style.fontSize = '11px'; el.style.margin = '3px 0'; el.style.paddingLeft = '8px'; el.style.fontWeight = 'bold'; el.style.color = '#000'; });
+      printReceiptEl.querySelectorAll('.print-total-section').forEach(el => { el.style.marginTop = '10px'; el.style.paddingTop = '8px'; el.style.borderTop = '2px solid #000'; });
+      printReceiptEl.querySelectorAll('.print-footer').forEach(el => { el.style.textAlign = 'center'; el.style.fontSize = '10px'; el.style.color = '#000'; el.style.marginTop = '12px'; el.style.fontWeight = 'bold'; el.style.paddingTop = '8px'; el.style.borderTop = '1px solid #000'; });
+
+      try {
+        console.log('Rendering receipt with html2canvas...');
+        const canvas = await html2canvas(printReceiptEl, {
+          scale: 3,
+          backgroundColor: '#ffffff',
+          useCORS: true,
+          logging: false,
+          width: 192,
+          windowWidth: 192
+        });
+
+        const imageData = canvas.toDataURL('image/png');
+        console.log('Receipt image generated, size:', imageData.length);
+
+        // Try to send to thermal printer via pywebview API
         const api = (window.pywebview && window.pywebview.api) ||
           (window.parent && window.parent.pywebview && window.parent.pywebview.api);
 
-        if (api) {
-          const printReceiptEl = document.querySelector('.print-receipt');
-          if (printReceiptEl) {
-            // Make visible temporarily to get HTML content
-            printReceiptEl.style.display = 'block';
-            const htmlContent = printReceiptEl.innerHTML;
-            printReceiptEl.style.display = 'none';
-
-            // Use print_receipt_html API (doesn't require html2canvas)
-            if (api.print_receipt_html) {
-              console.log('Using print_receipt_html API for thermal printing');
-              api.print_receipt_html(htmlContent);
-            } else if (api.print_receipt) {
-              // Fallback to text-based printing
-              console.log('Using print_receipt API (text mode)');
-              api.print_receipt(printReceiptEl.innerText);
-            } else {
-              console.error('No print API available');
-            }
-          }
+        if (api && api.print_receipt_image) {
+          console.log('Sending receipt image to thermal printer via print_receipt_image API');
+          const result = await api.print_receipt_image(imageData);
+          console.log('Print result:', result);
+        } else if (api && api.print_receipt_html) {
+          console.log('Fallback: using print_receipt_html');
+          api.print_receipt_html(printReceiptEl.innerHTML);
         } else {
-          console.log('Kiosk mode detected but no API available');
+          console.log('No thermal printer API, using browser print');
+          window.print();
         }
-      } else if (window.electronAPI) {
-        // Electron mode
-        window.electronAPI.print();
-      } else {
-        // Browser mode only - show system print dialog
+      } catch (err) {
+        console.error('html2canvas error:', err);
         window.print();
+      } finally {
+        printReceiptEl.style.display = 'none';
+        printReceiptEl.style.position = '';
+        printReceiptEl.style.left = '';
       }
 
-      window.location.href = "feedback.html";
+      setTimeout(() => {
+        window.location.href = "feedback.html";
+      }, 1500);
     }
 
     // Update print receipt based on current selection
@@ -2363,7 +2395,7 @@
       const previewOrderNumber = document.getElementById("preview-order-number");
       if (previewOrderNumber) previewOrderNumber.textContent = orderNumber;
 
-      const locationName = session.locationName || "Lippo Mall Puri";
+      const locationName = kioskPlaceName || session.locationName || "Timezone";
       const printLocationName = document.getElementById("print-location-name");
       if (printLocationName) printLocationName.textContent = locationName;
       const previewLocationName = document.getElementById("preview-location-name");
@@ -3199,6 +3231,20 @@
     // Initialize page with loader
     initPageWithLoader({
       onDataLoad: async () => {
+        // Fetch kiosk config for location name
+        try {
+          const configRes = await fetch(getApiUrl('/api/kiosk-config'));
+          const config = await configRes.json();
+          if (config.success && config.place) {
+            kioskPlaceName = config.place;
+            const printLoc = document.getElementById('print-location-name');
+            if (printLoc) printLoc.textContent = config.place;
+            const previewLoc = document.getElementById('preview-location-name');
+            if (previewLoc) previewLoc.textContent = config.place;
+          }
+        } catch (e) {
+          console.log('Could not fetch kiosk config, using default');
+        }
         applyLanguage(currentLang);
         loadSessionData();
         await fetchActiveOffers(); // Fetch and filter offers

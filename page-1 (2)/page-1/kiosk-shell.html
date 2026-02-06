@@ -5,6 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=1080, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Timezone Kiosk - Shell</title>
+    <script>
+        // CRITICAL: Save original window.print BEFORE kiosk_app.py overrides it
+        // The pywebview override converts HTML to plain text, losing all CSS formatting
+        // We need the real browser print for styled receipt output
+        window.__originalPrint = window.print.bind(window);
+    </script>
     <style>
         * {
             margin: 0;
@@ -18,6 +24,47 @@
             -moz-user-select: none !important;
             -ms-user-select: none !important;
             user-select: none !important;
+            -webkit-tap-highlight-color: transparent !important;
+            -webkit-user-drag: none !important;
+        }
+
+        /* ===== PRINT STYLES ===== */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #printable-area,
+            #printable-area * {
+                visibility: visible;
+            }
+
+            #printable-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+
+            /* Hide other global elements */
+            .global-video,
+            #page-frame,
+            #loading-overlay,
+            #exit-modal {
+                display: none !important;
+            }
+        }
+
+        /* Prevent image/gif selection and dragging */
+        img,
+        video,
+        gif,
+        canvas,
+        svg {
+            pointer-events: none;
+            -webkit-user-drag: none !important;
+            user-drag: none !important;
+            -webkit-touch-callout: none !important;
         }
 
         html,
@@ -540,6 +587,252 @@
         // Expose for debugging
         window.KioskShell = KioskShell;
     </script>
+
+    <!-- ===== SECRET EXIT GESTURE: Tap bottom-right corner 5 times within 3 seconds ===== -->
+    <!-- Shows password keypad modal, requires "timezone@shutdown" to exit -->
+
+    <!-- Password Modal HTML -->
+    <div id="kiosk-exit-modal"
+        style="display:none; position:fixed; top:0; left:0; width:1080px; height:1920px; background:rgba(0,0,0,0.95); z-index:99999; flex-direction:column; align-items:center; justify-content:center;">
+        <div style="background:#1a1a2e; border-radius:20px; padding:40px; width:800px; text-align:center;">
+            <h2 style="color:#fff; font-size:36px; margin-bottom:20px; font-family:Arial,sans-serif;">🔐 Admin Exit</h2>
+            <p style="color:#888; font-size:18px; margin-bottom:20px; font-family:Arial,sans-serif;">Enter password to
+                shutdown kiosk</p>
+
+            <!-- Password Display -->
+            <div id="pwd-display"
+                style="background:#0d0d1a; border:2px solid #333; border-radius:10px; padding:20px; margin-bottom:20px; min-height:60px; font-size:32px; color:#4ecdc4; font-family:monospace; letter-spacing:5px;">
+            </div>
+
+            <!-- Error Message -->
+            <div id="pwd-error"
+                style="color:#ff4757; font-size:18px; margin-bottom:15px; height:24px; font-family:Arial,sans-serif;">
+            </div>
+
+            <!-- Keypad -->
+            <div id="keypad" style="display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-bottom:20px;">
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display:flex; gap:20px; justify-content:center; margin-top:20px;">
+                <button id="pwd-cancel"
+                    style="background:#666; color:#fff; border:none; border-radius:10px; padding:20px 60px; font-size:24px; font-family:Arial,sans-serif; cursor:pointer;">Cancel</button>
+                <button id="pwd-clear"
+                    style="background:#ff4757; color:#fff; border:none; border-radius:10px; padding:20px 40px; font-size:24px; font-family:Arial,sans-serif; cursor:pointer;">Clear</button>
+                <button id="pwd-submit"
+                    style="background:#4ecdc4; color:#000; border:none; border-radius:10px; padding:20px 60px; font-size:24px; font-family:Arial,sans-serif; cursor:pointer; font-weight:bold;">Shutdown</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            /**
+             * SECRET KIOSK EXIT GESTURE WITH PASSWORD
+             * 
+             * Two ways to trigger:
+             * 1. Press Q key 5 times within 2 seconds (backup for keyboard)
+             * 2. Click timezone-branding logo 5 times within 2 seconds (for touch)
+             * 
+             * Password: timezone@shutdown
+             */
+            const REQUIRED_TAPS = 5;
+            const TIME_WINDOW_MS = 2000; // 2 seconds
+            const CORRECT_PASSWORD = 'tizo123';
+
+            let logoClickTimestamps = [];
+            let qKeyTimestamps = [];
+            let currentPassword = '';
+
+            // Get modal elements
+            const modal = document.getElementById('kiosk-exit-modal');
+            const pwdDisplay = document.getElementById('pwd-display');
+            const pwdError = document.getElementById('pwd-error');
+            const keypad = document.getElementById('keypad');
+            const cancelBtn = document.getElementById('pwd-cancel');
+            const clearBtn = document.getElementById('pwd-clear');
+            const submitBtn = document.getElementById('pwd-submit');
+
+            // Create keypad buttons
+            const keys = [
+                '1', '2', '3', '4', '5', '6',
+                '7', '8', '9', '0', '@', '#',
+                'q', 'w', 'e', 'r', 't', 'y',
+                'u', 'i', 'o', 'p', 'a', 's',
+                'd', 'f', 'g', 'h', 'j', 'k',
+                'l', 'z', 'x', 'c', 'v', 'b',
+                'n', 'm', '_', '-', '.', '⌫'
+            ];
+
+            keys.forEach(key => {
+                const btn = document.createElement('button');
+                btn.textContent = key;
+                btn.style.cssText = 'background:#2d2d44; color:#fff; border:none; border-radius:8px; padding:20px; font-size:24px; font-family:Arial,sans-serif; cursor:pointer;';
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (key === '⌫') {
+                        currentPassword = currentPassword.slice(0, -1);
+                    } else {
+                        currentPassword += key;
+                    }
+                    updateDisplay();
+                });
+                btn.addEventListener('touchstart', (e) => e.stopPropagation());
+                keypad.appendChild(btn);
+            });
+
+            function updateDisplay() {
+                pwdDisplay.textContent = '•'.repeat(currentPassword.length);
+                pwdError.textContent = '';
+            }
+
+            function showModal() {
+                currentPassword = '';
+                updateDisplay();
+                pwdError.textContent = '';
+                modal.style.display = 'flex';
+            }
+
+            function hideModal() {
+                modal.style.display = 'none';
+                currentPassword = '';
+            }
+
+            function attemptExit() {
+                if (currentPassword === CORRECT_PASSWORD) {
+                    console.log('[KioskExit] Password correct - triggering exit');
+                    if (window.electronAPI && window.electronAPI.exitKiosk) {
+                        window.electronAPI.exitKiosk();
+                    } else if (window.pywebview && window.pywebview.api && window.pywebview.api.shutdown_kiosk) {
+                        console.log('[KioskExit] Using pywebview shutdown_kiosk API');
+                        window.pywebview.api.shutdown_kiosk();
+                    } else {
+                        alert('Exit triggered (browser mode)');
+                        hideModal();
+                    }
+                } else {
+                    pwdError.textContent = '❌ Incorrect password';
+                    currentPassword = '';
+                    updateDisplay();
+                }
+            }
+
+            // Button handlers
+            cancelBtn.addEventListener('click', (e) => { e.stopPropagation(); hideModal(); });
+            clearBtn.addEventListener('click', (e) => { e.stopPropagation(); currentPassword = ''; updateDisplay(); });
+            submitBtn.addEventListener('click', (e) => { e.stopPropagation(); attemptExit(); });
+
+            // Prevent modal clicks from propagating
+            modal.addEventListener('click', (e) => e.stopPropagation());
+            modal.addEventListener('touchstart', (e) => e.stopPropagation());
+
+            // ============ Q KEY DETECTION ============
+            function handleQKey() {
+                if (modal.style.display === 'flex') return;
+
+                const now = Date.now();
+                qKeyTimestamps.push(now);
+                qKeyTimestamps = qKeyTimestamps.filter(t => now - t <= TIME_WINDOW_MS);
+
+                console.log(`[KioskExit] Q key ${qKeyTimestamps.length}/${REQUIRED_TAPS}`);
+
+                if (qKeyTimestamps.length >= REQUIRED_TAPS) {
+                    console.log('[KioskExit] Q key exit gesture - showing password modal');
+                    qKeyTimestamps = [];
+                    showModal();
+                }
+            }
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'q' || e.key === 'Q') {
+                    handleQKey();
+                }
+            }, true);
+
+            // ============ LOGO CLICK DETECTION ============
+            function handleLogoClick() {
+                if (modal.style.display === 'flex') return;
+
+                const now = Date.now();
+                logoClickTimestamps.push(now);
+                logoClickTimestamps = logoClickTimestamps.filter(t => now - t <= TIME_WINDOW_MS);
+
+                console.log(`[KioskExit] Logo click ${logoClickTimestamps.length}/${REQUIRED_TAPS}`);
+
+                if (logoClickTimestamps.length >= REQUIRED_TAPS) {
+                    console.log('[KioskExit] Logo exit gesture - showing password modal');
+                    logoClickTimestamps = [];
+                    showModal();
+                }
+            }
+
+            // Listen for clicks on timezone-branding logos in this document
+            document.addEventListener('click', function (e) {
+                const target = e.target;
+                if (target.tagName === 'IMG' &&
+                    (target.classList.contains('timezone-branding') ||
+                        target.src.includes('timezone-branding') ||
+                        target.classList.contains('timezone-logo'))) {
+                    handleLogoClick();
+                }
+            }, true);
+
+            // Expose showModal for iframe pages to call
+            window.showExitModal = showModal;
+            window.handleLogoClick = handleLogoClick;
+
+            // ============ IFRAME COMMUNICATION ============
+            // Listen for messages from iframe pages
+            window.addEventListener('message', function (e) {
+                if (e.data === 'KIOSK_EXIT_LOGO_CLICK') {
+                    console.log('[KioskExit] Received exit message from iframe - showing modal');
+                    showModal();
+                }
+
+                // Handle silent print request from iframes
+                // Supports object format: { type: 'KIOSK_PRINT_SILENT', content: '<html>...' }
+                // Or string format: 'KIOSK_PRINT_SILENT' (fallback)
+                const isPrintRequest = e.data === 'KIOSK_PRINT_SILENT' || (e.data && e.data.type === 'KIOSK_PRINT_SILENT');
+
+                if (isPrintRequest) {
+                    console.log('[Kiosk] Received print request from iframe');
+
+                    // Inject content if provided
+                    if (e.data && e.data.content) {
+                        const printableArea = document.getElementById('printable-area');
+                        if (printableArea) {
+                            printableArea.innerHTML = e.data.content;
+                            console.log('[Kiosk] Injected content length:', e.data.content.length);
+                        }
+                    }
+
+                    // WAIT for rendering before printing
+                    setTimeout(() => {
+                        if (window.electronAPI && window.electronAPI.print) {
+                            window.electronAPI.print();
+                        } else if (window.__originalPrint) {
+                            // Use the ORIGINAL window.print (saved before kiosk_app.py override)
+                            // This triggers proper @media print CSS rendering instead of plain-text conversion
+                            console.log('[Kiosk] Using original window.print for styled receipt output');
+                            window.__originalPrint();
+                        } else {
+                            console.log('[Kiosk] Falling back to window.print');
+                            window.print();
+                        }
+                    }, 500);
+
+                    // Clean up after print (optional, but good for memory/security)
+                    // Note: Print is async in Electron, so clearing immediately might race.
+                    // Ideally we'd wait for a callback, but for now we leave it or clear on next print.
+                }
+            });
+
+            console.log('[KioskExit] Password-protected exit initialized:');
+            console.log('  - Press Q key 5 times in 2 seconds');
+            console.log('  - Click timezone logo 5 times in 2 seconds');
+        })();
+    </script>
+    <div id="printable-area"></div>
 </body>
 
 </html>

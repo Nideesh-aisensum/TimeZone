@@ -625,9 +625,8 @@
         const data = await response.json();
 
         if (data.success) {
-          // Update the custom topup display with calculated TIZO from server
-          document.getElementById("selected-tizo").textContent = data.customTizo;
-          customTopupData.tizo = data.customTizo;
+          // Keep the TIZO value from localStorage (matches what calculator showed)
+          // Do NOT overwrite with server value — it may differ due to cache timing
 
           // Update offer 1 with database values
           const upsell1Rb = data.upsellBox1.rb;
