@@ -45,6 +45,12 @@ const DEFAULT_SESSION = {
     // Scratch card
     scratchCardRevealed: false,
     scratchPrize: 0,
+    scratchPrizeValue: 0,
+    scratchPrizeType: null,
+
+    // Upsell
+    upsellCost: 0,
+    upsellTizo: 0,
 
     // Prize/Bonus
     bonusAccepted: null, // true = accepted, false = rejected
@@ -185,6 +191,7 @@ function updateSession(updates) {
     }
 
     // Merge updates
+    console.log('🔄 Session Update:', JSON.stringify(updates));
     Object.assign(session, updates);
 
     // Recalculate totals if relevant fields changed - use parseInt to prevent string concatenation
@@ -241,10 +248,10 @@ function goHome() {
         return;
     }
     _navigationLock = true;
-    
+
     // Safety timeout to clear lock after 3 seconds in case navigation fails
     setTimeout(() => { _navigationLock = false; }, 3000);
-    
+
     localStorage.setItem('tizo_restart', 'true');
     window.location.href = 'welcome.html';
 }

@@ -159,11 +159,17 @@
 
     <script>
         // Send session complete to dashboard
+        // NOTE: If user came from feedback.html, the transaction was already saved there.
+        // Only save here for new users who skip the feedback page.
         const sessionData = getSession();
         console.log('📊 Session data for dashboard:', sessionData);
         console.log('👤 isNewPlayer value:', sessionData?.isNewPlayer, 'type:', typeof sessionData?.isNewPlayer);
 
-        if (window.Dashboard) {
+        const cameFromFeedback = document.referrer && document.referrer.includes('feedback.html');
+        console.log('📍 [Enjoy] Came from feedback page:', cameFromFeedback);
+
+        if (window.Dashboard && !cameFromFeedback) {
+            console.log('💾 [Enjoy] Saving transaction (new user / direct flow)...');
             window.Dashboard.sendSessionComplete({
                 // User info - use strict === true check to avoid null/undefined/string being truthy
                 isNewUser: sessionData?.isNewPlayer === true,
@@ -204,8 +210,13 @@
 
                 // 2nd Upsell tracking (when user upgrades from original offer)
                 secondUpsellAccepted: sessionData?.secondUpsellAccepted || false,
-                originalOfferCost: sessionData?.originalOfferCost || null
+                originalOfferCost: sessionData?.originalOfferCost || null,
+
+                // Feedback rating (if user skipped feedback page, may be null)
+                feedbackRating: sessionData?.feedbackRating || null
             });
+        } else if (cameFromFeedback) {
+            console.log('✅ [Enjoy] Transaction already saved by feedback.html — skipping duplicate save.');
         }
     </script>
 

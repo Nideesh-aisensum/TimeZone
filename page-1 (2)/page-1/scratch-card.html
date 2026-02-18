@@ -997,7 +997,15 @@
       cardContainer.classList.add("revealed");
 
       // Save scratch card revealed state to session
-      updateSession({ scratchCardRevealed: true });
+      // Save scratch card revealed state AND prize details to session
+      const prize = scratchCardData.selectedPrize;
+      updateSession({
+        scratchCardRevealed: true,
+        scratchPrizeType: prize ? prize.prize_type : 'TIZO',
+        scratchPrizeValue: prize ? prize.prize_value : scratchCardData.tizo,
+        // Also sync to legacy keys to be safe
+        scratchPrize: prize ? prize.prize_value : scratchCardData.tizo
+      });
 
       // Send scratch card event to dashboard
       if (typeof Dashboard !== 'undefined' && Dashboard.sendScratchCard) {

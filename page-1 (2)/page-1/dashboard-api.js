@@ -184,17 +184,83 @@
             place: sessionData.place || KIOSK_PLACE || '',
         };
 
-        const result = await sendToDashboard('/session', data);
-
-        // Clear session data
-        if (result && result.success) {
-            localStorage.removeItem('currentDashboardSession');
-            currentSessionId = null;
-            sessionStartTime = null;
-            console.log(`🏁 Session completed: ${sessionId}`);
+        // ✅ SAVE TO LOCAL DB FIRST (offline-safe, immediate)
+        try {
+            const localResp = await fetch('/api/customer-transaction', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sessionId: data.sessionId,
+                    orderNumber: sessionData.orderNumber || null,
+                    isNewUser: data.isNewUser,
+                    language: sessionData.language || 'id',
+                    cardType: data.cardType,
+                    cardQuantity: data.cardQuantity,
+                    offerId: data.offerId,
+                    offerName: data.offerName,
+                    offerCost: data.offerCost,
+                    offerTizo: data.offerTizo,
+                    offerType: data.offerType,
+                    customAmount: sessionData.customAmount || null,
+                    upsellAccepted: data.topupAccepted,
+                    secondUpsellAccepted: data.secondUpsellAccepted,
+                    upsellCost: sessionData.upsellCost || 0,
+                    upsellTizo: sessionData.upsellTizo || 0,
+                    oodAccepted: data.oodAccepted,
+                    oodCost: data.oodCost,
+                    oodTizo: sessionData.oodTizo || 0,
+                    oohAccepted: data.oohAccepted,
+                    oohCost: data.oohCost,
+                    oohTizo: sessionData.oohTizo || 0,
+                    snacksAccepted: data.snacksAccepted,
+                    snacksCost: data.snacksCost,
+                    snacksTizo: sessionData.snacksTizo || 0,
+                    feedbackRating: sessionData.feedbackRating || null,
+                    feedbackRating: sessionData.feedbackRating || null,
+                    feedbackComment: (sessionData.feedbackComment || '') + ' [DEBUG Session: ' + JSON.stringify({
+                        upsellCost: sessionData.upsellCost,
+                        offerCost: sessionData.offerCost,
+                        scratchPrizeValue: sessionData.scratchPrizeValue,
+                        scratchPrize: sessionData.scratchPrize,
+                        scratchPrizeType: sessionData.scratchPrizeType,
+                        topupAccepted: sessionData.topupAccepted,
+                        upsellAccepted: sessionData.upsellAccepted
+                    }) + ']',
+                    scratchCardRevealed: data.scratchCardRevealed,
+                    scratchPrizeType: sessionData.scratchPrizeType || null,
+                    scratchPrizeValue: sessionData.scratchPrizeValue || data.scratchPrize || 0,
+                    scratchPrizeLabel: sessionData.scratchPrizeLabel || null,
+                    bonusAccepted: data.bonusAccepted,
+                    bonusCost: data.bonusCost,
+                    bonusTizo: data.bonusTizo,
+                    bonusGift: data.bonusGift,
+                    bonusGiftDetails: data.bonusGiftDetails,
+                    bonusFreeGames: data.bonusFreeGames,
+                    totalCost: data.totalTizo ? (data.offerCost || 0) + (data.bonusCost || 0) : 0,
+                    totalTizo: data.totalTizo,
+                    finalPayment: sessionData.finalPayment || data.amount || 0,
+                    finalTizo: sessionData.finalTizo || data.totalTizo || 0,
+                    durationSeconds: data.durationSeconds,
+                    place: data.place
+                })
+            });
+            const localResult = await localResp.json();
+            console.log('💾 Transaction saved to local DB:', localResult);
+        } catch (localErr) {
+            console.error('⚠️ Failed to save transaction locally:', localErr.message);
         }
 
-        return result;
+        // Send to external dashboard in background (fire-and-forget, don't block)
+        sendToDashboard('/session', data).then(result => {
+            if (result && result.success) {
+                localStorage.removeItem('currentDashboardSession');
+                currentSessionId = null;
+                sessionStartTime = null;
+                console.log(`🏁 Session completed: ${sessionId}`);
+            }
+        }).catch(() => { });
+
+        return { success: true };
     }
 
     /**

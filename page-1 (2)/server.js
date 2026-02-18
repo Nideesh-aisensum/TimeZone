@@ -59,11 +59,22 @@ const KIOSK_VENUE = KIOSK_PLACE_RAW || (KIOSK_LOCATION ? (() => {
 /**
  * Fuzzy venue matching using regex
  * Handles minor spelling mistakes in .env PLACE value
+ * Strategy: split PLACE into keywords, build a regex that matches if ALL keywords
+ * appear (in any order) in the venue string, case-insensitive.
+ * Each keyword allows 1-char tolerance via optional char patterns.
+ * 
+ * Example: PLACE="Sumarecon Mall" matches "Summarecon Mall Serpong"
+ *          PLACE="margo" matches "Margo City"
  */
 function buildFuzzyPattern(place) {
     if (!place) return null;
+    // Split into words, filter out empty
     const words = place.trim().split(/\s+/).filter(w => w.length > 0);
+    // For each word, build a pattern that allows optional doubled letters and optional spaces
+    // e.g. "Sumarecon" -> "S+\s*u+\s*m+\s*a+\s*r+\s*e+\s*c+\s*o+\s*n+" (each char can repeat, spaces allowed between)
+    // This handles: "MARGOCITY" matching "Margo City", "Sumarecon" matching "Summarecon"
     const wordPatterns = words.map(word => {
+        // Escape special regex chars, then allow each letter to repeat with optional spaces between
         const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const flexPattern = escaped.split('').map(ch => {
             if (/[a-zA-Z]/.test(ch)) return ch + '+\\s*'; // allow repeated chars + optional spaces
@@ -71,35 +82,64 @@ function buildFuzzyPattern(place) {
         }).join('');
         return `(?=.*${flexPattern})`;
     });
+    // All words must appear (lookaheads), case-insensitive
     return new RegExp(wordPatterns.join(''), 'i');
 }
 
 const KIOSK_VENUE_PATTERN = buildFuzzyPattern(KIOSK_VENUE);
-let RESOLVED_VENUE = KIOSK_VENUE;
+if (KIOSK_VENUE) {
+    console.log(`📍 Kiosk PLACE (from .env): "${KIOSK_VENUE}"`);
+    console.log(`📍 Fuzzy pattern: ${KIOSK_VENUE_PATTERN}`);
+}
 
+// Resolved venue name (exact match from DB, found via fuzzy matching at startup)
+// This gets set after DB connection is ready, so SQL queries use the exact DB name
+let RESOLVED_VENUE = KIOSK_VENUE; // default to raw value
+
+/**
+ * Resolve the .env PLACE to an exact venue name from the database
+ * Uses fuzzy regex to handle spelling mistakes
+ * Called once at startup after DB is ready
+ */
 async function resolveVenueFromDB() {
     if (!KIOSK_VENUE || !KIOSK_VENUE_PATTERN) return;
     try {
+        // First try the places table (if it exists from cloud sync)
         let venueNames = [];
         try {
             const placesResult = await pool.query('SELECT DISTINCT name FROM places WHERE is_active = true');
             venueNames = placesResult.rows.map(r => r.name);
-        } catch (e) { /* places table might not exist */ }
+        } catch (e) {
+            // places table might not exist yet, fall through
+        }
+
+        // Also get distinct venues from offers table as fallback
         if (venueNames.length === 0) {
             const venueResult = await pool.query('SELECT DISTINCT unnest(venue) as v FROM offers WHERE venue IS NOT NULL');
             venueNames = venueResult.rows.map(r => r.v);
         }
-        if (venueNames.length === 0) return;
+
+        if (venueNames.length === 0) {
+            console.log('📍 No venues found in DB, using raw PLACE value');
+            return;
+        }
+
+        console.log(`📍 Available venues in DB: ${venueNames.join(', ')}`);
+
+        // Find the best fuzzy match
         const match = venueNames.find(name => KIOSK_VENUE_PATTERN.test(name));
         if (match) {
             RESOLVED_VENUE = match;
             console.log(`📍 ✅ Fuzzy matched "${KIOSK_VENUE}" → "${RESOLVED_VENUE}"`);
         } else {
+            // Try exact case-insensitive match as last resort
             const exactMatch = venueNames.find(name => name.toLowerCase() === KIOSK_VENUE.toLowerCase());
             if (exactMatch) {
                 RESOLVED_VENUE = exactMatch;
+                console.log(`📍 ✅ Exact matched "${KIOSK_VENUE}" → "${RESOLVED_VENUE}"`);
             } else {
                 // Try normalized match: strip all spaces and compare case-insensitive
+                // Handles: MARGOCITY -> Margo City, SUMMARECONMALLSERPONG -> Summarecon Mall Serpong
                 const normalize = s => s.replace(/\s+/g, '').toLowerCase();
                 const normalizedPlace = normalize(KIOSK_VENUE);
                 const normalizedMatch = venueNames.find(name => normalize(name) === normalizedPlace);
@@ -107,7 +147,8 @@ async function resolveVenueFromDB() {
                     RESOLVED_VENUE = normalizedMatch;
                     console.log(`📍 ✅ Normalized matched "${KIOSK_VENUE}" → "${RESOLVED_VENUE}"`);
                 } else {
-                    console.log(`📍 ⚠️ No match found for "${KIOSK_VENUE}" in DB venues. Using raw value.`);
+                    console.log(`📍 ⚠️ No fuzzy match found for "${KIOSK_VENUE}" in DB venues. Using raw value.`);
+                    console.log(`📍    Tip: Check that PLACE in .env matches a venue in the Offer Builder admin.`);
                 }
             }
         }
@@ -177,20 +218,25 @@ async function loadCustomTopupRatesCache() {
         console.log('   Rates:', customTopupRatesCache.map(r => `${r.topup_rb}RB=${r.tizo_value}TIZO`).join(', '));
     } catch (err) {
         console.error('❌ Failed to load custom top-up rates:', err.message);
-        // Fallback to hardcoded rates if DB fails
-        customTopupRatesCache = [
-            { topup_rb: 2000, tizo_value: 4000 },
-            { topup_rb: 600, tizo_value: 1200 },
-            { topup_rb: 500, tizo_value: 900 },
-            { topup_rb: 400, tizo_value: 650 },
-            { topup_rb: 350, tizo_value: 550 },
-            { topup_rb: 300, tizo_value: 450 },
-            { topup_rb: 250, tizo_value: 350 },
-            { topup_rb: 200, tizo_value: 260 },
-            { topup_rb: 150, tizo_value: 180 },
-            { topup_rb: 100, tizo_value: 110 }
-        ];
-        console.log('⚠️ Using fallback hardcoded custom top-up rates');
+        // Keep existing cache if available (from last successful sync)
+        if (customTopupRatesCache && customTopupRatesCache.length > 0) {
+            console.log('⚠️ Using previously cached custom top-up rates (DB error, keeping old data)');
+        } else {
+            // Absolute fallback: only used on first-ever boot with no DB
+            customTopupRatesCache = [
+                { topup_rb: 2000, tizo_value: 4000 },
+                { topup_rb: 600, tizo_value: 1200 },
+                { topup_rb: 500, tizo_value: 900 },
+                { topup_rb: 400, tizo_value: 650 },
+                { topup_rb: 350, tizo_value: 550 },
+                { topup_rb: 300, tizo_value: 450 },
+                { topup_rb: 250, tizo_value: 350 },
+                { topup_rb: 200, tizo_value: 260 },
+                { topup_rb: 150, tizo_value: 180 },
+                { topup_rb: 100, tizo_value: 110 }
+            ];
+            console.log('⚠️ Using fallback hardcoded custom top-up rates (first boot, no cache)');
+        }
     }
 }
 
@@ -452,16 +498,6 @@ async function syncTable(tableName) {
                         const val = row[colInfo.name];
                         if (val === null) return null;
 
-                        // DATE columns - convert JS Date to plain YYYY-MM-DD string
-                        // to prevent timezone shifts (e.g. IST causing +1 day)
-                        // pg driver creates Date at LOCAL midnight, so use local methods
-                        if (colInfo.udtName === 'date' && val instanceof Date) {
-                            const y = val.getFullYear();
-                            const m = String(val.getMonth() + 1).padStart(2, '0');
-                            const dd = String(val.getDate()).padStart(2, '0');
-                            return `${y}-${m}-${dd}`;
-                        }
-
                         // JSONB columns - stringify JS objects to JSON
                         if (colInfo.udtName === 'jsonb' && typeof val === 'object') {
                             return JSON.stringify(val);
@@ -523,9 +559,19 @@ async function syncAllTables() {
 
         console.log(`   📋 Found ${cloudTables.length} tables in Cloud`);
 
+        // Tables that are written locally and synced TO cloud — never overwrite from cloud
+        const LOCAL_WRITE_TABLES = new Set(['customer_transactions', 'kiosk_heartbeats']);
+
         for (const tableName of cloudTables) {
             // Filter out system or irrelevant tables if needed
             if (tableName.startsWith('pg_') || tableName.startsWith('sql_')) continue;
+
+            // Skip local-write tables — these are written by the kiosk and pushed TO cloud,
+            // not pulled FROM cloud. Syncing them would wipe unsent local transactions.
+            if (LOCAL_WRITE_TABLES.has(tableName)) {
+                console.log(`   ⏭️  Skipping local-write table: ${tableName}`);
+                continue;
+            }
 
             // Check if table exists locally
             if (!localTableSet.has(tableName)) {
@@ -571,26 +617,79 @@ async function syncAllTables() {
     lastSyncTime = Date.now();
 }
 
-async function startPeriodicSync(minutes) {
-    const ms = minutes * 60 * 1000;
-    console.log(`\n⏰ Periodic sync enabled: executing every ${minutes} minutes...`);
+// Calculate milliseconds until a specific hour:minute today or tomorrow
+function msUntilTime(hour, minute = 0) {
+    const now = new Date();
+    const target = new Date(now);
+    target.setHours(hour, minute, 0, 0);
+    if (target <= now) {
+        // Already passed today, schedule for tomorrow
+        target.setDate(target.getDate() + 1);
+    }
+    return target.getTime() - now.getTime();
+}
 
-    // Run immediately once
-    // wrapping in try-catch to prevent crashing main server
+/**
+ * Scheduled Offer Sync (Cloud → Local)
+ * Replaces the old 1-minute periodic sync.
+ * Syncs at: server startup + 10:00 AM + 8:00 PM local kiosk time.
+ * If sync fails (no network), existing local DB data is used.
+ */
+async function startScheduledSync() {
+    console.log(`\n⏰ Scheduled offer sync enabled: startup + 10:00 AM + 8:00 PM`);
+
+    // 1. Sync immediately on startup
     try {
+        console.log('🔄 Running initial offer sync on startup...');
         await syncAllTables();
+        console.log('✅ Initial offer sync completed');
     } catch (e) {
-        console.error('Initial sync failed:', e.message);
+        console.error('⚠️ Initial offer sync failed (using existing local DB):', e.message);
     }
 
-    setInterval(async () => {
+    // 2. Schedule 10:00 AM sync
+    const msTo10AM = msUntilTime(10, 0);
+    const hours10AM = (msTo10AM / 3600000).toFixed(1);
+    console.log(`   ⏰ Next 10:00 AM offer sync in ${hours10AM} hours`);
+    setTimeout(async () => {
         try {
-            console.log(`\n⏰ Triggering periodic sync (${new Date().toLocaleTimeString()})...`);
+            console.log('\n⏰ [10:00 AM] Triggering scheduled offer sync...');
             await syncAllTables();
         } catch (e) {
-            console.error('Periodic sync failed:', e.message);
+            console.error('⚠️ 10:00 AM offer sync failed:', e.message);
         }
-    }, ms);
+        // Then repeat every 24 hours
+        setInterval(async () => {
+            try {
+                console.log('\n⏰ [10:00 AM] Triggering scheduled offer sync...');
+                await syncAllTables();
+            } catch (e) {
+                console.error('⚠️ 10:00 AM offer sync failed:', e.message);
+            }
+        }, 24 * 60 * 60 * 1000);
+    }, msTo10AM);
+
+    // 3. Schedule 8:00 PM sync
+    const msTo8PM = msUntilTime(20, 0);
+    const hours8PM = (msTo8PM / 3600000).toFixed(1);
+    console.log(`   ⏰ Next 8:00 PM offer sync in ${hours8PM} hours`);
+    setTimeout(async () => {
+        try {
+            console.log('\n⏰ [8:00 PM] Triggering scheduled offer sync...');
+            await syncAllTables();
+        } catch (e) {
+            console.error('⚠️ 8:00 PM offer sync failed:', e.message);
+        }
+        // Then repeat every 24 hours
+        setInterval(async () => {
+            try {
+                console.log('\n⏰ [8:00 PM] Triggering scheduled offer sync...');
+                await syncAllTables();
+            } catch (e) {
+                console.error('⚠️ 8:00 PM offer sync failed:', e.message);
+            }
+        }, 24 * 60 * 60 * 1000);
+    }, msTo8PM);
 }
 
 // Real-time listener variables
@@ -689,6 +788,409 @@ async function setupRealtimeListener() {
 // SYNC LOGIC END
 // ========================================================
 
+// ========================================================
+// CUSTOMER TRANSACTIONS & HEARTBEAT
+// ========================================================
+
+/**
+ * Auto-create customer_transactions table in LOCAL DB on startup.
+ * This table stores every completed kiosk transaction locally.
+ * The synced_to_cloud flag tracks which rows have been uploaded.
+ */
+async function ensureCustomerTransactionsTable() {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS customer_transactions (
+                id SERIAL PRIMARY KEY,
+                session_id VARCHAR(100),
+                order_number VARCHAR(50),
+                place VARCHAR(200),
+                kiosk_location VARCHAR(50),
+                is_new_user BOOLEAN,
+                language VARCHAR(10),
+                transaction_timestamp TIMESTAMPTZ DEFAULT NOW(),
+                transaction_date DATE DEFAULT CURRENT_DATE,
+                card_type VARCHAR(50),
+                card_quantity INTEGER DEFAULT 1,
+                offer_id INTEGER,
+                offer_name VARCHAR(200),
+                offer_cost NUMERIC DEFAULT 0,
+                offer_tizo NUMERIC DEFAULT 0,
+                offer_type VARCHAR(50),
+                custom_amount NUMERIC,
+                upsell_accepted BOOLEAN DEFAULT FALSE,
+                second_upsell_accepted BOOLEAN DEFAULT FALSE,
+                upsell_cost NUMERIC DEFAULT 0,
+                upsell_tizo NUMERIC DEFAULT 0,
+                ood_accepted BOOLEAN DEFAULT FALSE,
+                ood_cost NUMERIC DEFAULT 0,
+                ood_tizo NUMERIC DEFAULT 0,
+                ooh_accepted BOOLEAN DEFAULT FALSE,
+                ooh_cost NUMERIC DEFAULT 0,
+                ooh_tizo NUMERIC DEFAULT 0,
+                snacks_accepted BOOLEAN DEFAULT FALSE,
+                snacks_cost NUMERIC DEFAULT 0,
+                snacks_tizo NUMERIC DEFAULT 0,
+                feedback_rating INTEGER,
+                feedback_comment TEXT,
+                scratch_card_revealed BOOLEAN DEFAULT FALSE,
+                scratch_prize_type VARCHAR(100),
+                scratch_prize_value NUMERIC DEFAULT 0,
+                scratch_prize_label VARCHAR(200),
+                bonus_accepted BOOLEAN DEFAULT FALSE,
+                bonus_cost NUMERIC DEFAULT 0,
+                bonus_tizo NUMERIC DEFAULT 0,
+                bonus_gift VARCHAR(200),
+                bonus_gift_details VARCHAR(200),
+                bonus_free_games INTEGER DEFAULT 0,
+                total_cost NUMERIC DEFAULT 0,
+                total_tizo NUMERIC DEFAULT 0,
+                final_payment NUMERIC DEFAULT 0,
+                final_tizo NUMERIC DEFAULT 0,
+                duration_seconds INTEGER DEFAULT 0,
+                synced_to_cloud BOOLEAN DEFAULT FALSE
+            )
+        `);
+        console.log('✅ customer_transactions table ready (local)');
+
+        // Migration: Ensure synced_to_cloud column exists (for existing tables)
+        try {
+            await pool.query('ALTER TABLE customer_transactions ADD COLUMN IF NOT EXISTS synced_to_cloud BOOLEAN DEFAULT FALSE');
+            console.log('✅ Checked/Added synced_to_cloud column');
+        } catch (e) {
+            try {
+                await pool.query('ALTER TABLE customer_transactions ADD COLUMN synced_to_cloud BOOLEAN DEFAULT FALSE');
+            } catch (ignored) { /* Ignore "column exists" error */ }
+        }
+
+        // Migration: Fix id column to use SERIAL sequence (if old table has plain integer id)
+        try {
+            await pool.query(`
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns
+                        WHERE table_name = 'customer_transactions'
+                        AND column_name = 'id'
+                        AND column_default LIKE 'nextval%'
+                    ) THEN
+                        CREATE SEQUENCE IF NOT EXISTS customer_transactions_id_seq;
+                        ALTER TABLE customer_transactions ALTER COLUMN id SET DEFAULT nextval('customer_transactions_id_seq');
+                        PERFORM setval('customer_transactions_id_seq', COALESCE((SELECT MAX(id) FROM customer_transactions), 0) + 1, false);
+                    END IF;
+                END $$;
+            `);
+            console.log('✅ Checked/Fixed id sequence for customer_transactions');
+        } catch (e) {
+            console.warn('⚠️ Could not fix id sequence:', e.message);
+        }
+
+        // Migration: Fix transaction_timestamp to have DEFAULT NOW() if missing
+        try {
+            await pool.query(`
+                ALTER TABLE customer_transactions
+                ALTER COLUMN transaction_timestamp SET DEFAULT NOW()
+            `);
+            console.log('✅ Checked/Fixed transaction_timestamp default');
+        } catch (e) {
+            // Ignore if already set
+        }
+
+        // Migration: Fix transaction_date to have DEFAULT CURRENT_DATE if missing
+        try {
+            await pool.query(`
+                ALTER TABLE customer_transactions
+                ALTER COLUMN transaction_date SET DEFAULT CURRENT_DATE
+            `);
+        } catch (e) {
+            // Ignore if already set
+        }
+    } catch (err) {
+        console.error('❌ Failed to create customer_transactions table:', err.message);
+    }
+}
+
+/**
+ * Auto-create kiosk_heartbeats table in CLOUD DB on startup.
+ */
+async function ensureHeartbeatTable() {
+    try {
+        await cloudPool.query(`
+            CREATE TABLE IF NOT EXISTS kiosk_heartbeats (
+                id SERIAL PRIMARY KEY,
+                kiosk_id VARCHAR(50) NOT NULL UNIQUE,
+                place VARCHAR(200),
+                status VARCHAR(20) DEFAULT 'online',
+                last_heartbeat TIMESTAMPTZ DEFAULT NOW(),
+                server_started_at TIMESTAMPTZ,
+                ip_address VARCHAR(50)
+            )
+        `);
+        console.log('✅ kiosk_heartbeats table ready (cloud)');
+    } catch (err) {
+        console.error('⚠️ Could not create kiosk_heartbeats table in cloud (will retry):', err.message);
+    }
+}
+
+/**
+ * Auto-create customer_transactions table in CLOUD DB on startup.
+ * Same schema as local but without synced_to_cloud column.
+ */
+async function ensureCloudTransactionsTable() {
+    try {
+        await cloudPool.query(`
+            CREATE TABLE IF NOT EXISTS customer_transactions (
+                id SERIAL PRIMARY KEY,
+                session_id VARCHAR(100),
+                order_number VARCHAR(50),
+                place VARCHAR(200),
+                kiosk_location VARCHAR(50),
+                is_new_user BOOLEAN,
+                language VARCHAR(10),
+                transaction_timestamp TIMESTAMPTZ DEFAULT NOW(),
+                transaction_date DATE DEFAULT CURRENT_DATE,
+                card_type VARCHAR(50),
+                card_quantity INTEGER DEFAULT 1,
+                offer_id INTEGER,
+                offer_name VARCHAR(200),
+                offer_cost NUMERIC DEFAULT 0,
+                offer_tizo NUMERIC DEFAULT 0,
+                offer_type VARCHAR(50),
+                custom_amount NUMERIC,
+                upsell_accepted BOOLEAN DEFAULT FALSE,
+                second_upsell_accepted BOOLEAN DEFAULT FALSE,
+                upsell_cost NUMERIC DEFAULT 0,
+                upsell_tizo NUMERIC DEFAULT 0,
+                ood_accepted BOOLEAN DEFAULT FALSE,
+                ood_cost NUMERIC DEFAULT 0,
+                ood_tizo NUMERIC DEFAULT 0,
+                ooh_accepted BOOLEAN DEFAULT FALSE,
+                ooh_cost NUMERIC DEFAULT 0,
+                ooh_tizo NUMERIC DEFAULT 0,
+                snacks_accepted BOOLEAN DEFAULT FALSE,
+                snacks_cost NUMERIC DEFAULT 0,
+                snacks_tizo NUMERIC DEFAULT 0,
+                feedback_rating INTEGER,
+                feedback_comment TEXT,
+                scratch_card_revealed BOOLEAN DEFAULT FALSE,
+                scratch_prize_type VARCHAR(100),
+                scratch_prize_value NUMERIC DEFAULT 0,
+                scratch_prize_label VARCHAR(200),
+                bonus_accepted BOOLEAN DEFAULT FALSE,
+                bonus_cost NUMERIC DEFAULT 0,
+                bonus_tizo NUMERIC DEFAULT 0,
+                bonus_gift VARCHAR(200),
+                bonus_gift_details VARCHAR(200),
+                bonus_free_games INTEGER DEFAULT 0,
+                total_cost NUMERIC DEFAULT 0,
+                total_tizo NUMERIC DEFAULT 0,
+                final_payment NUMERIC DEFAULT 0,
+                final_tizo NUMERIC DEFAULT 0,
+                duration_seconds INTEGER DEFAULT 0,
+                source_kiosk_id VARCHAR(50)
+            )
+        `);
+        console.log('✅ customer_transactions table ready (cloud)');
+    } catch (err) {
+        console.error('⚠️ Could not create customer_transactions table in cloud:', err.message);
+    }
+}
+
+/**
+ * Sync unsynced transactions from local DB to cloud DB.
+ * Marks rows as synced_to_cloud = true after successful upload.
+ */
+async function syncTransactionsToCloud() {
+    try {
+        const result = await pool.query(
+            'SELECT * FROM customer_transactions WHERE synced_to_cloud = false ORDER BY id'
+        );
+        if (result.rows.length === 0) {
+            console.log('☁️  No unsynced transactions to push to cloud');
+            return;
+        }
+        console.log(`☁️  Pushing ${result.rows.length} unsynced transaction(s) to cloud...`);
+        let successCount = 0;
+        const kioskId = (process.env.location || 'K1').toUpperCase();
+        for (const row of result.rows) {
+            try {
+                await cloudPool.query(`
+                    INSERT INTO customer_transactions (
+                        session_id, order_number, place, kiosk_location,
+                        is_new_user, language, transaction_timestamp, transaction_date,
+                        card_type, card_quantity, offer_id, offer_name,
+                        offer_cost, offer_tizo, offer_type, custom_amount,
+                        upsell_accepted, second_upsell_accepted, upsell_cost, upsell_tizo,
+                        ood_accepted, ood_cost, ood_tizo,
+                        ooh_accepted, ooh_cost, ooh_tizo,
+                        snacks_accepted, snacks_cost, snacks_tizo,
+                        feedback_rating, feedback_comment,
+                        scratch_card_revealed, scratch_prize_type, scratch_prize_value, scratch_prize_label,
+                        bonus_accepted, bonus_cost, bonus_tizo,
+                        bonus_gift, bonus_gift_details, bonus_free_games,
+                        total_cost, total_tizo, final_payment, final_tizo,
+                        duration_seconds, source_kiosk_id
+                    ) VALUES (
+                        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,
+                        $17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,
+                        $30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47
+                    )
+                `, [
+                    row.session_id, row.order_number, row.place, row.kiosk_location,
+                    row.is_new_user, row.language, row.transaction_timestamp, row.transaction_date,
+                    row.card_type, row.card_quantity, row.offer_id, row.offer_name,
+                    row.offer_cost, row.offer_tizo, row.offer_type, row.custom_amount,
+                    row.upsell_accepted, row.second_upsell_accepted, row.upsell_cost, row.upsell_tizo,
+                    row.ood_accepted, row.ood_cost, row.ood_tizo,
+                    row.ooh_accepted, row.ooh_cost, row.ooh_tizo,
+                    row.snacks_accepted, row.snacks_cost, row.snacks_tizo,
+                    row.feedback_rating, row.feedback_comment,
+                    row.scratch_card_revealed, row.scratch_prize_type, row.scratch_prize_value, row.scratch_prize_label,
+                    row.bonus_accepted, row.bonus_cost, row.bonus_tizo,
+                    row.bonus_gift, row.bonus_gift_details, row.bonus_free_games,
+                    row.total_cost, row.total_tizo, row.final_payment, row.final_tizo,
+                    row.duration_seconds, kioskId
+                ]);
+                // Mark as synced
+                await pool.query('UPDATE customer_transactions SET synced_to_cloud = true WHERE id = $1', [row.id]);
+                successCount++;
+            } catch (e) {
+                console.error(`⚠️ Failed to push transaction ${row.id} to cloud:`, e.message);
+                break; // Stop on first error (likely network issue)
+            }
+        }
+        console.log(`✅ Pushed ${successCount}/${result.rows.length} transactions to cloud`);
+    } catch (err) {
+        console.error('⚠️ Transaction cloud sync failed:', err.message);
+    }
+}
+
+/**
+ * Scheduled Transaction Sync (Local → Cloud)
+ * Pushes unsynced transactions at: server startup + 8:00 AM + 10:00 PM local time.
+ */
+async function startScheduledTransactionSync() {
+    console.log(`\n☁️  Scheduled transaction sync enabled: startup + 8:00 AM + 10:00 PM`);
+
+    // 1. Sync unsynced transactions on startup
+    try {
+        await syncTransactionsToCloud();
+    } catch (e) {
+        console.error('⚠️ Startup transaction sync failed:', e.message);
+    }
+
+    // 2. Schedule 8:00 AM sync
+    const msTo8AM = msUntilTime(8, 0);
+    const hours8AM = (msTo8AM / 3600000).toFixed(1);
+    console.log(`   ☁️  Next 8:00 AM transaction sync in ${hours8AM} hours`);
+    setTimeout(async () => {
+        try {
+            console.log('\n☁️  [8:00 AM] Triggering transaction sync to cloud...');
+            await syncTransactionsToCloud();
+        } catch (e) {
+            console.error('⚠️ 8:00 AM transaction sync failed:', e.message);
+        }
+        setInterval(async () => {
+            try {
+                console.log('\n☁️  [8:00 AM] Triggering transaction sync to cloud...');
+                await syncTransactionsToCloud();
+            } catch (e) {
+                console.error('⚠️ 8:00 AM transaction sync failed:', e.message);
+            }
+        }, 24 * 60 * 60 * 1000);
+    }, msTo8AM);
+
+    // 3. Schedule 10:00 PM sync
+    const msTo10PM = msUntilTime(22, 0);
+    const hours10PM = (msTo10PM / 3600000).toFixed(1);
+    console.log(`   ☁️  Next 10:00 PM transaction sync in ${hours10PM} hours`);
+    setTimeout(async () => {
+        try {
+            console.log('\n☁️  [10:00 PM] Triggering transaction sync to cloud...');
+            await syncTransactionsToCloud();
+        } catch (e) {
+            console.error('⚠️ 10:00 PM transaction sync failed:', e.message);
+        }
+        setInterval(async () => {
+            try {
+                console.log('\n☁️  [10:00 PM] Triggering transaction sync to cloud...');
+                await syncTransactionsToCloud();
+            } catch (e) {
+                console.error('⚠️ 10:00 PM transaction sync failed:', e.message);
+            }
+        }, 24 * 60 * 60 * 1000);
+    }, msTo10PM);
+
+    // 4. Periodic "Catch-up" Sync (Every 5 minutes)
+    // Ensures data syncs shortly after network restoration if startup sync failed
+    setInterval(async () => {
+        try {
+            // Only logs if there's actual work or error
+            await syncTransactionsToCloud();
+        } catch (e) {
+            // Silent fail on network error to avoid log spam
+        }
+    }, 5 * 60 * 1000);
+    console.log(`   ☁️  Periodic sync enabled: every 5 minutes`);
+}
+
+/**
+ * Heartbeat: Pings cloud DB every 2 minutes to signal kiosk is online.
+ * Uses UPSERT (ON CONFLICT) so there's one row per kiosk.
+ */
+/**
+ * Heartbeat: Pings Offer Builder API every 1 minute to signal kiosk is online.
+ * API triggers real-time SSE update on the dashboard.
+ */
+async function startHeartbeat() {
+    const kioskId = (process.env.location || 'K1').toUpperCase();
+    const place = process.env.PLACE || '';
+    const serverStartedAt = new Date().toISOString();
+    const OFFER_BUILDER_HEARTBEAT_URL = 'http://34.142.198.255:3001/api/kiosk-heartbeat';
+
+    function sendHeartbeat() {
+        const data = JSON.stringify({
+            kioskId,
+            place,
+            serverStartedAt
+        });
+
+        const url = new URL(OFFER_BUILDER_HEARTBEAT_URL);
+        const req = http.request({
+            hostname: url.hostname,
+            port: url.port,
+            path: url.pathname,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Content-Length': Buffer.byteLength(data)
+            },
+            timeout: 5000 // 5s timeout
+        }, (res) => {
+            console.log(`💓 Heartbeat sent. Status: ${res.statusCode}`);
+            res.resume();
+        });
+
+        req.on('error', (e) => {
+            console.warn(`⚠️ Heartbeat failed: ${e.message}`);
+        });
+
+        req.write(data);
+        req.end();
+    }
+
+    // Send immediately
+    sendHeartbeat();
+    console.log(`💓 Heartbeat started for kiosk ${kioskId} (sending to ${OFFER_BUILDER_HEARTBEAT_URL} every 1 min)`);
+
+    // Then every 1 minute
+    setInterval(sendHeartbeat, 60 * 1000);
+}
+
+// ========================================================
+// CUSTOMER TRANSACTIONS & HEARTBEAT END
+// ========================================================
+
 const mimeTypes = {
     '.html': 'text/html',
     '.css': 'text/css',
@@ -734,19 +1236,6 @@ const server = http.createServer((req, res) => {
         res.end(JSON.stringify({
             success: true,
             lastSyncTime: lastSyncTime
-        }));
-        return;
-    }
-
-    // API: Get kiosk configuration (PLACE, location, etc.)
-    if (req.method === 'GET' && req.url === '/api/kiosk-config') {
-        res.writeHead(200, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({
-            success: true,
-            place: (process.env.PLACE || 'Timezone').trim(),
-            location: KIOSK_LOCATION || 'k1',
-            venue: KIOSK_VENUE || '',
-            resolvedVenue: RESOLVED_VENUE || ''
         }));
         return;
     }
@@ -819,6 +1308,131 @@ const server = http.createServer((req, res) => {
         return;
     }
 
+    // API: Get kiosk config (PLACE, location) for dashboard logging
+    if (req.method === 'GET' && req.url === '/api/kiosk-config') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: true,
+            place: process.env.PLACE || '',
+            location: process.env.location || '',
+            venue: KIOSK_VENUE || '',
+            resolvedVenue: RESOLVED_VENUE || ''
+        }));
+        return;
+    }
+
+    // API: Save a customer transaction to local DB
+    if (req.method === 'POST' && req.url === '/api/customer-transaction') {
+        let body = '';
+        req.on('data', chunk => body += chunk);
+        req.on('end', async () => {
+            try {
+                const txn = JSON.parse(body);
+                console.log('📝 Received local transaction:', JSON.stringify(txn, null, 2));
+                const place = process.env.PLACE || '';
+                const kioskLocation = (process.env.location || 'K1').toUpperCase();
+
+                const result = await pool.query(`
+                    INSERT INTO customer_transactions (
+                        session_id, order_number, place, kiosk_location,
+                        is_new_user, language, card_type, card_quantity,
+                        offer_id, offer_name, offer_cost, offer_tizo, offer_type, custom_amount,
+                        upsell_accepted, second_upsell_accepted, upsell_cost, upsell_tizo,
+                        ood_accepted, ood_cost, ood_tizo,
+                        ooh_accepted, ooh_cost, ooh_tizo,
+                        snacks_accepted, snacks_cost, snacks_tizo,
+                        feedback_rating, feedback_comment,
+                        scratch_card_revealed, scratch_prize_type, scratch_prize_value, scratch_prize_label,
+                        bonus_accepted, bonus_cost, bonus_tizo,
+                        bonus_gift, bonus_gift_details, bonus_free_games,
+                        total_cost, total_tizo, final_payment, final_tizo,
+                        duration_seconds, synced_to_cloud
+                    ) VALUES (
+                        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,
+                        $17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,
+                        $30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,false
+                    ) RETURNING id
+                `, [
+                    txn.sessionId || null,
+                    txn.orderNumber || null,
+                    txn.place || place,
+                    txn.kioskLocation || kioskLocation,
+                    txn.isNewUser === true,
+                    txn.language || 'id',
+                    txn.cardType || null,
+                    parseInt(txn.cardQuantity) || 1,
+                    txn.offerId || null,
+                    txn.offerName || null,
+                    parseFloat(txn.offerCost) || 0,
+                    parseFloat(txn.offerTizo) || 0,
+                    txn.offerType || null,
+                    txn.customAmount ? parseFloat(txn.customAmount) : null,
+                    txn.upsellAccepted === true,
+                    txn.secondUpsellAccepted === true,
+                    parseFloat(txn.upsellCost) || 0,
+                    parseFloat(txn.upsellTizo) || 0,
+                    txn.oodAccepted === true,
+                    parseFloat(txn.oodCost) || 0,
+                    parseFloat(txn.oodTizo) || 0,
+                    txn.oohAccepted === true,
+                    parseFloat(txn.oohCost) || 0,
+                    parseFloat(txn.oohTizo) || 0,
+                    txn.snacksAccepted === true,
+                    parseFloat(txn.snacksCost) || 0,
+                    parseFloat(txn.snacksTizo) || 0,
+                    txn.feedbackRating ? parseInt(txn.feedbackRating) : null,
+                    txn.feedbackComment || null,
+                    txn.scratchCardRevealed === true,
+                    txn.scratchPrizeType || null,
+                    parseFloat(txn.scratchPrizeValue) || 0,
+                    txn.scratchPrizeLabel || null,
+                    txn.bonusAccepted === true,
+                    parseFloat(txn.bonusCost) || 0,
+                    parseFloat(txn.bonusTizo) || 0,
+                    txn.bonusGift || null,
+                    txn.bonusGiftDetails || null,
+                    parseInt(txn.bonusFreeGames) || 0,
+                    parseFloat(txn.totalCost) || 0,
+                    parseFloat(txn.totalTizo) || 0,
+                    parseFloat(txn.finalPayment) || 0,
+                    parseFloat(txn.finalTizo) || 0,
+                    parseInt(txn.durationSeconds) || 0
+                ]);
+
+                const newId = result.rows[0].id;
+                console.log(`💾 Transaction #${newId} saved locally (session: ${txn.sessionId})`);
+
+                // Attempt immediate cloud push in background (fire-and-forget)
+                syncTransactionsToCloud().catch(() => { });
+
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true, id: newId }));
+            } catch (err) {
+                console.error('❌ Failed to save transaction:', err.message);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, error: err.message }));
+            }
+        });
+        return;
+    }
+
+    // API: Get recent customer transactions
+    if (req.method === 'GET' && req.url.startsWith('/api/customer-transactions')) {
+        const urlParams = new URL(req.url, LOCAL_URL);
+        const limit = parseInt(urlParams.searchParams.get('limit')) || 50;
+        pool.query(
+            'SELECT * FROM customer_transactions ORDER BY id DESC LIMIT $1',
+            [limit]
+        ).then(result => {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: true, data: result.rows, count: result.rows.length }));
+        }).catch(err => {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, error: err.message }));
+        });
+        return;
+    }
+
     // API: Get layout config based on card type count
     if (req.method === 'GET' && req.url.startsWith('/api/layout-config')) {
         const urlParams = new URL(req.url, LOCAL_URL);
@@ -836,7 +1450,6 @@ const server = http.createServer((req, res) => {
             'welcome': 'Welcome',
             'blue': 'Blue',
             'gold': 'Gold',
-            'silver': 'Platinum',
             'platinum': 'Platinum',
             'new_user': 'New User'
         };
@@ -899,7 +1512,6 @@ const server = http.createServer((req, res) => {
             'welcome': 'Welcome',
             'blue': 'Blue',
             'gold': 'Gold',
-            'silver': 'Platinum',
             'platinum': 'Platinum',
             'new_user': 'Scratch Card - New User',
             'existing_user': 'Scratch Card - Existing User'
@@ -1206,7 +1818,6 @@ const server = http.createServer((req, res) => {
             'welcome': 'Welcome',
             'blue': 'Blue',
             'gold': 'Gold',
-            'silver': 'Platinum',
             'platinum': 'Platinum',
             'new_user': 'New User',
             'new_user_blue': 'New User - Blue',
@@ -1733,18 +2344,13 @@ const server = http.createServer((req, res) => {
         // Set cache headers for static assets (not HTML)
         const headers = { 'Content-Type': contentType };
 
-        // Cache images, videos, fonts for 1 day
-        if (['.png', '.jpg', '.gif', '.svg', '.mp4', '.webm', '.woff', '.woff2', '.ttf', '.ico'].includes(ext)) {
-            headers['Cache-Control'] = 'public, max-age=86400'; // 1 day
-        }
-        // Cache CSS/JS for 1 hour
-        else if (['.css', '.js'].includes(ext)) {
-            headers['Cache-Control'] = 'public, max-age=3600'; // 1 hour
-        }
-        // No cache for HTML
-        else if (ext === '.html') {
-            headers['Cache-Control'] = 'no-cache';
-        }
+        // Disable caching for ALL static files to ensure fresh code logic
+        // (Especially critical for Kiosk debugging)
+        const noCacheHeaders = 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0';
+
+        headers['Cache-Control'] = noCacheHeaders;
+        headers['Pragma'] = 'no-cache';
+        headers['Expires'] = '0';
 
         // Add Content-Length for all files
         headers['Content-Length'] = stats.size;
@@ -1805,9 +2411,6 @@ if (args.includes('--sync')) {
     })();
 } else {
     // Normal Server Mode
-    const periodicIndex = args.indexOf('--periodic');
-    const periodicInterval = periodicIndex !== -1 ? parseInt(args[periodicIndex + 1]) : 1;
-
     server.listen(PORT, async () => {
         console.log(`\n🚀 TIZO Server running at ${LOCAL_URL}`);
         console.log(`   (Listening on port ${PORT})`);
@@ -1833,8 +2436,21 @@ if (args.includes('--sync')) {
         // Load UNIVERSAL custom top-up rates cache (Custom Top-Up page - NO card type)
         await loadCustomTopupRatesCache();
 
-        // Start periodic sync automatically
-        startPeriodicSync(periodicInterval);
+        // Ensure local customer_transactions table exists
+        await ensureCustomerTransactionsTable();
+
+        // Ensure cloud tables exist for heartbeat and transactions
+        await ensureHeartbeatTable();
+        await ensureCloudTransactionsTable();
+
+        // Start scheduled offer sync (Cloud → Local): startup + 10AM + 8PM
+        startScheduledSync();
+
+        // Start scheduled transaction sync (Local → Cloud): startup + 8AM + 10PM
+        startScheduledTransactionSync();
+
+        // Start heartbeat (every 2 minutes)
+        startHeartbeat();
 
         // Enable real-time sync via PostgreSQL LISTEN/NOTIFY
         // This allows instant sync when Offer Builder updates cloud DB
@@ -1854,15 +2470,34 @@ if (args.includes('--sync')) {
         sendServerEvent('server_start');
     });
 
-    // Log server stop on shutdown (Windows-compatible)
+    // Send server stop on shutdown (Windows-compatible)
     let shutdownSent = false;
     function handleShutdown(signal) {
         if (shutdownSent) return;
         shutdownSent = true;
         console.log(`\n🛑 ${signal} received - logging server stop...`);
-        const req = sendServerEvent('server_stop');
-        req.on('close', () => process.exit(0));
-        setTimeout(() => process.exit(0), 2000);
+
+        // 1. Send final offline heartbeat (Best effort)
+        // We use sendBeacon-like fire-and-forget logic if possible, but here we just try a quick request
+        const kioskId = (process.env.location || 'K1').toUpperCase();
+        const place = process.env.PLACE || '';
+        const OFFER_BUILDER_HEARTBEAT_URL = 'http://34.142.198.255:3001/api/kiosk-heartbeat';
+
+        const data = JSON.stringify({ kioskId, place, status: 'offline' });
+        const url = new URL(OFFER_BUILDER_HEARTBEAT_URL);
+        const req = http.request({
+            hostname: url.hostname, port: url.port, path: url.pathname, method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) },
+            timeout: 1000 // Very short timeout for shutdown
+        });
+        req.on('error', () => { });
+        req.write(data);
+        req.end();
+
+        // 2. Also log to session API
+        const req2 = sendServerEvent('server_stop');
+        req2.on('close', () => process.exit(0));
+        setTimeout(() => process.exit(0), 1500);
     }
 
     // Windows: use readline to properly capture Ctrl+C

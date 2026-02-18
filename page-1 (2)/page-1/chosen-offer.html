@@ -1217,8 +1217,21 @@
         // User selected an upsell offer - use ONLY that offer (replace, don't add)
         // Take the last selected card as the chosen one
         const chosenCard = selectedCards[selectedCards.length - 1];
-        const newOfferCost = parseFloat(chosenCard.dataset.cost) || 0;
-        const newOfferTizo = parseFloat(chosenCard.dataset.tizoCredit) || 0;
+
+        let newOfferCost = parseFloat(chosenCard.dataset.cost) || 0;
+        let newOfferTizo = parseFloat(chosenCard.dataset.tizoCredit) || 0;
+
+        // Fallback/Validation: Look up in global additionalOffers
+        if (typeof additionalOffers !== 'undefined' && additionalOffers.length > 0) {
+          const cardId = chosenCard.id; // e.g. additional-offer-1
+          const index = parseInt(cardId.split('-').pop()) - 1;
+          if (additionalOffers[index]) {
+            const offer = additionalOffers[index];
+            newOfferCost = offer.rb * 1000;
+            newOfferTizo = offer.tizo;
+            console.log("Upsell selected (from global):", newOfferCost, newOfferTizo);
+          }
+        }
 
         // Get original offer cost for dashboard analytics
         const session = getSession();
@@ -1233,7 +1246,9 @@
           offerCost: newOfferCost,
           offerTizo: newOfferTizo,
           secondUpsellAccepted: isSecondUpsell,
-          originalOfferCost: originalCost
+          originalOfferCost: originalCost,
+          upsellCost: newOfferCost - originalCost,
+          upsellTizo: newOfferTizo
         });
 
         console.log("Offer REPLACED with upsell:", {

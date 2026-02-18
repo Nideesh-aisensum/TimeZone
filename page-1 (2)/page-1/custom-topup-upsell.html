@@ -844,7 +844,9 @@
           offerCost: parseFloat(selectedAdditionalOffer.cost),
           offerTizo: parseFloat(selectedAdditionalOffer.tizoCredit),
           secondUpsellAccepted: true,
-          originalOfferCost: originalCost
+          originalOfferCost: originalCost,
+          upsellCost: parseFloat(selectedAdditionalOffer.cost),
+          upsellTizo: parseFloat(selectedAdditionalOffer.tizoCredit)
         });
 
         console.log("Custom topup upsell accepted:", {

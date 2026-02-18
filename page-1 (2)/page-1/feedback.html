@@ -395,6 +395,11 @@
                     bonusFreeGames: sd?.bonusFreeGames || 0,
                     secondUpsellAccepted: sd?.secondUpsellAccepted || false,
                     originalOfferCost: sd?.originalOfferCost || null,
+                    upsellCost: sd?.upsellCost || 0,
+                    upsellTizo: sd?.upsellTizo || 0,
+                    scratchPrizeValue: sd?.scratchPrizeValue || 0,
+                    scratchPrizeType: sd?.scratchPrizeType || null,
+                    feedbackRating: selectedRating || sd?.feedbackRating || null,
                     place: kioskPlace
                 });
                 console.log('✅ [Feedback] Session complete sent');
@@ -470,8 +475,11 @@
             submitInProgress = true;
 
             console.log('Feedback submitted:', selectedRating);
-            // Store feedback
+            // Store feedback rating in session so sendSessionCompleteData picks it up
             localStorage.setItem('feedbackRating', selectedRating);
+            if (window.updateSession) {
+                window.updateSession({ feedbackRating: selectedRating });
+            }
 
             // Send feedback to dashboard (fire and forget)
             if (window.Dashboard && window.Dashboard.sendFeedback) {
@@ -479,10 +487,12 @@
                 window.Dashboard.sendFeedback({ rating: selectedRating });
             }
 
-            // Send session complete (fire and forget)
-            sendSessionCompleteData();
+            // Await the session complete save, but with a 3s timeout so the button
+            // never hangs if the network is slow. Navigation happens either way.
+            const timeout = new Promise(resolve => setTimeout(resolve, 3000));
+            await Promise.race([sendSessionCompleteData(), timeout]);
 
-            // Navigate immediately - don't wait for network calls
+            // Navigate after save (or after timeout)
             window.location.href = 'enjoy.html';
         }
 
