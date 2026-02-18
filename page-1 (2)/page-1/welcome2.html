@@ -244,6 +244,42 @@
 
     </script>
 
+    <!-- Secret Exit: Click timezone logo 5 times in 2 seconds -->
+    <script>
+        (function () {
+            const REQUIRED_CLICKS = 5;
+            const TIME_WINDOW_MS = 2000;
+            let clickTimestamps = [];
+
+            // Find the timezone logo
+            const logo = document.querySelector('.timezone-branding');
+            if (logo) {
+                // Make logo clickable (override pointer-events: none from kiosk CSS)
+                logo.style.pointerEvents = 'auto';
+                logo.style.cursor = 'pointer';
+
+                logo.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    const now = Date.now();
+                    clickTimestamps.push(now);
+                    clickTimestamps = clickTimestamps.filter(t => now - t <= TIME_WINDOW_MS);
+
+                    console.log(`[Exit] Logo click ${clickTimestamps.length}/${REQUIRED_CLICKS}`);
+
+                    if (clickTimestamps.length >= REQUIRED_CLICKS) {
+                        console.log('[Exit] Triggering password modal via parent shell');
+                        clickTimestamps = [];
+                        // Send message to parent shell (kiosk-shell.html)
+                        if (window.parent && window.parent !== window) {
+                            window.parent.postMessage('KIOSK_EXIT_LOGO_CLICK', '*');
+                        }
+                    }
+                });
+
+                console.log('[Exit] Logo click detection enabled on welcome2.html');
+            }
+        })();
+    </script>
 
 </body>
 

@@ -986,9 +986,10 @@
         const data = await response.json();
 
         if (data.success) {
-          // Update the base offer's TIZO with calculated value from server
-          const calculatedBaseTizo = data.customTizo;
-          document.getElementById("selected-tizo").textContent = calculatedBaseTizo;
+          // Use the actual offer's TIZO from the database (not the universal calculated rate)
+          // This preserves location-specific TIZO values (e.g. 190 for Summarecon vs 180 for Margo)
+          const actualBaseTizo = Math.round(parseFloat(selectedOfferData.tizoCredit)) || data.customTizo;
+          document.getElementById("selected-tizo").textContent = actualBaseTizo;
 
           // Update old TIZO strikethrough value (same as RB value - base value before bonus)
           const oldTizoEl = document.getElementById("selected-old-tizo");
@@ -1007,8 +1008,8 @@
             { id: 'upsell-2', rb: upsell2Rb, tizo: upsell2Tizo }
           ];
 
-          console.log("✅ Using universal TIZO calculation (same as custom-topup-upsell)");
-          console.log(`Base: ${baseRb}RB = ${calculatedBaseTizo}TIZO`);
+          console.log("✅ Using offer TIZO (location-specific) + universal upsell calculation");
+          console.log(`Base: ${baseRb}RB = ${actualBaseTizo}TIZO`);
           console.log(`Upsell 1: ${upsell1Rb}RB = ${upsell1Tizo}TIZO`);
           console.log(`Upsell 2: ${upsell2Rb}RB = ${upsell2Tizo}TIZO`);
 

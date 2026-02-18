@@ -727,7 +727,7 @@
                     <!-- Prize Display - INSIDE CARD -->
                     <div class="prize-display editable" data-id="prize-display" bis_skin_checked="1">
                         <p id="prize-label" class="prize-label editable" data-id="prize-label"
-                            style="transform: translate(0px, 40px) scale(1);">TAMBAH 50 RB</p>
+                            style="transform: translate(0px, 40px) scale(1);">TAMBAH RB</p>
                         <p id="prize-get-label" class="free-gift-label editable" data-id="prize-get-label"
                             style="transform: translate(0px, 70px) scale(1); font-size: 36px;">DAPAT</p>
                         <p id="prize-value-display" class="free-gift-value editable" data-id="prize-value-display"
@@ -1003,9 +1003,9 @@
             if (prizeLabel) {
                 // Bold text - no GET/DAPAT here (it's shown separately below)
                 if (currentLang === 'id') {
-                    prizeLabel.textContent = `TAMBAH 50 RB`;
+                    prizeLabel.textContent = `TAMBAH ${bonusCostInRb} RB`;
                 } else {
-                    prizeLabel.textContent = `ADD 50 RB`;
+                    prizeLabel.textContent = `ADD ${bonusCostInRb} RB`;
                 }
             }
 

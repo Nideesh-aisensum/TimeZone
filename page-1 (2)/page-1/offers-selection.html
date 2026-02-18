@@ -2143,6 +2143,7 @@
   <script src="session-manager.js"></script>
   <script src="language.js"></script>
   <script src="currency-formatter.js?v=2"></script>
+  <script src="offer-prefetch.js"></script>
 
   <script>
     // Set current page in session
@@ -2225,6 +2226,17 @@
 
     // Fetch layout config from API based on card type
     async function fetchLayoutConfig() {
+      // Check for cached layout first (from prefetch)
+      if (window.OfferPrefetch) {
+        const cachedLayout = OfferPrefetch.getCachedLayout(selectedCardType);
+        if (cachedLayout) {
+          console.log('[offers-selection] Using cached layout:', cachedLayout.layout);
+          document.querySelector(".offer-slider").style.display = "none";
+          setOfferCount(cachedLayout.layout);
+          return;
+        }
+      }
+
       try {
         const response = await fetch(getApiUrl(`/api/layout-config?cardType=${selectedCardType}`));
 
@@ -2255,8 +2267,20 @@
       }
     }
 
-    // Fetch offers from API
+    // Fetch offers from API (or use cached data)
     async function fetchOffers() {
+      // Check for cached offers first (from prefetch)
+      if (window.OfferPrefetch) {
+        const cachedOffers = OfferPrefetch.getCachedOffers(selectedCardType);
+        if (cachedOffers && cachedOffers.offers && cachedOffers.offers.length > 0) {
+          console.log('[offers-selection] Using cached offers:', cachedOffers.offers.length, 'offers');
+          offersData = cachedOffers.offers;
+          updateOfferCards();
+          return;
+        }
+      }
+
+      // Fallback to API fetch if no cache
       try {
         const response = await fetch(getApiUrl(`/api/offers?cardType=${selectedCardType}`));
         const data = await response.json();

@@ -23,7 +23,7 @@ const DEFAULT_SESSION = {
     isNewPlayer: null, // true = new player, false = existing player
 
     // Card selection
-    selectedCard: null, // 'red', 'blue', 'gold', 'silver'
+    selectedCard: null, // 'red', 'blue', 'gold', 'platinum'
     cardQuantity: 1,
 
     // Offer selection
@@ -60,7 +60,25 @@ const DEFAULT_SESSION = {
 
     // Transaction
     orderNumber: null,
-    transactionComplete: false
+    transactionComplete: false,
+
+    // Dashboard Analytics - Offer acceptance tracking
+    topupAccepted: false,          // Whether user accepted topup offer
+    oodAccepted: false,            // Offer of Day accepted
+    oohAccepted: false,            // Offer of Hour accepted  
+    snacksAccepted: false,         // Snacks offer accepted
+
+    // Dashboard Analytics - OOD/OOH/Snacks costs and tizo (for Overall revenue chart)
+    oodCost: 0,
+    oodTizo: 0,
+    oohCost: 0,
+    oohTizo: 0,
+    snacksCost: 0,
+    snacksTizo: 0,
+
+    // Dashboard Analytics - Final payment tracking
+    finalPayment: 0,
+    finalTizo: 0
 };
 
 /**

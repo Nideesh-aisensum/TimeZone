@@ -8,8 +8,7 @@ function getCardType() {
             'red': 'Red',
             'blue': 'Blue',
             'gold': 'Gold',
-            'platinum': 'Platinum',
-            'silver': 'Platinum'
+            'platinum': 'Platinum'
         };
         userCardType = map[session.selectedCard.toLowerCase()] || 'Red';
         if (session.selectedCard === 'new_user') userCardType = 'Red';
@@ -17,7 +16,7 @@ function getCardType() {
         // Try localStorage fallback
         const storedCard = localStorage.getItem('selectedCard');
         if (storedCard) {
-            const map = { 'red': 'Red', 'blue': 'Blue', 'gold': 'Gold', 'platinum': 'Platinum', 'silver': 'Platinum' };
+            const map = { 'red': 'Red', 'blue': 'Blue', 'gold': 'Gold', 'platinum': 'Platinum' };
             userCardType = map[storedCard.toLowerCase()] || 'Red';
         }
     }

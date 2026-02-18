@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, initial-scale=1.0">
+    <title>Timezone Kiosk</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #000;
+        }
+
+        /* Persistent video background - NEVER reloads */
+        .persistent-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 1080px;
+            height: 1920px;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        /* Content iframe - loads pages without background */
+        .content-frame {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            z-index: 10;
+            background: transparent;
+        }
+
+        /* Transition overlay */
+        .transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: 100;
+            pointer-events: none;
+            transition: opacity 0.15s ease;
+        }
+
+        .transition-overlay.fading {
+            opacity: 0;
+        }
+
+        /* Loading indicator */
+        .loading-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .loading-indicator.visible {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Persistent video background - loads ONCE, never reloads -->
+    <video class="persistent-bg" id="main-bg" autoplay loop muted playsinline>
+        <source src="page-1/other-bg.mp4" type="video/mp4">
+    </video>
+
+    <!-- Content iframe - pages load here without their own backgrounds -->
+    <iframe class="content-frame" id="content-frame" src="about:blank"></iframe>
+
+    <!-- Transition overlay -->
+    <div class="transition-overlay" id="transition-overlay"></div>
+
+    <!-- Loading indicator -->
+    <div class="loading-indicator" id="loading-indicator">
+        <img src="page-1/loading.gif" alt="Loading..." style="width: 100px;">
+    </div>
+
+    <script>
+        const contentFrame = document.getElementById('content-frame');
+        const transitionOverlay = document.getElementById('transition-overlay');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const mainBg = document.getElementById('main-bg');
+
+        let isNavigating = false;
+
+        /**
+         * Navigate to a page with instant transition
+         * The background stays constant - only content changes
+         */
+        function navigateTo(pageName) {
+            if (isNavigating) return;
+            isNavigating = true;
+
+            // Fade out current content
+            contentFrame.style.opacity = '0';
+            contentFrame.style.transition = 'opacity 0.1s ease';
+
+            setTimeout(() => {
+                // Load new page
+                contentFrame.src = 'page-1/' + pageName;
+            }, 100);
+        }
+
+        // Listen for page load in iframe
+        contentFrame.addEventListener('load', () => {
+            // Inject message listener into iframe for navigation
+            try {
+                const iframeWindow = contentFrame.contentWindow;
+
+                // Override navigation in iframe
+                iframeWindow.eval(`
+                    // Override window.location.href
+                    const originalHref = Object.getOwnPropertyDescriptor(window.location.__proto__, 'href');
+                    Object.defineProperty(window.location, 'href', {
+                        set: function(value) {
+                            // Extract just the filename
+                            const pageName = value.split('/').pop();
+                            parent.postMessage({ type: 'navigate', page: pageName }, '*');
+                        },
+                        get: originalHref.get
+                    });
+                `);
+
+                // Hide the background in iframe (we have our own)
+                const iframeDoc = contentFrame.contentDocument;
+                if (iframeDoc) {
+                    const videos = iframeDoc.querySelectorAll('video.video-bg, .bg-video');
+                    videos.forEach(v => v.style.display = 'none');
+
+                    // Make container background transparent
+                    const container = iframeDoc.querySelector('.container, .screensaver-container');
+                    if (container) {
+                        container.style.background = 'transparent';
+                    }
+                }
+            } catch (e) {
+                console.log('Could not inject into iframe:', e);
+            }
+
+            // Fade in content
+            contentFrame.style.opacity = '1';
+            isNavigating = false;
+        });
+
+        // Listen for navigation messages from iframe
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'navigate') {
+                navigateTo(event.data.page);
+            }
+        });
+
+        // Start with welcome page
+        navigateTo('welcome.html');
+    </script>
+</body>
+
+</html>

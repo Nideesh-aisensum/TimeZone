@@ -4,15 +4,48 @@ const path = require('path');
 const { Pool } = require('pg');
 require('dotenv').config();
 
+const https = require('https');
 const PORT = process.env.PORT || 3000;
 const BASE_DIR = __dirname;
 const LOCAL_URL = `http://localhost:${PORT}`;
+const DASHBOARD_API_URL = 'https://timezone-dashboard.aisensum.com/api/kiosk';
 
-// Kiosk Configuration - set 'location' in .env to filter offers for this specific kiosk
-// Maps k1->Kiosk 1, k2->Kiosk 2, etc. to match Offer Builder venue checkboxes
+// Send server start/stop event to dashboard
+function sendServerEvent(action) {
+    const kioskId = (process.env.location || 'K1').toUpperCase();
+    const place = process.env.PLACE || '';
+    const data = JSON.stringify({
+        kioskId: place || kioskId,
+        action,
+        timestamp: new Date().toISOString(),
+        place
+    });
+    console.log(`🖥️ Sending ${action} to dashboard...`);
+    const url = new URL(DASHBOARD_API_URL + '/session');
+    const req = https.request({
+        hostname: url.hostname,
+        path: url.pathname,
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) }
+    }, (res) => {
+        let body = '';
+        res.on('data', c => body += c);
+        res.on('end', () => console.log(`📊 ${action} logged to dashboard:`, body));
+    });
+    req.on('error', (e) => console.warn(`⚠️ Failed to log ${action}:`, e.message));
+    req.write(data);
+    req.end();
+    return req;
+}
+
+// Kiosk Configuration - set 'PLACE' in .env to filter offers for this specific kiosk location
+// PLACE should match the venue/place name set in the Offer Builder admin panel
+// e.g. PLACE=Summarecon Mall Serpong
+// Falls back to old 'location' mapping (k1->Kiosk 1) for backward compatibility
 const KIOSK_LOCATION = process.env.location || null;
-const KIOSK_VENUE = KIOSK_LOCATION ? (() => {
-    // Map shorthand (k1, k2) to full venue name (Kiosk 1, Kiosk 2)
+const KIOSK_PLACE_RAW = process.env.PLACE || null;
+const KIOSK_VENUE = KIOSK_PLACE_RAW || (KIOSK_LOCATION ? (() => {
+    // Legacy fallback: Map shorthand (k1, k2) to full venue name (Kiosk 1, Kiosk 2)
     const locationMap = {
         'k1': 'Kiosk 1',
         'k2': 'Kiosk 2',
@@ -21,7 +54,108 @@ const KIOSK_VENUE = KIOSK_LOCATION ? (() => {
         'k5': 'Kiosk 5'
     };
     return locationMap[KIOSK_LOCATION.toLowerCase()] || KIOSK_LOCATION;
-})() : null;
+})() : null);
+
+/**
+ * Fuzzy venue matching using regex
+ * Handles minor spelling mistakes in .env PLACE value
+ * Strategy: split PLACE into keywords, build a regex that matches if ALL keywords
+ * appear (in any order) in the venue string, case-insensitive.
+ * Each keyword allows 1-char tolerance via optional char patterns.
+ * 
+ * Example: PLACE="Sumarecon Mall" matches "Summarecon Mall Serpong"
+ *          PLACE="margo" matches "Margo City"
+ */
+function buildFuzzyPattern(place) {
+    if (!place) return null;
+    // Split into words, filter out empty
+    const words = place.trim().split(/\s+/).filter(w => w.length > 0);
+    // For each word, build a pattern that allows optional doubled letters and optional spaces
+    // e.g. "Sumarecon" -> "S+\s*u+\s*m+\s*a+\s*r+\s*e+\s*c+\s*o+\s*n+" (each char can repeat, spaces allowed between)
+    // This handles: "MARGOCITY" matching "Margo City", "Sumarecon" matching "Summarecon"
+    const wordPatterns = words.map(word => {
+        // Escape special regex chars, then allow each letter to repeat with optional spaces between
+        const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const flexPattern = escaped.split('').map(ch => {
+            if (/[a-zA-Z]/.test(ch)) return ch + '+\\s*'; // allow repeated chars + optional spaces
+            return ch;
+        }).join('');
+        return `(?=.*${flexPattern})`;
+    });
+    // All words must appear (lookaheads), case-insensitive
+    return new RegExp(wordPatterns.join(''), 'i');
+}
+
+const KIOSK_VENUE_PATTERN = buildFuzzyPattern(KIOSK_VENUE);
+if (KIOSK_VENUE) {
+    console.log(`📍 Kiosk PLACE (from .env): "${KIOSK_VENUE}"`);
+    console.log(`📍 Fuzzy pattern: ${KIOSK_VENUE_PATTERN}`);
+}
+
+// Resolved venue name (exact match from DB, found via fuzzy matching at startup)
+// This gets set after DB connection is ready, so SQL queries use the exact DB name
+let RESOLVED_VENUE = KIOSK_VENUE; // default to raw value
+
+/**
+ * Resolve the .env PLACE to an exact venue name from the database
+ * Uses fuzzy regex to handle spelling mistakes
+ * Called once at startup after DB is ready
+ */
+async function resolveVenueFromDB() {
+    if (!KIOSK_VENUE || !KIOSK_VENUE_PATTERN) return;
+    try {
+        // First try the places table (if it exists from cloud sync)
+        let venueNames = [];
+        try {
+            const placesResult = await pool.query('SELECT DISTINCT name FROM places WHERE is_active = true');
+            venueNames = placesResult.rows.map(r => r.name);
+        } catch (e) {
+            // places table might not exist yet, fall through
+        }
+
+        // Also get distinct venues from offers table as fallback
+        if (venueNames.length === 0) {
+            const venueResult = await pool.query('SELECT DISTINCT unnest(venue) as v FROM offers WHERE venue IS NOT NULL');
+            venueNames = venueResult.rows.map(r => r.v);
+        }
+
+        if (venueNames.length === 0) {
+            console.log('📍 No venues found in DB, using raw PLACE value');
+            return;
+        }
+
+        console.log(`📍 Available venues in DB: ${venueNames.join(', ')}`);
+
+        // Find the best fuzzy match
+        const match = venueNames.find(name => KIOSK_VENUE_PATTERN.test(name));
+        if (match) {
+            RESOLVED_VENUE = match;
+            console.log(`📍 ✅ Fuzzy matched "${KIOSK_VENUE}" → "${RESOLVED_VENUE}"`);
+        } else {
+            // Try exact case-insensitive match as last resort
+            const exactMatch = venueNames.find(name => name.toLowerCase() === KIOSK_VENUE.toLowerCase());
+            if (exactMatch) {
+                RESOLVED_VENUE = exactMatch;
+                console.log(`📍 ✅ Exact matched "${KIOSK_VENUE}" → "${RESOLVED_VENUE}"`);
+            } else {
+                // Try normalized match: strip all spaces and compare case-insensitive
+                // Handles: MARGOCITY -> Margo City, SUMMARECONMALLSERPONG -> Summarecon Mall Serpong
+                const normalize = s => s.replace(/\s+/g, '').toLowerCase();
+                const normalizedPlace = normalize(KIOSK_VENUE);
+                const normalizedMatch = venueNames.find(name => normalize(name) === normalizedPlace);
+                if (normalizedMatch) {
+                    RESOLVED_VENUE = normalizedMatch;
+                    console.log(`📍 ✅ Normalized matched "${KIOSK_VENUE}" → "${RESOLVED_VENUE}"`);
+                } else {
+                    console.log(`📍 ⚠️ No fuzzy match found for "${KIOSK_VENUE}" in DB venues. Using raw value.`);
+                    console.log(`📍    Tip: Check that PLACE in .env matches a venue in the Offer Builder admin.`);
+                }
+            }
+        }
+    } catch (err) {
+        console.error('📍 ❌ Error resolving venue from DB:', err.message);
+    }
+}
 
 // Cache for offers from database (used for Offers Page TIZO calculation - card-type specific)
 let upsellOffersCache = null;
@@ -35,8 +169,8 @@ let customTopupRatesCache = null;
  */
 async function loadUpsellOffersCache() {
     try {
-        // Fetch all active offers from the offers table
-        const result = await pool.query(`
+        // Fetch active offers from the offers table, filtered by venue if configured
+        let query = `
             SELECT 
                 card_type,
                 ROUND(cost / 1000) as topup_rb,
@@ -44,9 +178,14 @@ async function loadUpsellOffersCache() {
             FROM offers 
             WHERE is_active = true 
             AND (start_date IS NULL OR start_date <= CURRENT_DATE) 
-            AND (end_date IS NULL OR end_date >= CURRENT_DATE)
-            ORDER BY topup_rb DESC
-        `);
+            AND (end_date IS NULL OR end_date >= CURRENT_DATE)`;
+        let params = [];
+        if (RESOLVED_VENUE) {
+            query += ` AND (venue IS NULL OR venue = '{}' OR $1 = ANY(venue))`;
+            params.push(RESOLVED_VENUE);
+        }
+        query += ` ORDER BY topup_rb DESC`;
+        const result = await pool.query(query, params);
         upsellOffersCache = result.rows.map(row => ({
             card_type: row.card_type,
             topup_rb: parseInt(row.topup_rb),
@@ -161,19 +300,15 @@ const localPool = new Pool({
 // Cloud database connection
 // Used for fetching updates
 const cloudPool = new Pool({
-    host: process.env.CLOUD_DB_HOST || '47.129.117.239',
+    host: process.env.CLOUD_DB_HOST || '34.142.198.255',
     port: process.env.CLOUD_DB_PORT || 5433,
     database: process.env.CLOUD_DB_NAME || 'TimeZone',
     user: process.env.CLOUD_DB_USER || 'postgres',
     password: process.env.CLOUD_DB_PASSWORD || 'tizo123',
     max: 5,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 10000,
+    connectionTimeoutMillis: 30000,
 });
-
-// Dedicated client for LISTEN/NOTIFY (real-time sync)
-let notifyClient = null;
-let isListening = false;
 
 // Alias localPool as pool for backward compatibility with existing API routes
 const pool = localPool;
@@ -457,6 +592,9 @@ async function syncAllTables() {
     console.log(`✅ Sync complete: ${tablesToSync.length} tables processed, ${errorCount} errors`);
     console.log('═══════════════════════════════════════════════════════════');
 
+    // Re-resolve venue in case new places were synced from cloud
+    await resolveVenueFromDB();
+
     // Refresh cache if server is running
     await loadUpsellOffersCache();
 
@@ -464,9 +602,36 @@ async function syncAllTables() {
     lastSyncTime = Date.now();
 }
 
+async function startPeriodicSync(minutes) {
+    const ms = minutes * 60 * 1000;
+    console.log(`\n⏰ Periodic sync enabled: executing every ${minutes} minutes...`);
+
+    // Run immediately once
+    // wrapping in try-catch to prevent crashing main server
+    try {
+        await syncAllTables();
+    } catch (e) {
+        console.error('Initial sync failed:', e.message);
+    }
+
+    setInterval(async () => {
+        try {
+            console.log(`\n⏰ Triggering periodic sync (${new Date().toLocaleTimeString()})...`);
+            await syncAllTables();
+        } catch (e) {
+            console.error('Periodic sync failed:', e.message);
+        }
+    }, ms);
+}
+
+// Real-time listener variables
+let notifyClient = null;
+let isListening = false;
+
 /**
  * Setup real-time listener for database changes
  * Uses PostgreSQL LISTEN/NOTIFY for instant sync instead of polling
+ * IMPORTANT: Uses a standalone Client (not pool) to keep connection alive
  */
 async function setupRealtimeListener() {
     if (isListening) {
@@ -475,8 +640,18 @@ async function setupRealtimeListener() {
     }
 
     try {
-        // Create dedicated client for LISTEN
-        notifyClient = await cloudPool.connect();
+        // Create a STANDALONE client (not from pool) for LISTEN
+        // Pool connections get released after idle, breaking LISTEN
+        const { Client } = require('pg');
+        notifyClient = new Client({
+            host: process.env.CLOUD_DB_HOST || '47.129.117.239',
+            port: process.env.CLOUD_DB_PORT || 5433,
+            database: process.env.CLOUD_DB_NAME || 'TimeZone',
+            user: process.env.CLOUD_DB_USER || 'postgres',
+            password: process.env.CLOUD_DB_PASSWORD || 'tizo123',
+        });
+
+        await notifyClient.connect();
         console.log('\n🔔 Setting up real-time database listener...');
 
         // Listen for notifications on 'kiosk_data_change' channel
@@ -495,7 +670,7 @@ async function setupRealtimeListener() {
                     console.log(`   Operation: ${payload.operation}`);
                     console.log(`   Time: ${new Date(payload.timestamp).toLocaleTimeString()}`);
                     console.log('   🔄 Triggering immediate sync...\n');
-                    
+
                     // Trigger immediate sync
                     await syncAllTables();
                     console.log('✅ Real-time sync completed\n');
@@ -505,10 +680,11 @@ async function setupRealtimeListener() {
             }
         });
 
-        // Handle connection errors
+        // Handle connection errors - reconnect automatically
         notifyClient.on('error', (err) => {
             console.error('❌ Notification client error:', err.message);
             isListening = false;
+            notifyClient = null;
             // Attempt to reconnect after 5 seconds
             setTimeout(() => {
                 console.log('🔄 Attempting to reconnect real-time listener...');
@@ -516,42 +692,28 @@ async function setupRealtimeListener() {
             }, 5000);
         });
 
-        // Handle connection end
+        // Handle connection end - reconnect automatically
         notifyClient.on('end', () => {
             console.log('⚠️  Notification client disconnected');
             isListening = false;
+            notifyClient = null;
+            // Attempt to reconnect after 5 seconds
+            setTimeout(() => {
+                console.log('🔄 Attempting to reconnect real-time listener...');
+                setupRealtimeListener();
+            }, 5000);
         });
 
     } catch (err) {
         console.error('❌ Failed to setup real-time listener:', err.message);
         console.log('⚠️  Falling back to periodic sync mode');
         isListening = false;
+        // Retry after 30 seconds
+        setTimeout(() => {
+            console.log('🔄 Retrying real-time listener setup...');
+            setupRealtimeListener();
+        }, 30000);
     }
-}
-
-/**
- * Fallback periodic sync (used if real-time listener fails)
- * Also useful as a safety net to catch any missed notifications
- */
-async function startPeriodicSync(minutes) {
-    const ms = minutes * 60 * 1000;
-    console.log(`\n⏰ Fallback periodic sync: every ${minutes} minutes (safety net)`);
-
-    // Run immediately once
-    try {
-        await syncAllTables();
-    } catch (e) {
-        console.error('Initial sync failed:', e.message);
-    }
-
-    setInterval(async () => {
-        try {
-            console.log(`\n⏰ Fallback periodic sync (${new Date().toLocaleTimeString()})...`);
-            await syncAllTables();
-        } catch (e) {
-            console.error('Periodic sync failed:', e.message);
-        }
-    }, ms);
 }
 
 // ========================================================
@@ -633,6 +795,61 @@ const server = http.createServer((req, res) => {
         return;
     }
 
+    // API: Trigger immediate sync from cloud (called by Offer Builder when offers change)
+    // This provides instant sync without relying on PostgreSQL LISTEN/NOTIFY
+    if (req.method === 'POST' && req.url === '/api/trigger-sync') {
+        console.log('\n📡 Sync trigger received from Offer Builder!');
+
+        // Parse optional body for source info
+        let body = '';
+        req.on('data', chunk => body += chunk);
+        req.on('end', async () => {
+            try {
+                let source = 'unknown';
+                if (body) {
+                    try {
+                        const data = JSON.parse(body);
+                        source = data.source || 'unknown';
+                        if (data.table) console.log(`   Table changed: ${data.table}`);
+                        if (data.operation) console.log(`   Operation: ${data.operation}`);
+                    } catch (e) { /* ignore parse errors */ }
+                }
+                console.log(`   Source: ${source}`);
+                console.log('   🔄 Triggering immediate sync...\n');
+
+                await syncAllTables();
+
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: true,
+                    message: '✅ Sync completed successfully',
+                    lastSyncTime: lastSyncTime
+                }));
+            } catch (err) {
+                console.error('❌ Sync trigger failed:', err.message);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: false,
+                    error: err.message
+                }));
+            }
+        });
+        return;
+    }
+
+    // API: Get kiosk config (PLACE, location) for dashboard logging
+    if (req.method === 'GET' && req.url === '/api/kiosk-config') {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({
+            success: true,
+            place: process.env.PLACE || '',
+            location: process.env.location || '',
+            venue: KIOSK_VENUE || '',
+            resolvedVenue: RESOLVED_VENUE || ''
+        }));
+        return;
+    }
+
     // API: Get layout config based on card type count
     if (req.method === 'GET' && req.url.startsWith('/api/layout-config')) {
         const urlParams = new URL(req.url, LOCAL_URL);
@@ -650,7 +867,6 @@ const server = http.createServer((req, res) => {
             'welcome': 'Welcome',
             'blue': 'Blue',
             'gold': 'Gold',
-            'silver': 'Platinum',
             'platinum': 'Platinum',
             'new_user': 'New User'
         };
@@ -665,11 +881,11 @@ const server = http.createServer((req, res) => {
             AND (end_date IS NULL OR end_date >= CURRENT_DATE)`;
         let params = [dbCardType];
 
-        // Apply venue filter if configured
-        if (KIOSK_VENUE) {
+        // Apply venue filter if configured (uses fuzzy-resolved venue name)
+        if (RESOLVED_VENUE) {
             countQuery += ` AND (venue IS NULL OR venue = '{}' OR $2 = ANY(venue))`;
-            params.push(KIOSK_VENUE);
-            console.log(`[/api/layout-config] ✅ Venue filter APPLIED: ${KIOSK_VENUE}`);
+            params.push(RESOLVED_VENUE);
+            console.log(`[/api/layout-config] ✅ Venue filter APPLIED: ${RESOLVED_VENUE}`);
         }
 
         pool.query(countQuery, params)
@@ -713,7 +929,6 @@ const server = http.createServer((req, res) => {
             'welcome': 'Welcome',
             'blue': 'Blue',
             'gold': 'Gold',
-            'silver': 'Platinum',
             'platinum': 'Platinum',
             'new_user': 'Scratch Card - New User',
             'existing_user': 'Scratch Card - Existing User'
@@ -1020,7 +1235,6 @@ const server = http.createServer((req, res) => {
             'welcome': 'Welcome',
             'blue': 'Blue',
             'gold': 'Gold',
-            'silver': 'Platinum',
             'platinum': 'Platinum',
             'new_user': 'New User',
             'new_user_blue': 'New User - Blue',
@@ -1032,9 +1246,9 @@ const server = http.createServer((req, res) => {
         // Category map for OOH/OOD (case-insensitive)
         // Maps URL parameters to actual category names saved by Offer Builder
         const categoryMap = {
-            'ooh': 'OFFER OF THE HOUR',
-            'ood': 'OFFER OF THE DAY',
-            'snacks': 'Snacks',
+            'ooh': 'Fixed Offer',
+            'ood': 'OOD',
+            'snacks': 'Scratch Card',
             'voucher': 'Voucher',
             'scratch card': 'Scratch Card'
         };
@@ -1056,18 +1270,19 @@ const server = http.createServer((req, res) => {
 
         // Filter by kiosk venue if configured (show offers matching venue OR global offers with empty venue)
         // Apply to all requests except specific offerId lookups (icons need exact match)
-        if (KIOSK_VENUE && !offerId) {
+        if (RESOLVED_VENUE && !offerId) {
             query += ` AND (venue IS NULL OR venue = '{}' OR $1 = ANY(venue))`;
-            params.push(KIOSK_VENUE);
-            console.log(`[/api/offers] ✅ Venue filter APPLIED: ${KIOSK_VENUE}`);
+            params.push(RESOLVED_VENUE);
+            console.log(`[/api/offers] ✅ Venue filter APPLIED: ${RESOLVED_VENUE}`);
         } else {
-            console.log(`[/api/offers] ⚠️ Venue filter NOT applied (KIOSK_VENUE=${KIOSK_VENUE})`);
+            console.log(`[/api/offers] ⚠️ Venue filter NOT applied (RESOLVED_VENUE=${RESOLVED_VENUE})`);
         }
         let paramIndex = params.length + 1; // Start after any venue param
 
-        // If screensaverOnly, filter to only OOD, OOH, and Snacks categories
+        // If screensaverOnly, filter to only OOD, Fixed Offer, and Scratch Card categories WITH Universal card type
+        // This ensures card-specific offers (Welcome, Blue, Gold, Platinum) don't appear in screensaver
         if (screensaverOnly && !offerId && !cost) {
-            query += ` AND category IN ('OOD', 'OFFER OF THE DAY', 'OOH', 'OFFER OF THE HOUR', 'Snacks')`;
+            query += ` AND category IN ('OOD', 'Fixed Offer', 'Scratch Card') AND LOWER(card_type) = 'universal'`;
         }
 
         // Filter by offer ID if provided (for fetching specific offer with icons)
@@ -1090,11 +1305,20 @@ const server = http.createServer((req, res) => {
             query += ` AND category = $${paramIndex}`;
             params.push(dbCategory);
             paramIndex++;
+
+            // For screensaver categories (OOD, OOH, Snacks), only show Universal card type offers
+            const screensaverCategories = ['ood', 'ooh', 'snacks'];
+            if (screensaverCategories.includes(category.toLowerCase())) {
+                query += ` AND LOWER(card_type) = 'universal'`;
+                console.log(`[/api/offers] 🎯 Screensaver category detected - filtering to Universal card_type only`);
+            }
         }
 
         // Filter by card type if provided
         if (cardType && !offerId) {
             const dbCardType = cardTypeMap[cardType.toLowerCase()] || cardType;
+            // Only include specific card type offers (not Universal) for offers selection page
+            // Universal offers are meant for screensaver (OOD/OOH) only, not regular card selection
             query += ` AND card_type = $${paramIndex}`;
             params.push(dbCardType);
             paramIndex++;
@@ -1610,7 +1834,7 @@ if (args.includes('--sync')) {
 } else {
     // Normal Server Mode
     const periodicIndex = args.indexOf('--periodic');
-    const periodicInterval = periodicIndex !== -1 ? parseInt(args[periodicIndex + 1]) : 5;
+    const periodicInterval = periodicIndex !== -1 ? parseInt(args[periodicIndex + 1]) : 1;
 
     server.listen(PORT, async () => {
         console.log(`\n🚀 TIZO Server running at ${LOCAL_URL}`);
@@ -1619,11 +1843,14 @@ if (args.includes('--sync')) {
         // Show which DB we are using for API
         console.log(`\n🗄️  Local Database: ${process.env.DB_HOST || 'localhost'}:${process.env.DB_PORT || 5433}`);
 
+        // Resolve fuzzy venue match from DB before loading caches
+        await resolveVenueFromDB();
+
         // Show kiosk configuration
-        if (KIOSK_LOCATION || KIOSK_VENUE) {
+        if (KIOSK_VENUE || RESOLVED_VENUE) {
             console.log(`\n🏪 Kiosk Config:`);
-            console.log(`   Location: ${KIOSK_LOCATION || '(not set)'}`);
-            console.log(`   Venue Filter: ${KIOSK_VENUE || '(not set - showing all offers)'}`);
+            console.log(`   PLACE (from .env): ${KIOSK_VENUE || '(not set)'}`);
+            console.log(`   Resolved Venue: ${RESOLVED_VENUE || '(not set - showing all offers)'}`);
         } else {
             console.log(`\n🏪 Kiosk Config: Not configured (showing all offers)`);
         }
@@ -1634,14 +1861,12 @@ if (args.includes('--sync')) {
         // Load UNIVERSAL custom top-up rates cache (Custom Top-Up page - NO card type)
         await loadCustomTopupRatesCache();
 
-        // Setup real-time listener for instant sync
-        await setupRealtimeListener();
+        // Start periodic sync automatically
+        startPeriodicSync(periodicInterval);
 
-        // Start fallback periodic sync (safety net, runs less frequently)
-        // If real-time listener is working, this acts as a backup
-        // Increase interval to 30 minutes since real-time sync handles most updates
-        const fallbackInterval = isListening ? 30 : periodicInterval;
-        startPeriodicSync(fallbackInterval);
+        // Enable real-time sync via PostgreSQL LISTEN/NOTIFY
+        // This allows instant sync when Offer Builder updates cloud DB
+        setupRealtimeListener();
 
         console.log(`\n📂 Open your pages:`);
         console.log(`   ${LOCAL_URL}/kiosk                         ⭐ KIOSK SHELL (Persistent BG)`);
@@ -1652,28 +1877,29 @@ if (args.includes('--sync')) {
         console.log(`   ${LOCAL_URL}/page-1/welcome.html`);
         console.log(`\n💾 Auto-save enabled - changes will be saved directly to files!`);
         console.log(`\nPress Ctrl+C to stop the server.\n`);
+
+        // Log server start to dashboard
+        sendServerEvent('server_start');
     });
 
-    // Graceful shutdown handler
-    process.on('SIGINT', async () => {
-        console.log('\n\n🛑 Shutting down server...');
-        
-        // Close real-time listener
-        if (notifyClient) {
-            try {
-                await notifyClient.query('UNLISTEN kiosk_data_change');
-                notifyClient.release();
-                console.log('✅ Real-time listener closed');
-            } catch (err) {
-                console.error('⚠️  Error closing listener:', err.message);
-            }
-        }
-        
-        // Close database pools
-        await localPool.end();
-        await cloudPool.end();
-        console.log('✅ Database connections closed');
-        console.log('👋 Goodbye!\n');
-        process.exit(0);
-    });
+    // Log server stop on shutdown (Windows-compatible)
+    let shutdownSent = false;
+    function handleShutdown(signal) {
+        if (shutdownSent) return;
+        shutdownSent = true;
+        console.log(`\n🛑 ${signal} received - logging server stop...`);
+        const req = sendServerEvent('server_stop');
+        req.on('close', () => process.exit(0));
+        setTimeout(() => process.exit(0), 2000);
+    }
+
+    // Windows: use readline to properly capture Ctrl+C
+    if (process.platform === 'win32') {
+        const rl = require('readline').createInterface({ input: process.stdin });
+        rl.on('SIGINT', () => handleShutdown('SIGINT'));
+        rl.on('close', () => handleShutdown('CLOSE'));
+    }
+    process.on('SIGINT', () => handleShutdown('SIGINT'));
+    process.on('SIGTERM', () => handleShutdown('SIGTERM'));
+    process.on('SIGBREAK', () => handleShutdown('SIGBREAK'));
 }

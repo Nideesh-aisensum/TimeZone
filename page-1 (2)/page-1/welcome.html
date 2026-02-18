@@ -276,14 +276,81 @@
     let idleTimeout;
     const IDLE_TIME = 15000; // 3 seconds for testing
 
+    // Check if any screensaver offers are active
+    async function hasActiveScreensaverOffers() {
+      try {
+        // Try to use cache first
+        const cache = sessionStorage.getItem("screensaver_cache");
+        if (cache) {
+          try {
+            const data = JSON.parse(cache);
+            // Cache valid for 30 seconds
+            if (Date.now() - data.timestamp < 30000) {
+              const hasOOD = data.ood?.success && data.ood?.offers?.length > 0;
+              const hasOOH = data.ooh?.success && data.ooh?.offers?.length > 0;
+              const hasSnacks = data.snacks?.success && data.snacks?.offers?.length > 0;
+              console.log(`Screensaver check (cached): OOD=${hasOOD}, OOH=${hasOOH}, Snacks=${hasSnacks}`);
+              return hasOOD || hasOOH || hasSnacks;
+            }
+          } catch (parseErr) {
+            console.log("Cache parse error, fetching fresh data");
+          }
+        }
+
+        // Fetch directly from API (bypass cache if quota exceeded)
+        console.log("Fetching screensaver offers directly from API...");
+        const [oodRes, oohRes, snacksRes] = await Promise.all([
+          fetch(getApiUrl("/api/offers?category=OOD")),
+          fetch(getApiUrl("/api/offers?category=OOH")),
+          fetch(getApiUrl("/api/offers?category=Snacks")),
+        ]);
+
+        const oodData = oodRes.ok ? await oodRes.json() : null;
+        const oohData = oohRes.ok ? await oohRes.json() : null;
+        const snacksData = snacksRes.ok ? await snacksRes.json() : null;
+
+        const hasOOD = oodData?.success && oodData?.offers?.length > 0;
+        const hasOOH = oohData?.success && oohData?.offers?.length > 0;
+        const hasSnacks = snacksData?.success && snacksData?.offers?.length > 0;
+
+        console.log(`Screensaver check (API): OOD=${hasOOD}, OOH=${hasOOH}, Snacks=${hasSnacks}`);
+
+        // Try to cache for next time (ignore quota errors)
+        try {
+          sessionStorage.setItem("screensaver_cache", JSON.stringify({
+            timestamp: Date.now(),
+            ood: oodData,
+            ooh: oohData,
+            snacks: snacksData
+          }));
+        } catch (cacheErr) {
+          // Quota exceeded - that's fine, we already have the data
+          console.log("Could not cache screensaver data (quota), continuing anyway");
+        }
+
+        return hasOOD || hasOOH || hasSnacks;
+      } catch (e) {
+        console.log("Error checking screensaver offers:", e);
+        // On error, default to showing screensaver to check there
+        return true;
+      }
+    }
+
     function resetIdleTimer(e) {
       // console.log('Resetting idle timer due to:', e?.type);
       clearTimeout(idleTimeout);
       // Only set idle timer if not in edit mode
       if (!window.isEditModeActive || !window.isEditModeActive()) {
-        idleTimeout = setTimeout(function () {
-          console.log("Idle timeout reached! Redirecting...");
-          PageTransition.navigateTo("screensaver.html");
+        idleTimeout = setTimeout(async function () {
+          console.log("Idle timeout reached! Checking for active offers...");
+          const hasOffers = await hasActiveScreensaverOffers();
+          if (hasOffers) {
+            console.log("Active screensaver offers found, navigating to screensaver");
+            PageTransition.navigateTo("screensaver.html");
+          } else {
+            console.log("No active screensaver offers, staying on welcome page");
+            resetIdleTimer(); // Reset timer to check again later
+          }
         }, IDLE_TIME);
       }
     }

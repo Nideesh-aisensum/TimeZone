@@ -1,5 +1,6 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-    print: () => ipcRenderer.send('print-silent')
+    print: () => ipcRenderer.send('print-silent'),
+    exitKiosk: () => ipcRenderer.send('exit-kiosk')
 });

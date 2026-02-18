@@ -27,6 +27,23 @@
     let currentSessionId = null;
     let sessionStartTime = null;
 
+    // Kiosk place/venue name from local server .env
+    // Use localStorage cache so it's available instantly (async fetch updates it for next time)
+    let KIOSK_PLACE = localStorage.getItem('kioskPlace') || '';
+    (async function fetchKioskPlace() {
+        try {
+            const resp = await fetch('/api/kiosk-config');
+            const data = await resp.json();
+            if (data.success && data.place) {
+                KIOSK_PLACE = data.place;
+                localStorage.setItem('kioskPlace', data.place);
+                console.log('📍 Kiosk place:', KIOSK_PLACE);
+            }
+        } catch (e) {
+            console.warn('⚠️ Could not fetch kiosk config:', e.message);
+        }
+    })();
+
     /**
      * Send data to dashboard API
      * @param {string} endpoint - API endpoint (e.g., '/session')
@@ -111,8 +128,8 @@
             action: 'session_complete',
             timestamp: new Date().toISOString(),
 
-            // User info
-            isNewUser: sessionData.isNewUser || false,
+            // User info - strict boolean check
+            isNewUser: sessionData.isNewUser === true,
             cardType: sessionData.cardType || 'unknown',
 
             // Transaction info
@@ -133,6 +150,11 @@
             oohAccepted: sessionData.oohAccepted || false,
             snacksAccepted: sessionData.snacksAccepted || false,
 
+            // OOD/OOH/Snacks costs for revenue tracking
+            oodCost: sessionData.oodCost || 0,
+            oohCost: sessionData.oohCost || 0,
+            snacksCost: sessionData.snacksCost || 0,
+
             // Scratch card
             scratchCardAccepted: sessionData.scratchCardAccepted || false,
             scratchCardRevealed: sessionData.scratchCardRevealed || false,
@@ -146,9 +168,20 @@
             bonusGiftDetails: sessionData.bonusGiftDetails || null,
             bonusFreeGames: sessionData.bonusFreeGames || 0,
 
+            // Card details
+            cardQuantity: sessionData.cardQuantity || 1,
+            selectedCardCount: sessionData.selectedCardCount || 1,
+
+            // 2nd Upsell tracking
+            secondUpsellAccepted: sessionData.secondUpsellAccepted || false,
+            originalOfferCost: sessionData.originalOfferCost || null,
+
             // Session metadata
             status: 'completed',
             durationSeconds: duration,
+
+            // Venue/Place from kiosk .env
+            place: sessionData.place || KIOSK_PLACE || '',
         };
 
         const result = await sendToDashboard('/session', data);

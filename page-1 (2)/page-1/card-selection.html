@@ -466,6 +466,8 @@
 
   <script src="shell-connector.js"></script>
   <script src="page-transition.js"></script>
+  <script src="api-config.js"></script>
+  <script src="offer-prefetch.js"></script>
 </head>
 
 <body class="">
@@ -964,8 +966,8 @@
         <div class="grid-card" data-card="gold" onclick="selectCardFromGrid(this)" bis_skin_checked="1">
           <img src="gold-card.png" alt="Gold Card" />
         </div>
-        <div class="grid-card" data-card="silver" onclick="selectCardFromGrid(this)" bis_skin_checked="1">
-          <img src="silver-card.png" alt="Silver Card" />
+        <div class="grid-card" data-card="platinum" onclick="selectCardFromGrid(this)" bis_skin_checked="1">
+          <img src="silver-card.png" alt="Platinum Card" />
         </div>
       </div>
 
@@ -997,8 +999,8 @@
               src="blue-elite-dark.png" alt="Blue Card" /></div>
           <div class="card-thumb" data-card="gold" onclick="selectCard(this)" bis_skin_checked="1"><img
               src="gold-dark.png" alt="Gold Card" /></div>
-          <div class="card-thumb" data-card="silver" onclick="selectCard(this)" bis_skin_checked="1">
-            <img src="silver-dark.png" alt="Silver Card" />
+          <div class="card-thumb" data-card="platinum" onclick="selectCard(this)" bis_skin_checked="1">
+            <img src="silver-dark.png" alt="Platinum Card" />
           </div>
         </div>
       </div>
@@ -1094,13 +1096,13 @@
         red: "Welcome to Timezone, your fun starts now.",
         blue: "Top-up Rp 500RB and get a one-time gift of 50 Tizo + 500 tickets. Only in the Fun App.",
         gold: "Top-up Rp 2JT total and get a one-time gift of 200 Tizo + 2,000 tickets. Only in the Fun App.",
-        silver: "Top-up Rp 8JT total and get a one-time gift of 800 Tizo + 8,000 tickets. Only in the Fun App.",
+        platinum: "Top-up Rp 8JT total and get a one-time gift of 800 Tizo + 8,000 tickets. Only in the Fun App.",
       },
       id: {
         red: "Selamat datang di Timezone. Saatnya Bersenang-senang!",
         blue: "Isi ulang saldo Rp 500RB dan dapatkan hadiah sekali pakai berupa 50 Tizo + 500 tiket. Hanya di Fun App.",
         gold: "Isi ulang saldo Rp 2JT dan dapatkan hadiah sekali pakai berupa 200 Tizo + 2.000 tiket — hanya di Fun App.",
-        silver: "Isi ulang saldo Rp 8JT dan dapatkan hadiah sekali pakai berupa 800 Tizo + 8.000 tiket. Hanya di Fun App.",
+        platinum: "Isi ulang saldo Rp 8JT dan dapatkan hadiah sekali pakai berupa 800 Tizo + 8.000 tiket. Hanya di Fun App.",
       },
     };
 
@@ -1109,7 +1111,7 @@
       red: { light: "red-card.png", dark: "red-card.png", title: "WELCOME CARD", desc: cardDescriptions.en.red },
       blue: { light: "blue-card.png", dark: "blue-card.png", title: "BLUE ELITE", desc: cardDescriptions.en.blue },
       gold: { light: "gold-card.png", dark: "gold-card.png", title: "GOLD", desc: cardDescriptions.en.gold },
-      silver: { light: "silver-card.png", dark: "silver-card.png", title: "PLATINUM", desc: cardDescriptions.en.silver },
+      platinum: { light: "silver-card.png", dark: "silver-card.png", title: "PLATINUM", desc: cardDescriptions.en.platinum },
     };
 
     function setCardDescriptionsForLanguage(lang) {
@@ -1145,7 +1147,7 @@
             const cardId = card.id.toLowerCase();
             // Map database id to our cardData keys
             let key = cardId;
-            if (cardId === "platinum") key = "silver"; // platinum maps to silver in UI
+            // platinum is now used directly as the key
 
             if (cardData[key]) {
               // Descriptions are managed locally to keep copy consistent
@@ -1342,7 +1344,13 @@
       localStorage.setItem("cardQuantity", quantity);
       localStorage.setItem("selectedCardCount", quantity);
       localStorage.setItem("isNewPlayer", "false");
-      window.location.href = "offers-selection.html";
+
+      // Prefetch offers before navigating for instant loading
+      if (window.OfferPrefetch) {
+        OfferPrefetch.navigateWithPrefetch(selectedCard, "offers-selection.html");
+      } else {
+        window.location.href = "offers-selection.html";
+      }
     }
 
     function toggleLanguage() {

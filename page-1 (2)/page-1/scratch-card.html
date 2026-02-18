@@ -646,7 +646,8 @@
       }
 
       // Draw cost text - Bold text only, GET/DAPAT shown separately in gift section
-      const boldText = currentLang === "id" ? "TAMBAH 50 RB" : "ADD 50 RB";
+      const costRb = scratchCardData.costInRb || 50;
+      const boldText = currentLang === "id" ? `TAMBAH ${costRb} RB` : `ADD ${costRb} RB`;
       prizeCtx.font = "bold 32px Nulshock, sans-serif";
       prizeCtx.fillStyle = "#00ffff";
       prizeCtx.textAlign = "center";
@@ -998,6 +999,16 @@
       // Save scratch card revealed state to session
       updateSession({ scratchCardRevealed: true });
 
+      // Send scratch card event to dashboard
+      if (typeof Dashboard !== 'undefined' && Dashboard.sendScratchCard) {
+        const prize = scratchCardData.selectedPrize;
+        Dashboard.sendScratchCard({
+          revealed: true,
+          prizeValue: prize ? prize.prize_value : scratchCardData.tizo,
+          prizeName: prize ? prize.prize_label : `${scratchCardData.tizo} TIZO`,
+        });
+      }
+
       // Auto-redirect to prize summary after animation
       setTimeout(() => {
         if (window.isEditModeActive && window.isEditModeActive()) {
@@ -1009,7 +1020,6 @@
         window.location.href = "prize-summary.html";
       }, 1200);
     }
-
 
     function handleContinue() {
       if (window.isEditModeActive && window.isEditModeActive()) {

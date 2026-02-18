@@ -973,7 +973,7 @@
 
             <!-- OOD Section -->
             <div class="scratch-section editable" data-id="ood-section"
-              style="margin-top: 20px; transform: translate(0, -72.0001px) scale(1.2); pointer-events: none;">
+              style="margin-top: 20px; display: none; transform: translate(0, -72.0001px) scale(1.2); pointer-events: none;">
               <h3 id="ood-title" class="section-title"
                 style="font-size: 24px; margin-bottom: 15px; pointer-events: none;">OFFER OF THE DAY:
               </h3>
@@ -1003,7 +1003,7 @@
 
             <!-- OOH Section -->
             <div class="scratch-section editable" data-id="ooh-section"
-              style="margin-top: 20px; transform: translate(0, -72.0001px) scale(1.2); pointer-events: none;">
+              style="margin-top: 20px; display: none; transform: translate(0, -72.0001px) scale(1.2); pointer-events: none;">
               <h3 id="ooh-title" class="section-title"
                 style="font-size: 24px; margin-bottom: 15px; pointer-events: none;">OFFER OF THE HOUR:
               </h3>
@@ -1248,7 +1248,7 @@
 
   <!-- Print Receipt (hidden on screen, shown when printing) -->
   <div class="print-receipt">
-    <div class="print-header print-receipt">
+    <div class="print-header">
       <img src="logo-black.png" alt="TIMEZONE" class="print-logo-img"
         style="width: 200px; height: auto; display: block; margin: 0 auto;" />
       <div class="print-website">www.timezonegames.com</div>
@@ -1455,14 +1455,14 @@
         printOodSection: "OOD (Offer Of The Day)",
         printOohSection: "OOH (Offer Of The Hour)",
         printSnacksSection: "Free Snacks",
-        printTransactionAmount: "Transaction Amount :",
-        printTotalTizo: "Total Tizo :",
-        printBonus: "Bonus :",
-        printBonusOod: "Bonus OOD :",
-        printBonusOoh: "Bonus OOH :",
-        printTotalPayment: "Total Payment :",
-        printTotalTizos: "Total Tizos :",
-        printReceiveTotal: "You receive total:",
+        printTransactionAmount: "Transaction Amount",
+        printTotalTizo: "Total Tizo",
+        printBonus: "Bonus",
+        printBonusOod: "Bonus OOD",
+        printBonusOoh: "Bonus OOH",
+        printTotalPayment: "Total Payment",
+        printTotalTizos: "Total Tizos",
+        printReceiveTotal: "You receive total",
         printFooter: "Total amount is per card. You can use this offer on",
         printFooterCards: "cards",
         printCancelBtn: "CANCEL",
@@ -1494,14 +1494,14 @@
         printOodSection: "OOD (Penawaran Hari Ini)",
         printOohSection: "OOH (Penawaran Jam Ini)",
         printSnacksSection: "Snack Gratis",
-        printTransactionAmount: "Nominal Transaksi :",
-        printTotalTizo: "Total Tizo :",
-        printBonus: "Bonus :",
-        printBonusOod: "Bonus OOD :",
-        printBonusOoh: "Bonus OOH :",
-        printTotalPayment: "Total Pembayaran :",
-        printTotalTizos: "Total Tizo :",
-        printReceiveTotal: "Kamu menerima total:",
+        printTransactionAmount: "Nominal Transaksi",
+        printTotalTizo: "Total Tizo",
+        printBonus: "Bonus",
+        printBonusOod: "Bonus OOD",
+        printBonusOoh: "Bonus OOH",
+        printTotalPayment: "Total Pembayaran",
+        printTotalTizos: "Total Tizo",
+        printReceiveTotal: "Kamu menerima total",
         printFooter: "Total pembayaran ini berlaku untuk satu kartu. Anda dapat menggunakan penawaran ini untuk",
         printFooterCards: "kartu",
         printCancelBtn: "BATAL",
@@ -2127,8 +2127,8 @@
       document.querySelectorAll(".print-section .print-row span:first-child").forEach(el => {
         const text = el.textContent.trim();
         if (text.includes("Nominal") || text.includes("Transaction")) el.textContent = data.printTransactionAmount;
-        if (text === "Total Tizo :") el.textContent = data.printTotalTizo;
-        if (text === "Bonus :") el.textContent = data.printBonus;
+        if (text === "Total Tizo" || text === "Total Tizo :") el.textContent = data.printTotalTizo;
+        if (text === "Bonus" || text === "Bonus :") el.textContent = data.printBonus;
       });
 
       // Print total section
@@ -2176,13 +2176,19 @@
         finalTizo += Number(snacksTizo) || 0;
       }
 
-      // Update session based on selections
+      // Update session based on selections (include costs so enjoy.html can send them to dashboard)
       updateSession({
         topupAccepted: topupSelected,
         scratchCardAccepted: scratchCardSelected,
         oodAccepted: oodSelected,
         oohAccepted: oohSelected,
         snacksAccepted: snacksSelected,
+        oodCost: oodSelected ? (Number(oodCost) || 0) : 0,
+        oodTizo: oodSelected ? (Number(oodTizo) || 0) : 0,
+        oohCost: oohSelected ? (Number(oohCost) || 0) : 0,
+        oohTizo: oohSelected ? (Number(oohTizo) || 0) : 0,
+        snacksCost: snacksSelected ? (Number(snacksCost) || 0) : 0,
+        snacksTizo: snacksSelected ? (Number(snacksTizo) || 0) : 0,
         finalPayment: finalPayment,
         finalTizo: finalTizo,
       });
@@ -2261,6 +2267,24 @@
       printReceiptEl.querySelectorAll('.print-row').forEach(el => { el.style.display = 'flex'; el.style.justifyContent = 'space-between'; el.style.fontSize = '11px'; el.style.margin = '3px 0'; el.style.paddingLeft = '8px'; el.style.fontWeight = 'bold'; el.style.color = '#000'; });
       printReceiptEl.querySelectorAll('.print-total-section').forEach(el => { el.style.marginTop = '10px'; el.style.paddingTop = '8px'; el.style.borderTop = '2px solid #000'; });
       printReceiptEl.querySelectorAll('.print-footer').forEach(el => { el.style.textAlign = 'center'; el.style.fontSize = '10px'; el.style.color = '#000'; el.style.marginTop = '12px'; el.style.fontWeight = 'bold'; el.style.paddingTop = '8px'; el.style.borderTop = '1px solid #000'; });
+
+      // Preload logo image before rendering - ensure it's fully loaded
+      const logoImg = printReceiptEl.querySelector('.print-logo-img');
+      if (logoImg) {
+        await new Promise((resolve) => {
+          if (logoImg.complete && logoImg.naturalWidth > 0) {
+            resolve();
+          } else {
+            const freshImg = new Image();
+            freshImg.onload = () => {
+              logoImg.src = freshImg.src;
+              resolve();
+            };
+            freshImg.onerror = () => resolve();
+            freshImg.src = 'logo-black.png?' + Date.now();
+          }
+        });
+      }
 
       try {
         console.log('Rendering receipt with html2canvas...');
@@ -3200,19 +3224,8 @@
             }
             console.log("[screensaver-offer] picked Snacks offer", { gift: snacksOffer.gift, gift_details: snacksOffer.gift_details });
           } else {
-            // Fallback: show default OOD section so one screensaver offer is always visible
-            if (oodSection) oodSection.style.display = "block";
-            const oodAmountEl = document.getElementById("ood-amount");
-            const oodRbUnitEl = document.getElementById("ood-rb-unit");
-            const oodCostRb = Math.round(oodCost / 1000);
-            if (typeof formatAndUpdateRbDisplay === "function") {
-              formatAndUpdateRbDisplay(oodAmountEl, oodRbUnitEl, oodCostRb);
-            } else if (oodAmountEl) {
-              oodAmountEl.textContent = oodCostRb;
-            }
-            if (document.getElementById("ood-tizo")) document.getElementById("ood-tizo").textContent = oodTizo;
-            oodSelected = true;
-            console.warn("[screensaver-offer] no offers returned, showing default OOD fallback");
+            // No active offers - hide all OOD/OOH/Snacks sections
+            console.log("[screensaver-offer] no offers returned, all OOD/OOH/Snacks sections hidden");
           }
 
           // Handle Scratch Card Section Visibility

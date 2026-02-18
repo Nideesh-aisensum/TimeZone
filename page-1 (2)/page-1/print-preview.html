@@ -336,7 +336,7 @@
             </div>
 
             <div class="location">
-                <div class="location-name" id="location-name">Lippo Mall Puri</div>
+                <div class="location-name" id="location-name">Loading...</div>
                 <div class="location-date" id="location-date"></div>
             </div>
 
@@ -504,6 +504,16 @@
         // Initialize page with loader
         initPageWithLoader({
             onDataLoad: async () => {
+                // Fetch kiosk config for location name
+                try {
+                    const response = await fetch('/api/kiosk-config');
+                    const config = await response.json();
+                    if (config.success && config.place) {
+                        document.getElementById('location-name').textContent = config.place;
+                    }
+                } catch (e) {
+                    console.log('Could not fetch kiosk config, using default');
+                }
                 init();
             },
             minLoadTime: 300

@@ -1,0 +1,12 @@
+{
+    "name": "timezone-launcher",
+    "version": "1.0.0",
+    "description": "Timezone Server Launcher",
+    "main": "launcher.js",
+    "bin": "launcher.js",
+    "pkg": {
+        "targets": ["node18-win-x64"],
+        "outputPath": ".",
+        "assets": ["timezone-icon.ico"]
+    }
+}

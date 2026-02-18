@@ -407,6 +407,13 @@
         color: #e91e63;
       }
 
+      .print-logo-img {
+        width: 180px !important;
+        height: auto !important;
+        display: block !important;
+        margin: 0 auto 5px auto !important;
+      }
+
       .print-website {
         font-size: 10px;
         color: #666;
@@ -853,12 +860,13 @@
   <!-- Print Receipt (hidden on screen, shown when printing) -->
   <div class="print-receipt">
     <div class="print-header">
-      <div class="print-logo"><span class="time">TIME</span><span class="zone">ZONE</span></div>
+      <img src="logo-black.png" alt="TIMEZONE" class="print-logo-img"
+        style="width: 200px; height: auto; display: block; margin: 0 auto;" />
       <div class="print-website">www.timezonegames.com</div>
     </div>
 
     <div class="print-location">
-      <div class="print-location-name">Lippo Mall Puri</div>
+      <div class="print-location-name" id="print-location-name">Loading...</div>
       <div class="print-location-date" id="print-date">Jumat, 12 Des 2025 13.18</div>
     </div>
 
@@ -1878,6 +1886,16 @@
     // Initialize page with loader
     initPageWithLoader({
       onDataLoad: async () => {
+        // Fetch location name for print receipt
+        try {
+          const configRes = await fetch('/api/kiosk-config');
+          const config = await configRes.json();
+          if (config.success && config.place) {
+            document.querySelector('.print-location-name').textContent = config.place;
+          }
+        } catch (e) {
+          console.log('Using default location');
+        }
         applyLanguage(currentLang);
         loadSessionData();
         await fetchActiveOffers(); // Fetch and filter offers

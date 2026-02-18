@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print Receipt Test - All Offers Selected</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00ffff;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .receipt-preview {
+            background: white;
+            color: black;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            font-family: "Courier New", monospace;
+            max-width: 350px;
+            margin: 20px auto;
+        }
+
+        .test-btn {
+            display: block;
+            width: 300px;
+            margin: 30px auto;
+            padding: 20px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #00ff00 0%, #00cc00 100%);
+            color: black;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .test-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+        }
+
+        .test-btn:active {
+            transform: scale(0.95);
+        }
+
+        .info-box {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .info-box h3 {
+            color: #00ffff;
+            margin-bottom: 10px;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding-left: 10px;
+        }
+
+        .info-box li {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-box li:last-child {
+            border-bottom: none;
+        }
+
+        .checkmark {
+            color: #00ff00;
+            margin-right: 10px;
+        }
+
+        /* ========== PRINT RECEIPT STYLES FOR 80MM THERMAL PAPER ========== */
+        .print-receipt {
+            display: none;
+        }
+
+        @media print {
+            @page {
+                size: 80mm auto;
+                margin: 0;
+                padding: 0;
+            }
+
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            body {
+                background: white !important;
+                overflow: visible !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 80mm !important;
+                font-family: "Courier New", monospace !important;
+            }
+
+            .container,
+            .test-btn,
+            .info-box,
+            h1 {
+                display: none !important;
+            }
+
+            .print-receipt {
+                display: block !important;
+                width: 72mm !important;
+                max-width: 72mm !important;
+                margin: 0 auto !important;
+                padding: 4mm 4mm 3mm 4mm !important;
+                font-family: "Courier New", monospace !important;
+                color: #000 !important;
+                background: white !important;
+                font-size: 10px !important;
+            }
+
+            .print-header {
+                text-align: center;
+                margin-bottom: 10px;
+                padding-top: 0;
+            }
+
+            .print-logo-img {
+                width: 180px !important;
+                height: auto !important;
+                display: block !important;
+                margin: 0 auto 5px auto !important;
+            }
+
+            .print-website {
+                font-size: 10px;
+                color: #000;
+                margin-top: 3px;
+            }
+
+            .print-location {
+                text-align: center;
+                margin: 15px 0;
+            }
+
+            .print-location-name {
+                font-weight: bold;
+                font-size: 18px;
+                color: #000;
+            }
+
+            .print-location-date {
+                font-size: 12px;
+                color: #000;
+                margin-top: 3px;
+                font-weight: bold;
+            }
+
+            .print-divider {
+                border: none;
+                border-top: 1px dashed #000;
+                margin: 10px 0;
+            }
+
+            .print-message {
+                text-align: center;
+                font-size: 11px;
+                color: #000;
+                line-height: 1.4;
+                margin: 10px 0;
+            }
+
+            .print-order-number {
+                text-align: center;
+                font-size: 18px;
+                font-weight: bold;
+                color: #000;
+                margin: 15px 0;
+                letter-spacing: 2px;
+            }
+
+            .print-section {
+                margin: 15px 0;
+                padding-bottom: 10px;
+                border-bottom: 1px dashed #000;
+            }
+
+            .print-section-title {
+                font-weight: bold;
+                font-size: 13px;
+                margin-bottom: 8px;
+            }
+
+            .print-row {
+                display: flex;
+                justify-content: space-between;
+                font-size: 11px;
+                margin: 4px 0;
+                padding-left: 10px;
+                font-weight: bold;
+                color: #000;
+            }
+
+            .print-row span:first-child {
+                color: #000;
+                font-weight: bold;
+            }
+
+            .print-row span:last-child {
+                color: #000;
+                font-weight: bold;
+            }
+
+            .print-total-section {
+                margin-top: 15px;
+                padding-top: 12px;
+                border-top: 1px solid #000;
+            }
+
+            .print-total-row {
+                font-weight: bold;
+            }
+
+            .print-footer {
+                text-align: center;
+                font-size: 10px;
+                color: #000;
+                margin-top: 20px;
+                font-style: normal;
+                font-weight: bold;
+                padding-top: 10px;
+                border-top: 1px solid #000;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🖨️ PRINT RECEIPT TESTER</h1>
+
+        <div class="info-box">
+            <h3>Test Configuration - All Offers Selected:</h3>
+            <ul>
+                <li><span class="checkmark">✓</span> Top-up Package: Rp1.200.000 → 2500 Tizo</li>
+                <li><span class="checkmark">✓</span> Bonus: 500 TICKETS</li>
+                <li><span class="checkmark">✓</span> Bonus Scratchcard: Rp50.000 → 120 Tizo</li>
+                <li><span class="checkmark">✓</span> Bonus: 10 GAMES</li>
+                <li><span class="checkmark">✓</span> Custom Top-up: Rp500.000 → 500 Tizo</li>
+                <li><span class="checkmark">✓</span> OOD (Offer Of The Day): Rp300.000 → 700 Tizo</li>
+                <li><span class="checkmark">✓</span> Bonus OOD: COCA-COLA</li>
+            </ul>
+        </div>
+
+        <div class="info-box">
+            <h3>Total Summary:</h3>
+            <ul>
+                <li><strong>Total Payment:</strong> Rp2.050.000</li>
+                <li><strong>Total Tizo:</strong> 3820 Tizo</li>
+                <li><strong>All Bonuses:</strong> 500 TICKETS, 10 GAMES, COCA-COLA</li>
+            </ul>
+        </div>
+
+        <button class="test-btn" onclick="testPrint()">🖨️ TEST PRINT</button>
+    </div>
+
+    <!-- Print Receipt (hidden on screen, shown when printing) -->
+    <div class="print-receipt">
+        <div class="print-header">
+            <img src="logo-black.png" alt="TIMEZONE" class="print-logo-img" />
+            <div class="print-website">www.timezonegames.com</div>
+        </div>
+
+        <div class="print-location">
+            <div class="print-location-name">Loading...</div>
+            <div class="print-location-date" id="print-date">Selasa, 21 Jan 2026 20:00</div>
+        </div>
+
+        <hr class="print-divider" />
+
+        <p class="print-message">*** MOHON UNTUK MENYERAHKAN STRUK INI<br />KE KASIR UNTUK MENYELESAIKAN<br />PEMBAYARAN
+            ***</p>
+
+        <div class="print-order-number">RSCTEST12345</div>
+
+        <hr class="print-divider" />
+
+        <!-- Paket Top-up Section -->
+        <div class="print-section">
+            <div class="print-section-title">Paket Top-up</div>
+            <div class="print-row">
+                <span>Nominal Transaksi</span>
+                <span>Rp1.200.000</span>
+            </div>
+            <div class="print-row">
+                <span>Total Tizo</span>
+                <span>2500 Tizo</span>
+            </div>
+            <div class="print-row">
+                <span>Bonus</span>
+                <span>500 TICKETS</span>
+            </div>
+        </div>
+
+        <!-- Bonus Scratchcard Section -->
+        <div class="print-section">
+            <div class="print-section-title">Bonus Scratchcard</div>
+            <div class="print-row">
+                <span>Nominal Transaksi</span>
+                <span>Rp50.000</span>
+            </div>
+            <div class="print-row">
+                <span>Total Tizo</span>
+                <span>120 Tizo</span>
+            </div>
+            <div class="print-row">
+                <span>Bonus</span>
+                <span>10 GAMES</span>
+            </div>
+        </div>
+
+        <!-- Custom Top-up Section -->
+        <div class="print-section">
+            <div class="print-section-title">Custom Top-up</div>
+            <div class="print-row">
+                <span>Nominal Transaksi</span>
+                <span>Rp500.000</span>
+            </div>
+            <div class="print-row">
+                <span>Total Tizo</span>
+                <span>500 Tizo</span>
+            </div>
+        </div>
+
+        <!-- OOD Section -->
+        <div class="print-section">
+            <div class="print-section-title">OOD (Penawaran Hari Ini)</div>
+            <div class="print-row">
+                <span>Nominal Transaksi</span>
+                <span>Rp300.000</span>
+            </div>
+            <div class="print-row">
+                <span>Total Tizo</span>
+                <span>700 Tizo</span>
+            </div>
+            <div class="print-row">
+                <span>Bonus</span>
+                <span>COCA-COLA</span>
+            </div>
+        </div>
+
+        <!-- Total Section -->
+        <div class="print-total-section">
+            <div class="print-row print-total-row">
+                <span>Total Bayar</span>
+                <span>Rp2.050.000</span>
+            </div>
+            <div class="print-row print-total-row">
+                <span>Total Tizo</span>
+                <span>3820 Tizo</span>
+            </div>
+            <div class="print-row print-total-row">
+                <span>Bonus</span>
+                <span>500 TICKETS</span>
+            </div>
+            <div class="print-row print-total-row">
+                <span>Bonus</span>
+                <span>10 GAMES</span>
+            </div>
+            <div class="print-row print-total-row">
+                <span>Bonus OOD</span>
+                <span>COCA-COLA</span>
+            </div>
+        </div>
+
+        <p class="print-footer">Total pembayaran ini berlaku untuk satu kartu.<br />Anda dapat menggunakan penawaran ini
+            untuk 1 kartu</p>
+    </div>
+
+    <script>
+        // Set current date/time (ES5 compatible)
+        function pad(number) {
+            return number < 10 ? '0' + number : String(number);
+        }
+
+        function updateDateTime() {
+            var now = new Date();
+            var days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+            var months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+            var dayName = days[now.getDay()];
+            var day = now.getDate();
+            var month = months[now.getMonth()];
+            var year = now.getFullYear();
+            var hours = pad(now.getHours());
+            var minutes = pad(now.getMinutes());
+
+            var dateStr = dayName + ', ' + day + ' ' + month + ' ' + year + ' ' + hours + ':' + minutes;
+            document.getElementById('print-date').textContent = dateStr;
+        }
+
+        function testPrint() {
+            updateDateTime();
+            window.print();
+        }
+
+        // Update date on load
+        updateDateTime();
+
+        // Fetch location name from config
+        fetch('/api/kiosk-config')
+            .then(r => r.json())
+            .then(config => {
+                if (config.success && config.place) {
+                    document.querySelector('.print-location-name').textContent = config.place;
+                }
+            })
+            .catch(() => console.log('Using default location'));
+    </script>
+</body>
+
+</html>

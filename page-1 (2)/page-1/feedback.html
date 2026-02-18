@@ -239,54 +239,52 @@
 
 </head>
 
-<body class="" __processed_3e7892a4-808f-4c4f-8ea7-0dd0c9b04ddb__="true"
-    bis_register="W3sibWFzdGVyIjp0cnVlLCJleHRlbnNpb25JZCI6ImVwcGlvY2VtaG1ubGJoanBsY2drb2ZjaWllZ29tY29uIiwiYWRibG9ja2VyU3RhdHVzIjp7IkRJU1BMQVkiOiJkaXNhYmxlZCIsIkZBQ0VCT09LIjoiZGlzYWJsZWQiLCJUV0lUVEVSIjoiZGlzYWJsZWQiLCJSRURESVQiOiJkaXNhYmxlZCIsIlBJTlRFUkVTVCI6ImRpc2FibGVkIiwiSU5TVEFHUkFNIjoiZGlzYWJsZWQiLCJUSUtUT0siOiJkaXNhYmxlZCIsIkxJTktFRElOIjoiZGlzYWJsZWQiLCJDT05GSUciOiJkaXNhYmxlZCJ9LCJ2ZXJzaW9uIjoiMi4wLjM1Iiwic2NvcmUiOjIwMDM1fV0="
-    __processed_e4a8e295-edb4-4b26-b748-d3e22bdf5ae5__="true" __processed_b46d3f21-cc14-4135-83e1-d920e9a260b3__="true">
-    <div class="container" bis_skin_checked="1">
+<body>
+    <div class="container">
         <!-- Video Background -->
-        <video class="video-bg" autoplay="" loop="" muted="" playsinline="">
+        <video class="video-bg" autoplay loop muted playsinline>
             <source src="other-bg.mp4" type="video/mp4">
         </video>
         <!-- Home Button -->
         <img src="home.png" alt="Home" class="editable added-element" data-id="home-button" onclick="goHome()"
-            style="max-width: 200px; height: auto; position: absolute; top: 31px; right: 30px; /*transform: translate(calc(-50% + 412.67px), calc(-50% - 792px)) scale(0.9);*/ z-index: 50; cursor: pointer;">
+            style="max-width: 200px; height: auto; position: absolute; top: 31px; right: 30px; z-index: 50; cursor: pointer;">
 
-        <div class="content" bis_skin_checked="1">
+        <div class="content">
             <!-- Timezone Branding -->
             <div class="branding-section editable" data-id="branding-section"
-                style="transform: translate(0px, 70px) scale(1);" bis_skin_checked="1">
+                style="transform: translate(0px, 70px) scale(1);">
                 <img src="timezone-branding.png" alt="Timezone" class="branding-logo timezone-branding">
             </div>
 
             <!-- Popup Container -->
             <div class="popup-container editable" data-id="popup-container"
-                style="transform: translate(0, 140.333px) scale(1.4);" bis_skin_checked="1">
+                style="transform: translate(0, 140.333px) scale(1.4);">
                 <img src="feedback-bg.png" alt="Popup Background" class="popup-bg" data-no-text-edit="true">
 
-                <div class="popup-content" bis_skin_checked="1">
+                <div class="popup-content">
                     <!-- Header Section -->
                     <div class="header-section editable" data-id="header-section"
-                        style="transform: translate(-8.00006px, 5.33337px) scale(0.6);" bis_skin_checked="1">
+                        style="transform: translate(-8.00006px, 5.33337px) scale(0.6);">
                         <h1 id="header-title" class="header-title">NILAI<br>PENGALAMANMU</h1>
                         <p id="header-subtitle" class="header-subtitle">TEKAN IKON UNTUK PILIH</p>
                     </div>
 
                     <!-- Emoji Rating Section -->
                     <div class="rating-section editable" data-id="rating-section"
-                        style="transform: translate(0px, 0px) scale(0.8);" bis_skin_checked="1">
-                        <div class="rating-item" data-rating="1" onclick="selectRating(1)" bis_skin_checked="1">
+                        style="transform: translate(0px, 0px) scale(0.8);">
+                        <div class="rating-item" data-rating="1" onclick="selectRating(1)">
                             <img id="rating-1" src="feedback-icons/angry.png" alt="Angry" class="rating-icon">
                             <span id="label-1" class="rating-label">Buruk</span>
                         </div>
-                        <div class="rating-item" data-rating="2" onclick="selectRating(2)" bis_skin_checked="1">
+                        <div class="rating-item" data-rating="2" onclick="selectRating(2)">
                             <img id="rating-2" src="feedback-icons/sad.png" alt="Sad" class="rating-icon">
                             <span id="label-2" class="rating-label">Kurang</span>
                         </div>
-                        <div class="rating-item" data-rating="3" onclick="selectRating(3)" bis_skin_checked="1">
+                        <div class="rating-item" data-rating="3" onclick="selectRating(3)">
                             <img id="rating-3" src="feedback-icons/ok.png" alt="OK" class="rating-icon">
                             <span id="label-3" class="rating-label">Baik</span>
                         </div>
-                        <div class="rating-item" data-rating="4" onclick="selectRating(4)" bis_skin_checked="1">
+                        <div class="rating-item" data-rating="4" onclick="selectRating(4)">
                             <img id="rating-4" src="feedback-icons/happy.png" alt="Happy" class="rating-icon">
                             <span id="label-4" class="rating-label">Puas</span>
                         </div>
@@ -296,7 +294,7 @@
 
             <!-- Submit Button -->
             <div class="submit-button editable disabled" data-id="submit-button" onclick="handleSubmit()"
-                style="transform: translate(-5.33331px, 245.333px) scale(1.2);" bis_skin_checked="1">
+                style="transform: translate(-5.33331px, 245.333px) scale(1.2);">
                 <img src="button.png" alt="Button" class="submit-button-bg">
                 <span id="submit-text" class="submit-button-text">KIRIM PENILAIAN</span>
             </div>
@@ -344,6 +342,66 @@
 
         let currentLang = getCurrentLanguage();
         let selectedRating = null;
+        let sessionCompleteSent = false;
+
+        // Send session complete to dashboard (called before any navigation away)
+        async function sendSessionCompleteData() {
+            if (sessionCompleteSent) return;
+            sessionCompleteSent = true;
+            const sd = getSession();
+            console.log('📊 [Feedback] Sending session complete. isNewPlayer:', sd?.isNewPlayer, 'type:', typeof sd?.isNewPlayer);
+            console.log('📊 [Feedback] Full session:', JSON.stringify(sd));
+
+            // Fetch place directly from local server (don't rely on async dashboard-api init)
+            let kioskPlace = localStorage.getItem('kioskPlace') || '';
+            if (!kioskPlace) {
+                try {
+                    const cfgResp = await fetch('/api/kiosk-config');
+                    const cfgData = await cfgResp.json();
+                    if (cfgData.success && cfgData.place) {
+                        kioskPlace = cfgData.place;
+                        localStorage.setItem('kioskPlace', kioskPlace);
+                    }
+                } catch (e) { console.warn('⚠️ Could not fetch place:', e.message); }
+            }
+            console.log('📍 [Feedback] Place:', kioskPlace);
+
+            if (window.Dashboard && window.Dashboard.sendSessionComplete) {
+                await window.Dashboard.sendSessionComplete({
+                    isNewUser: sd?.isNewPlayer === true,
+                    cardType: sd?.selectedCard || 'unknown',
+                    cardQuantity: sd?.cardQuantity || 1,
+                    amount: sd?.finalPayment || sd?.totalCost || 0,
+                    offerId: sd?.selectedOffer,
+                    offerType: sd?.selectedOffer ? 'fixed_offer' : 'custom_topup',
+                    offerCost: sd?.offerCost || 0,
+                    offerTizo: sd?.offerTizo || 0,
+                    totalTizo: sd?.totalTizo || 0,
+                    bonusPercent: 0,
+                    oodAccepted: sd?.oodAccepted || false,
+                    oohAccepted: sd?.oohAccepted || false,
+                    snacksAccepted: sd?.snacksAccepted || false,
+                    oodCost: sd?.oodCost || 0,
+                    oohCost: sd?.oohCost || 0,
+                    snacksCost: sd?.snacksCost || 0,
+                    scratchCardAccepted: sd?.scratchCardAccepted || false,
+                    scratchCardRevealed: sd?.scratchCardRevealed || false,
+                    scratchPrize: sd?.scratchPrize || 0,
+                    bonusAccepted: sd?.bonusAccepted || false,
+                    bonusCost: sd?.bonusCost || 0,
+                    bonusTizo: sd?.bonusTizo || 0,
+                    bonusGift: sd?.bonusGift || null,
+                    bonusGiftDetails: sd?.bonusGiftDetails || null,
+                    bonusFreeGames: sd?.bonusFreeGames || 0,
+                    secondUpsellAccepted: sd?.secondUpsellAccepted || false,
+                    originalOfferCost: sd?.originalOfferCost || null,
+                    place: kioskPlace
+                });
+                console.log('✅ [Feedback] Session complete sent');
+            } else {
+                console.warn('⚠️ [Feedback] Dashboard not available');
+            }
+        }
 
         const iconPaths = {
             1: { normal: 'feedback-icons/angry.png', selected: 'feedback-icons/angry_selected.png' },
@@ -398,7 +456,8 @@
             document.getElementById('lang-dropdown').classList.add('hidden');
         }
 
-        function handleSubmit() {
+        let submitInProgress = false;
+        async function handleSubmit() {
             if (window.isEditModeActive && window.isEditModeActive()) {
                 return;
             }
@@ -407,17 +466,23 @@
                 return; // No rating selected
             }
 
+            if (submitInProgress) return; // Prevent double-click
+            submitInProgress = true;
+
             console.log('Feedback submitted:', selectedRating);
             // Store feedback
             localStorage.setItem('feedbackRating', selectedRating);
 
-            // Send feedback to dashboard
+            // Send feedback to dashboard (fire and forget)
             if (window.Dashboard && window.Dashboard.sendFeedback) {
                 console.log('📝 Sending feedback to dashboard:', selectedRating);
                 window.Dashboard.sendFeedback({ rating: selectedRating });
             }
 
-            // Navigate to enjoy page
+            // Send session complete (fire and forget)
+            sendSessionCompleteData();
+
+            // Navigate immediately - don't wait for network calls
             window.location.href = 'enjoy.html';
         }
 
@@ -446,8 +511,9 @@
             if (idleTimer) {
                 clearTimeout(idleTimer);
             }
-            idleTimer = setTimeout(() => {
-                console.log('[Feedback] Idle timeout - going to screensaver');
+            idleTimer = setTimeout(async () => {
+                console.log('[Feedback] Idle timeout - sending session complete before screensaver');
+                await sendSessionCompleteData();
                 window.location.href = 'screensaver.html';
             }, IDLE_TIMEOUT_MS);
         }
@@ -461,9 +527,6 @@
         resetIdleTimer();
     </script>
 
-
-    <span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span><span id="PING_IFRAME_FORM_DETECTION"
-        style="display: none;"></span><span id="PING_IFRAME_FORM_DETECTION" style="display: none;"></span>
 </body>
 
 </html>

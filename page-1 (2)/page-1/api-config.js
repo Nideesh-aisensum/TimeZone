@@ -2,7 +2,7 @@
  * Global API Configuration
  * Handles API base URL resolution for file:// protocol vs server usage
  */
-const API_BASE_URL = (window.location.protocol === 'file:')
+var API_BASE_URL = (window.location.protocol === 'file:')
     ? 'http://localhost:3000'
     : ''; // If served via HTTP, use relative paths (empty base)
 

@@ -161,11 +161,12 @@
         // Send session complete to dashboard
         const sessionData = getSession();
         console.log('📊 Session data for dashboard:', sessionData);
+        console.log('👤 isNewPlayer value:', sessionData?.isNewPlayer, 'type:', typeof sessionData?.isNewPlayer);
 
         if (window.Dashboard) {
             window.Dashboard.sendSessionComplete({
-                // User info
-                isNewUser: sessionData?.isNewPlayer || false,
+                // User info - use strict === true check to avoid null/undefined/string being truthy
+                isNewUser: sessionData?.isNewPlayer === true,
                 cardType: sessionData?.selectedCard || 'unknown',
                 cardQuantity: sessionData?.cardQuantity || 1,
 
@@ -182,6 +183,11 @@
                 oodAccepted: sessionData?.oodAccepted || false,
                 oohAccepted: sessionData?.oohAccepted || false,
                 snacksAccepted: sessionData?.snacksAccepted || false,
+
+                // OOD/OOH/Snacks costs for revenue tracking
+                oodCost: sessionData?.oodCost || 0,
+                oohCost: sessionData?.oohCost || 0,
+                snacksCost: sessionData?.snacksCost || 0,
 
                 // Scratch card details
                 scratchCardAccepted: sessionData?.scratchCardAccepted || false,
